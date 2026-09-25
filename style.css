@@ -1221,12 +1221,13 @@ main {
     padding: 15px;
   }
 
-  .register-product-list {
-    grid-template-columns:
-      repeat(2, minmax(0, 1fr));
-
+.register-product-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 9px;
-  }
+}
+.register-product-image {
+    aspect-ratio: 2 / 1;
+}
 
   .register-product-info {
     padding: 8px;
