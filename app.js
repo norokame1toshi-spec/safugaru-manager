@@ -9708,6 +9708,10 @@ async function openEventDetail(eventId) {
 // イベント終了
 // ============================================================
 
+// ============================================================
+// イベント終了
+// ============================================================
+
 async function finalizeEvent(eventId) {
 
     if (!eventId) {
@@ -9766,7 +9770,9 @@ async function finalizeEvent(eventId) {
         const confirmed =
             confirm(
                 "イベントを終了します。\n\n" +
-                "各商品の残り在庫をマスター在庫へ戻します。\n\n" +
+                "イベントで販売した数量をマスター在庫から反映します。\n\n" +
+                "イベントに持っていっただけで売れていない商品は、" +
+                "マスター在庫には影響しません。\n\n" +
                 "この処理は取り消しできません。\n\n" +
                 "本当に終了しますか？"
             );
@@ -9815,7 +9821,9 @@ async function finalizeEvent(eventId) {
 
                     const transaction =
                         db.transaction(
-                            ["eventInventory"],
+                            [
+                                "eventInventory"
+                            ],
                             "readonly"
                         );
 
@@ -9870,10 +9878,33 @@ async function finalizeEvent(eventId) {
 
 
         // ----------------------------------------------------
-        // マスター在庫へ戻す数量を計算
+        // 販売数をもとにマスター在庫を計算
+        // ----------------------------------------------------
+        //
+        // 重要：
+        //
+        // inventory.quantity は
+        // 「イベントに持っていった数量」なので、
+        // マスター在庫の終了計算には使用しない。
+        //
+        // マスター在庫はイベント中に減らしていないため、
+        // イベント終了時に減らすのは
+        // 「実際に売れた数量」だけ。
+        //
+        // 例：
+        //
+        // マスター在庫 20
+        // イベント開始在庫 15
+        // 3個販売
+        //
+        // ↓
+        //
+        // マスター在庫 20 - 3
+        // = 17
+        //
         // ----------------------------------------------------
 
-        const returnData = [];
+        const soldData = [];
 
 
         eventInventory.forEach(
@@ -9894,15 +9925,6 @@ async function finalizeEvent(eventId) {
                 }
 
 
-                const startQuantity =
-                    Math.max(
-                        0,
-                        Number(
-                            inventory.quantity || 0
-                        )
-                    );
-
-
                 const soldQuantity =
                     Math.max(
                         0,
@@ -9912,21 +9934,13 @@ async function finalizeEvent(eventId) {
                     );
 
 
-                const remainingQuantity =
-                    Math.max(
-                        0,
-                        startQuantity -
-                        soldQuantity
-                    );
-
-
-                returnData.push({
+                soldData.push({
 
                     productId:
                         product.id,
 
-                    remainingQuantity:
-                        remainingQuantity
+                    soldQuantity:
+                        soldQuantity
 
                 });
 
@@ -9965,10 +9979,10 @@ async function finalizeEvent(eventId) {
 
 
                 // ------------------------------------------------
-                // 商品のマスター在庫に残りを戻す
+                // マスター在庫から販売数だけ減らす
                 // ------------------------------------------------
 
-                returnData.forEach(
+                soldData.forEach(
                     data => {
 
                         const product =
@@ -9995,9 +10009,25 @@ async function finalizeEvent(eventId) {
                             );
 
 
+                        const soldQuantity =
+                            Math.max(
+                                0,
+                                Number(
+                                    data.soldQuantity || 0
+                                )
+                            );
+
+
+                        // ----------------------------------------
+                        // 実際に売れた数だけマスターから減らす
+                        // ----------------------------------------
+
                         product.stock =
-                            currentStock +
-                            data.remainingQuantity;
+                            Math.max(
+                                0,
+                                currentStock -
+                                soldQuantity
+                            );
 
 
                         product.updatedAt =
@@ -10083,7 +10113,8 @@ async function finalizeEvent(eventId) {
 
         alert(
             "イベントを終了しました。\n\n" +
-            "残り在庫をマスター在庫へ戻しました。"
+            "イベントで販売した数量を\n" +
+            "マスター在庫へ反映しました。"
         );
 
 
