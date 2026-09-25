@@ -1285,3 +1285,143 @@ main {
   }
 
 }
+
+/* =====================================================
+   在庫管理：スマホ対応
+===================================================== */
+
+@media (max-width: 700px) {
+
+  /* 在庫一覧全体 */
+  #inventory-section {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: hidden;
+  }
+
+  #inventory-list {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    padding: 10px;
+    overflow-x: hidden;
+  }
+
+
+  /* -----------------------------------------
+     在庫の商品一覧
+  ----------------------------------------- */
+
+  #inventory-list > * {
+    max-width: 100%;
+    min-width: 0;
+  }
+
+
+  /* -----------------------------------------
+     商品カード・行
+  ----------------------------------------- */
+
+  #inventory-list .product-card,
+  #inventory-list .inventory-card,
+  #inventory-list .inventory-item {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+
+
+  /* -----------------------------------------
+     商品名
+  ----------------------------------------- */
+
+  #inventory-list .product-name,
+  #inventory-list .inventory-name {
+    min-width: 0;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+
+  /* -----------------------------------------
+     在庫数・金額など
+  ----------------------------------------- */
+
+  #inventory-list .product-stock,
+  #inventory-list .inventory-stock {
+    min-width: 0;
+    white-space: normal;
+  }
+
+
+  /* -----------------------------------------
+     ボタン
+  ----------------------------------------- */
+
+  #inventory-list button {
+    max-width: 100%;
+    box-sizing: border-box;
+    white-space: normal;
+    flex-shrink: 1;
+  }
+
+
+  /* -----------------------------------------
+     横並びになっている部分
+  ----------------------------------------- */
+
+  #inventory-list .inventory-row,
+  #inventory-list .inventory-header,
+  #inventory-list .inventory-actions {
+    max-width: 100%;
+    min-width: 0;
+    flex-wrap: wrap;
+  }
+
+
+  /* -----------------------------------------
+     表
+  ----------------------------------------- */
+
+  #inventory-list table {
+    width: 100%;
+    max-width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+  }
+
+  #inventory-list th,
+  #inventory-list td {
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+
+  /* -----------------------------------------
+     画像
+  ----------------------------------------- */
+
+  #inventory-list img {
+    max-width: 100%;
+    height: auto;
+  }
+
+
+  /* -----------------------------------------
+     横方向にはみ出す要素を防止
+  ----------------------------------------- */
+
+  #inventory-list input,
+  #inventory-list select {
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+}
