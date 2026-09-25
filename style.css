@@ -1306,122 +1306,137 @@ main {
     min-width: 0;
     padding: 10px;
     overflow-x: hidden;
+    box-sizing: border-box;
   }
 
 
-  /* -----------------------------------------
-     在庫の商品一覧
-  ----------------------------------------- */
+  /* =================================================
+     在庫1商品
+  ================================================= */
 
-  #inventory-list > * {
-    max-width: 100%;
-    min-width: 0;
-  }
-
-
-  /* -----------------------------------------
-     商品カード・行
-  ----------------------------------------- */
-
-  #inventory-list .product-card,
-  #inventory-list .inventory-card,
   #inventory-list .inventory-item {
     width: 100%;
     max-width: 100%;
     min-width: 0;
     box-sizing: border-box;
     overflow: hidden;
+
+    grid-template-columns:
+      minmax(0, 1fr)
+      52px
+      52px
+      60px
+      78px !important;
+
+    gap: 5px !important;
+
+    padding: 10px 4px !important;
   }
 
 
-  /* -----------------------------------------
-     商品名
-  ----------------------------------------- */
+  /* =================================================
+     商品名・カテゴリ
+  ================================================= */
 
-  #inventory-list .product-name,
-  #inventory-list .inventory-name {
+  #inventory-list .inventory-item > div:first-child {
     min-width: 0;
     max-width: 100%;
-    overflow-wrap: anywhere;
-    word-break: break-word;
+    overflow: hidden;
   }
 
-
-  /* -----------------------------------------
-     在庫数・金額など
-  ----------------------------------------- */
-
-  #inventory-list .product-stock,
-  #inventory-list .inventory-stock {
+  #inventory-list .inventory-item > div:first-child > div:first-child {
     min-width: 0;
-    white-space: normal;
+    max-width: 100%;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    font-size: 13px;
+  }
+
+  #inventory-list .inventory-item > div:first-child > div:nth-child(2) {
+    min-width: 0;
+    max-width: 100%;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
 
-  /* -----------------------------------------
-     ボタン
-  ----------------------------------------- */
+  /* =================================================
+     在庫・予約・販売可能
+  ================================================= */
 
-  #inventory-list button {
+  #inventory-list .inventory-item > div:not(:first-child) {
+    min-width: 0;
+    text-align: center;
+  }
+
+  #inventory-list .inventory-item small {
+    font-size: 9px !important;
+  }
+
+  #inventory-list .inventory-item strong {
+    font-size: 15px;
+  }
+
+
+  /* =================================================
+     在庫修正ボタン
+  ================================================= */
+
+  #inventory-list .inventory-adjust-button {
+    width: 78px;
+    min-width: 0;
     max-width: 100%;
+
+    padding: 8px 4px !important;
+
+    font-size: 11px;
+    white-space: nowrap;
+
     box-sizing: border-box;
-    white-space: normal;
-    flex-shrink: 1;
   }
 
+}
 
-  /* -----------------------------------------
-     横並びになっている部分
-  ----------------------------------------- */
 
-  #inventory-list .inventory-row,
-  #inventory-list .inventory-header,
-  #inventory-list .inventory-actions {
-    max-width: 100%;
-    min-width: 0;
-    flex-wrap: wrap;
+/* =====================================================
+   さらに小さいスマホ
+===================================================== */
+
+@media (max-width: 380px) {
+
+  #inventory-list {
+    padding: 6px;
   }
 
+  #inventory-list .inventory-item {
+    grid-template-columns:
+      minmax(0, 1fr)
+      48px
+      48px
+      55px
+      72px !important;
 
-  /* -----------------------------------------
-     表
-  ----------------------------------------- */
+    gap: 4px !important;
 
-  #inventory-list table {
-    width: 100%;
-    max-width: 100%;
-    table-layout: fixed;
-    border-collapse: collapse;
+    padding: 9px 2px !important;
   }
 
-  #inventory-list th,
-  #inventory-list td {
-    max-width: 100%;
-    min-width: 0;
-    box-sizing: border-box;
-    overflow-wrap: anywhere;
-    word-break: break-word;
+  #inventory-list .inventory-item > div:first-child > div:first-child {
+    font-size: 12px;
   }
 
-
-  /* -----------------------------------------
-     画像
-  ----------------------------------------- */
-
-  #inventory-list img {
-    max-width: 100%;
-    height: auto;
+  #inventory-list .inventory-item strong {
+    font-size: 14px;
   }
 
-
-  /* -----------------------------------------
-     横方向にはみ出す要素を防止
-  ----------------------------------------- */
-
-  #inventory-list input,
-  #inventory-list select {
-    max-width: 100%;
-    box-sizing: border-box;
+  #inventory-list .inventory-adjust-button {
+    width: 72px;
+    font-size: 10px;
   }
 
 }
