@@ -130,19 +130,32 @@ type="button"
 </p>
 
 </div>
+<div
+    style="
+        display:flex;
+        gap:8px;
+        flex-wrap:wrap;
+        justify-content:flex-end;
+    "
+>
+
+<button
+id="bulk-add-product-button"
+class="secondary-button"
+type="button"
+>
+＋ 一括登録
+</button>
 
 <button
 id="add-product-button"
 class="primary-button"
 type="button"
-
 >
-
-
 ＋ 商品追加
-
-
 </button>
+
+</div>
 
 </div>
 
@@ -765,6 +778,111 @@ type="button"
 保存
 
 
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- =====================================================
+     商品一括登録モーダル
+====================================================== -->
+
+<div
+    id="bulk-product-modal"
+    class="modal"
+>
+
+<div class="modal-content">
+
+<div class="modal-header">
+
+<h2>
+    商品一括登録
+</h2>
+
+<button
+    id="close-bulk-product-modal"
+    class="close-button"
+    type="button"
+>
+    ×
+</button>
+
+</div>
+
+<p
+    style="
+        margin:0 0 15px;
+        color:#666;
+        font-size:13px;
+        line-height:1.6;
+    "
+>
+    複数の商品をまとめて登録できます。<br>
+    商品名・価格・在庫・カテゴリを入力してください。
+</p>
+
+<div
+    id="bulk-product-list"
+    style="
+        display:flex;
+        flex-direction:column;
+        gap:8px;
+        max-height:55vh;
+        overflow-y:auto;
+        padding:2px;
+    "
+></div>
+
+<div
+    style="
+        display:flex;
+        gap:8px;
+        flex-wrap:wrap;
+        margin-top:12px;
+    "
+>
+
+<button
+    id="bulk-add-row"
+    class="secondary-button"
+    type="button"
+>
+    ＋ 行を追加
+</button>
+
+<button
+    id="bulk-clear-rows"
+    class="secondary-button"
+    type="button"
+>
+    入力をクリア
+</button>
+
+</div>
+
+<div
+    class="modal-buttons"
+    style="margin-top:15px;"
+>
+
+<button
+    id="cancel-bulk-product"
+    class="secondary-button"
+    type="button"
+>
+    キャンセル
+</button>
+
+<button
+    id="save-bulk-products"
+    class="primary-button"
+    type="button"
+>
+    一括登録
 </button>
 
 </div>
