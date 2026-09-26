@@ -1153,6 +1153,14 @@ main {
   .register-cart-area {
     padding: 15px;
   }
+    /* レジを一番上に */
+  .register-cart-area {
+    order: -1;
+  }
+
+  .register-products-area {
+    order: 0;
+  }
 
 
   /* =====================================================
