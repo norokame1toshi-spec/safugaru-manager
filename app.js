@@ -2467,6 +2467,675 @@ async function saveProduct() {
 
 
 // ============================================================
+// 商品一括登録
+// ============================================================
+
+function openBulkProductModal() {
+
+    const modal =
+        document.getElementById(
+            "bulk-product-modal"
+        );
+
+    if (!modal) {
+        return;
+    }
+
+    const list =
+        document.getElementById(
+            "bulk-product-list"
+        );
+
+    list.innerHTML = "";
+
+    addBulkProductRow();
+
+    modal.classList.add("show");
+}
+
+
+// ============================================================
+// 商品一括登録モーダルを閉じる
+// ============================================================
+
+function closeBulkProductModal() {
+
+    const modal =
+        document.getElementById(
+            "bulk-product-modal"
+        );
+
+    if (modal) {
+
+        modal.classList.remove(
+            "show"
+        );
+
+    }
+
+}
+
+
+// ============================================================
+// 一括登録：カテゴリ選択肢
+// ============================================================
+
+function createBulkCategoryOptions(
+    selectedParent = "",
+    selectedSub = ""
+) {
+
+    let html = `
+        <option value="">
+            選択してください
+        </option>
+    `;
+
+    Object.keys(
+        categoryData
+    ).forEach(
+        parent => {
+
+            html += `
+                <option
+                    value="${escapeHTML(parent)}"
+                    ${
+                        parent === selectedParent
+                            ? "selected"
+                            : ""
+                    }
+                >
+                    ${escapeHTML(parent)}
+                </option>
+            `;
+
+        }
+    );
+
+    return html;
+}
+
+
+// ============================================================
+// 一括登録：行追加
+// ============================================================
+
+function addBulkProductRow(
+    data = {}
+) {
+
+    const list =
+        document.getElementById(
+            "bulk-product-list"
+        );
+
+    if (!list) {
+        return;
+    }
+
+    const row =
+        document.createElement(
+            "div"
+        );
+
+    row.className =
+        "bulk-product-row";
+
+    row.style.cssText = `
+        border:1px solid #ddd;
+        border-radius:10px;
+        padding:10px;
+        background:#fff;
+    `;
+
+    row.innerHTML = `
+
+        <div
+            style="
+                display:grid;
+                grid-template-columns:
+                    minmax(0,2fr)
+                    90px
+                    70px;
+                gap:6px;
+            "
+        >
+
+            <input
+                type="text"
+                class="bulk-product-name"
+                placeholder="商品名"
+                value="${escapeHTML(
+                    data.name || ""
+                )}"
+            >
+
+            <input
+                type="number"
+                class="bulk-product-price"
+                min="0"
+                inputmode="numeric"
+                placeholder="価格"
+                value="${
+                    data.price ??
+                    ""
+                }"
+            >
+
+            <input
+                type="number"
+                class="bulk-product-stock"
+                min="0"
+                inputmode="numeric"
+                placeholder="在庫"
+                value="${
+                    data.stock ??
+                    ""
+                }"
+            >
+
+        </div>
+
+        <div
+            style="
+                display:grid;
+                grid-template-columns:1fr 1fr;
+                gap:6px;
+                margin-top:6px;
+            "
+        >
+
+            <select
+                class="bulk-product-parent"
+            >
+                ${createBulkCategoryOptions(
+                    data.parentCategory || ""
+                )}
+            </select>
+
+            <select
+                class="bulk-product-sub"
+            >
+                <option value="">
+                    小カテゴリ
+                </option>
+            </select>
+
+        </div>
+
+        <div
+            style="
+                display:flex;
+                justify-content:flex-end;
+                margin-top:6px;
+            "
+        >
+
+            <button
+                type="button"
+                class="bulk-delete-row"
+                style="
+                    border:0;
+                    background:none;
+                    color:#c62828;
+                    font-size:12px;
+                    cursor:pointer;
+                "
+            >
+                この行を削除
+            </button>
+
+        </div>
+    `;
+
+    list.appendChild(
+        row
+    );
+
+
+    const parentSelect =
+        row.querySelector(
+            ".bulk-product-parent"
+        );
+
+    const subSelect =
+        row.querySelector(
+            ".bulk-product-sub"
+        );
+
+
+    function updateSubCategories() {
+
+        const parent =
+            parentSelect.value;
+
+        subSelect.innerHTML = `
+            <option value="">
+                小カテゴリ
+            </option>
+        `;
+
+        if (
+            !parent ||
+            !categoryData[parent]
+        ) {
+            return;
+        }
+
+        categoryData[parent]
+            .forEach(
+                sub => {
+
+                    const option =
+                        document.createElement(
+                            "option"
+                        );
+
+                    option.value =
+                        sub;
+
+                    option.textContent =
+                        sub;
+
+                    if (
+                        sub ===
+                        data.subCategory
+                    ) {
+                        option.selected =
+                            true;
+                    }
+
+                    subSelect.appendChild(
+                        option
+                    );
+
+                }
+            );
+
+    }
+
+
+    parentSelect.addEventListener(
+        "change",
+        () => {
+
+            data.subCategory =
+                "";
+
+            updateSubCategories();
+
+        }
+    );
+
+
+    row.querySelector(
+        ".bulk-delete-row"
+    ).addEventListener(
+        "click",
+        () => {
+
+            row.remove();
+
+        }
+    );
+
+
+    updateSubCategories();
+
+}
+
+
+// ============================================================
+// 商品一括登録
+// ============================================================
+
+async function saveBulkProducts() {
+
+    const list =
+        document.getElementById(
+            "bulk-product-list"
+        );
+
+    if (!list) {
+        return;
+    }
+
+
+    const rows =
+        Array.from(
+            list.querySelectorAll(
+                ".bulk-product-row"
+            )
+        );
+
+
+    if (rows.length === 0) {
+
+        alert(
+            "登録する商品がありません。"
+        );
+
+        return;
+
+    }
+
+
+    const products = [];
+
+
+    for (
+        const row
+        of rows
+    ) {
+
+        const name =
+            row.querySelector(
+                ".bulk-product-name"
+            ).value.trim();
+
+        const price =
+            Number(
+                row.querySelector(
+                    ".bulk-product-price"
+                ).value
+            );
+
+        const stock =
+            Number(
+                row.querySelector(
+                    ".bulk-product-stock"
+                ).value
+            );
+
+        const parentCategory =
+            row.querySelector(
+                ".bulk-product-parent"
+            ).value;
+
+        const subCategory =
+            row.querySelector(
+                ".bulk-product-sub"
+            ).value;
+
+
+        // 完全に空の行は無視
+        if (
+            !name &&
+            !row.querySelector(
+                ".bulk-product-price"
+            ).value &&
+            !row.querySelector(
+                ".bulk-product-stock"
+            ).value &&
+            !parentCategory &&
+            !subCategory
+        ) {
+            continue;
+        }
+
+
+        if (!name) {
+
+            alert(
+                "商品名が入力されていない行があります。"
+            );
+
+            return;
+
+        }
+
+
+        if (
+            !Number.isFinite(price) ||
+            price < 0
+        ) {
+
+            alert(
+                `「${name}」の価格を確認してください。`
+            );
+
+            return;
+
+        }
+
+
+        if (
+            !Number.isInteger(stock) ||
+            stock < 0
+        ) {
+
+            alert(
+                `「${name}」の在庫数を確認してください。`
+            );
+
+            return;
+
+        }
+
+
+        if (!parentCategory) {
+
+            alert(
+                `「${name}」の大カテゴリを選択してください。`
+            );
+
+            return;
+
+        }
+
+
+        if (!subCategory) {
+
+            alert(
+                `「${name}」の小カテゴリを選択してください。`
+            );
+
+            return;
+
+        }
+
+
+        products.push({
+
+            id:
+                createId(),
+
+            name,
+
+            price,
+
+            stock,
+
+            reserved:
+                0,
+
+            parentCategory,
+
+            subCategory,
+
+            category:
+                parentCategory,
+
+            image:
+                null,
+
+            updatedAt:
+                new Date().toISOString()
+
+        });
+
+    }
+
+
+    if (
+        products.length === 0
+    ) {
+
+        alert(
+            "登録する商品がありません。"
+        );
+
+        return;
+
+    }
+
+
+    const confirmed =
+        confirm(
+            `${products.length}件の商品を登録します。\n\n登録しますか？`
+        );
+
+
+    if (!confirmed) {
+        return;
+    }
+
+
+    try {
+
+        await new Promise(
+            (
+                resolve,
+                reject
+            ) => {
+
+                const transaction =
+                    db.transaction(
+                        [
+                            "products",
+                            "inventoryHistory"
+                        ],
+                        "readwrite"
+                    );
+
+
+                const productStore =
+                    transaction.objectStore(
+                        "products"
+                    );
+
+
+                const historyStore =
+                    transaction.objectStore(
+                        "inventoryHistory"
+                    );
+
+
+                products.forEach(
+                    product => {
+
+                        productStore.put(
+                            product
+                        );
+
+
+                        addInventoryHistory(
+                            historyStore,
+                            {
+                                productId:
+                                    product.id,
+
+                                productName:
+                                    product.name,
+
+                                type:
+                                    "initial",
+
+                                delta:
+                                    product.stock,
+
+                                beforeStock:
+                                    0,
+
+                                afterStock:
+                                    product.stock,
+
+                                reserved:
+                                    0,
+
+                                reason:
+                                    "一括商品登録",
+
+                                memo:
+                                    ""
+
+                            }
+                        );
+
+                    }
+                );
+
+
+                transaction.oncomplete =
+                    () => {
+
+                        resolve();
+
+                    };
+
+
+                transaction.onerror =
+                    () => {
+
+                        reject(
+                            transaction.error
+                        );
+
+                    };
+
+
+                transaction.onabort =
+                    () => {
+
+                        reject(
+                            transaction.error ||
+                            new Error(
+                                "一括登録が中断されました。"
+                            )
+                        );
+
+                    };
+
+            }
+        );
+
+
+        closeBulkProductModal();
+
+
+        await loadProducts();
+
+        await loadRegisterProducts();
+
+        await loadInventory();
+
+
+        alert(
+            `${products.length}件の商品を登録しました。`
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "商品一括登録エラー",
+            error
+        );
+
+        alert(
+            "商品の一括登録に失敗しました。\n\n" +
+            "エラー：" +
+            (
+                error?.message ||
+                error
+            )
+        );
+
+    }
+
+}
+
+// ============================================================
 // 商品削除
 // ============================================================
 
@@ -8480,6 +9149,100 @@ document.getElementById("close-event-modal")
             "click",
             completeSale
         );
+
+        document
+    .getElementById(
+        "bulk-add-product-button"
+    )
+    ?.addEventListener(
+        "click",
+        () => {
+
+            openBulkProductModal();
+
+        }
+    );
+
+
+document
+    .getElementById(
+        "close-bulk-product-modal"
+    )
+    ?.addEventListener(
+        "click",
+        () => {
+
+            closeBulkProductModal();
+
+        }
+    );
+
+
+document
+    .getElementById(
+        "cancel-bulk-product"
+    )
+    ?.addEventListener(
+        "click",
+        () => {
+
+            closeBulkProductModal();
+
+        }
+    );
+
+
+document
+    .getElementById(
+        "bulk-add-row"
+    )
+    ?.addEventListener(
+        "click",
+        () => {
+
+            addBulkProductRow();
+
+        }
+    );
+
+
+document
+    .getElementById(
+        "bulk-clear-rows"
+    )
+    ?.addEventListener(
+        "click",
+        () => {
+
+            const list =
+                document.getElementById(
+                    "bulk-product-list"
+                );
+
+            if (list) {
+
+                list.innerHTML = "";
+
+                addBulkProductRow();
+
+            }
+
+        }
+    );
+
+
+document
+    .getElementById(
+        "save-bulk-products"
+    )
+    ?.addEventListener(
+        "click",
+        () => {
+
+            saveBulkProducts();
+
+        }
+    );
 
 }
 
