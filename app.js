@@ -3,7 +3,7 @@
 // app.js
 // ============================================================
 
-
+alert("app.js 読み込み確認");
 // ============================================================
 // IndexedDB
 // ============================================================
@@ -244,7 +244,6 @@ const categoryData = {
 
 };
 
-
 // ============================================================
 // アプリの状態
 // ============================================================
@@ -262,6 +261,8 @@ let selectedRegisterEventId = "";
 let registerProductSearchText = "";
 let registerProductCategory = "";
 let registerProductSubCategory = "";
+
+
 // ============================================================
 // IndexedDBを開く
 // ============================================================
@@ -341,16 +342,11 @@ function openDatabase() {
 
             if (!missingStore) {
 
-                // 他のタブなどから
-                // バージョンアップ要求が来たら
-                // 現在の接続を閉じる
-
                 db.onversionchange = () => {
 
                     db.close();
 
                 };
-
 
                 resolve(db);
 
@@ -366,7 +362,6 @@ function openDatabase() {
 
             const currentVersion =
                 db.version;
-
 
             db.close();
 
@@ -411,7 +406,6 @@ function openDatabase() {
                         db.close();
 
                     };
-
 
                     resolve(db);
 
@@ -485,6 +479,7 @@ function openDatabase() {
 async function backupDatabase() {
 
     const storeNames = [
+
         "products",
         "reservations",
         "sales",
@@ -492,14 +487,23 @@ async function backupDatabase() {
         "events",
         "eventInventory",
         "eventExpenses"
+
     ];
 
 
     const backupData = {
-        appName: "さふがる工房 イベント管理",
-        backupVersion: 1,
-        createdAt: new Date().toISOString(),
+
+        appName:
+            "さふがる工房 イベント管理",
+
+        backupVersion:
+            1,
+
+        createdAt:
+            new Date().toISOString(),
+
         stores: {}
+
     };
 
 
@@ -581,7 +585,6 @@ async function backupDatabase() {
 }
 
 
-
 // ============================================================
 // バックアップファイルを書き出す
 // ============================================================
@@ -600,15 +603,6 @@ async function exportBackup() {
         const backupData =
             await backupDatabase();
 
-            console.log(
-    "バックアップ商品数:",
-    backupData.stores.products.length
-);
-
-console.log(
-    "バックアップ商品:",
-    backupData.stores.products
-);
 
         const json =
             JSON.stringify(
@@ -639,19 +633,25 @@ console.log(
         const dateText =
             [
                 date.getFullYear(),
+
                 String(
                     date.getMonth() + 1
                 ).padStart(2, "0"),
+
                 String(
                     date.getDate()
                 ).padStart(2, "0"),
+
                 "_",
+
                 String(
                     date.getHours()
                 ).padStart(2, "0"),
+
                 String(
                     date.getMinutes()
                 ).padStart(2, "0")
+
             ].join("");
 
 
@@ -705,44 +705,33 @@ console.log(
     }
 
 }
-
 // ============================================================
 // バックアップからデータを復元
 // ============================================================
 
 async function importBackupFile(file) {
 
-    alert("① importBackupFile が呼ばれた");
-
     try {
 
-        const text = await file.text();
+        const text =
+            await file.text();
 
-        alert(
-            "② ファイル読み込み成功\n文字数：" +
-            text.length
-        );
 
         const backupData =
             JSON.parse(text);
 
-        alert(
-            "③ JSON解析成功\n商品数：" +
-            (
-                backupData.stores?.products?.length
-                ?? "取得失敗"
-            )
-        );
 
         if (!db) {
+
             await openDatabase();
+
         }
 
-        alert("④ DB準備完了");
 
-        await restoreBackup(backupData);
+        await restoreBackup(
+            backupData
+        );
 
-        alert("⑤ restoreBackup 完了");
 
         await loadProducts();
         await loadReservations();
@@ -751,12 +740,12 @@ async function importBackupFile(file) {
         await loadHistory();
         await loadEvents();
 
-        alert("⑥ 画面更新完了");
 
         alert(
             "バックアップを復元しました。\n\n" +
             "画面を確認してください。"
         );
+
 
     } catch (error) {
 
@@ -765,14 +754,20 @@ async function importBackupFile(file) {
             error
         );
 
+
         alert(
             "復元エラー\n\n" +
-            "場所を確認してください。\n\n" +
-            String(error?.message || error)
+            String(
+                error?.message ||
+                error
+            )
         );
 
     }
+
 }
+
+
 // ============================================================
 // バックアップからデータを復元
 // ============================================================
@@ -782,6 +777,7 @@ async function restoreBackup(
 ) {
 
     const storeNames = [
+
         "products",
         "reservations",
         "sales",
@@ -789,6 +785,7 @@ async function restoreBackup(
         "events",
         "eventInventory",
         "eventExpenses"
+
     ];
 
 
@@ -806,26 +803,6 @@ async function restoreBackup(
         );
 
     }
-
-
-    // ========================================================
-    // 商品数確認
-    // ========================================================
-
-    const backupProductCount =
-        Array.isArray(
-            backupData.stores.products
-        )
-            ? backupData.stores.products.length
-            : -1;
-
-
-    alert(
-        "復元処理を開始します。\n\n" +
-        "バックアップの商品数：" +
-        backupProductCount +
-        "個"
-    );
 
 
     // ========================================================
@@ -883,7 +860,6 @@ async function restoreBackup(
 
             let transaction;
 
-
             try {
 
                 transaction =
@@ -893,11 +869,6 @@ async function restoreBackup(
                     );
 
             } catch (error) {
-
-                alert(
-                    "DBトランザクション開始エラー\n\n" +
-                    error.message
-                );
 
                 reject(error);
 
@@ -913,54 +884,38 @@ async function restoreBackup(
             storeNames.forEach(
                 storeName => {
 
-                    try {
+                    const store =
+                        transaction.objectStore(
+                            storeName
+                        );
 
-                        const store =
-                            transaction.objectStore(
-                                storeName
+
+                    const records =
+                        backupData.stores[
+                            storeName
+                        ];
+
+
+                    // ------------------------------
+                    // 現在のデータを削除
+                    // ------------------------------
+
+                    store.clear();
+
+
+                    // ------------------------------
+                    // バックアップを追加
+                    // ------------------------------
+
+                    records.forEach(
+                        record => {
+
+                            store.put(
+                                record
                             );
 
-
-                        const records =
-                            backupData.stores[
-                                storeName
-                            ];
-
-
-                        // ------------------------------
-                        // 現在のデータを削除
-                        // ------------------------------
-
-                        store.clear();
-
-
-                        // ------------------------------
-                        // バックアップを追加
-                        // ------------------------------
-
-                        records.forEach(
-                            record => {
-
-                                store.put(
-                                    record
-                                );
-
-                            }
-                        );
-
-                    } catch (error) {
-
-                        alert(
-                            "復元中にエラーが発生しました\n\n" +
-                            "ストア：" +
-                            storeName +
-                            "\n\n" +
-                            error.message
-                        );
-
-                        reject(error);
-
-                    }
+                        }
+                    );
 
                 }
             );
@@ -972,14 +927,6 @@ async function restoreBackup(
 
             transaction.oncomplete =
                 () => {
-
-                    alert(
-                        "DBへの復元が完了しました。\n\n" +
-                        "商品数：" +
-                        backupProductCount +
-                        "個"
-                    );
-
 
                     resolve();
 
@@ -993,24 +940,11 @@ async function restoreBackup(
             transaction.onerror =
                 () => {
 
-                    const error =
-                        transaction.error;
-
-
-                    alert(
-                        "復元トランザクションエラー\n\n" +
-                        (
-                            error
-                                ? error.name +
-                                  "\n" +
-                                  error.message
-                                : "原因不明"
-                        )
-                    );
-
-
                     reject(
-                        error
+                        transaction.error ||
+                        new Error(
+                            "復元トランザクションでエラーが発生しました。"
+                        )
                     );
 
                 };
@@ -1023,24 +957,8 @@ async function restoreBackup(
             transaction.onabort =
                 () => {
 
-                    const error =
-                        transaction.error;
-
-
-                    alert(
-                        "復元処理が中断されました。\n\n" +
-                        (
-                            error
-                                ? error.name +
-                                  "\n" +
-                                  error.message
-                                : "原因不明"
-                        )
-                    );
-
-
                     reject(
-                        error ||
+                        transaction.error ||
                         new Error(
                             "復元処理が中断されました。"
                         )
@@ -1052,9 +970,6 @@ async function restoreBackup(
     );
 
 }
-
-
-
 
 
 // ============================================================
@@ -1118,12 +1033,13 @@ async function requestPersistentStorage() {
             error
         );
 
-
         return false;
 
     }
 
 }
+
+
 // ============================================================
 // ID
 // ============================================================
@@ -1142,7 +1058,9 @@ function createId() {
 
     return (
         Date.now().toString(36) +
-        Math.random().toString(36).substring(2)
+        Math.random()
+            .toString(36)
+            .substring(2)
     );
 
 }
@@ -1182,7 +1100,9 @@ function formatYen(value) {
 
     return (
         "¥" +
-        Number(value || 0).toLocaleString()
+        Number(
+            value || 0
+        ).toLocaleString()
     );
 
 }
@@ -1195,7 +1115,9 @@ function formatYen(value) {
 function formatDateTime(value) {
 
     if (!value) {
+
         return "";
+
     }
 
 
@@ -1223,43 +1145,47 @@ function formatDateTime(value) {
 
 function getAllProducts() {
 
-    return new Promise((resolve, reject) => {
+    return new Promise(
+        (resolve, reject) => {
 
-        const transaction =
-            db.transaction(
-                "products",
-                "readonly"
-            );
-
-
-        const store =
-            transaction.objectStore(
-                "products"
-            );
+            const transaction =
+                db.transaction(
+                    "products",
+                    "readonly"
+                );
 
 
-        const request =
-            store.getAll();
+            const store =
+                transaction.objectStore(
+                    "products"
+                );
 
 
-        request.onsuccess = () => {
-
-            resolve(
-                request.result || []
-            );
-
-        };
+            const request =
+                store.getAll();
 
 
-        request.onerror = () => {
+            request.onsuccess =
+                () => {
 
-            reject(
-                request.error
-            );
+                    resolve(
+                        request.result || []
+                    );
 
-        };
+                };
 
-    });
+
+            request.onerror =
+                () => {
+
+                    reject(
+                        request.error
+                    );
+
+                };
+
+        }
+    );
 
 }
 
@@ -1270,47 +1196,49 @@ function getAllProducts() {
 
 function getProduct(id) {
 
-    return new Promise((resolve, reject) => {
+    return new Promise(
+        (resolve, reject) => {
 
-        const transaction =
-            db.transaction(
-                "products",
-                "readonly"
-            );
-
-
-        const store =
-            transaction.objectStore(
-                "products"
-            );
+            const transaction =
+                db.transaction(
+                    "products",
+                    "readonly"
+                );
 
 
-        const request =
-            store.get(id);
+            const store =
+                transaction.objectStore(
+                    "products"
+                );
 
 
-        request.onsuccess = () => {
-
-            resolve(
-                request.result
-            );
-
-        };
+            const request =
+                store.get(id);
 
 
-        request.onerror = () => {
+            request.onsuccess =
+                () => {
 
-            reject(
-                request.error
-            );
+                    resolve(
+                        request.result
+                    );
 
-        };
+                };
 
-    });
+
+            request.onerror =
+                () => {
+
+                    reject(
+                        request.error
+                    );
+
+                };
+
+        }
+    );
 
 }
-
-
 // ============================================================
 // 販売可能数
 // 実在庫 - 予約確保
@@ -1339,7 +1267,9 @@ async function loadProducts() {
 
     renderCategoryNavigation();
 
-    renderProducts(products);
+    renderProducts(
+        products
+    );
 
 }
 
@@ -1357,7 +1287,9 @@ function renderProducts(products) {
 
 
     if (!container) {
+
         return;
+
     }
 
 
@@ -1460,7 +1392,9 @@ function renderProducts(products) {
 
 
             const sellable =
-                getSellableStock(product);
+                getSellableStock(
+                    product
+                );
 
 
             card.innerHTML = `
@@ -1558,7 +1492,6 @@ function renderProducts(products) {
 }
 
 
-
 // ============================================================
 // カテゴリナビ
 // ============================================================
@@ -1572,7 +1505,9 @@ function renderCategoryNavigation() {
 
 
     if (!container) {
+
         return;
+
     }
 
 
@@ -1612,7 +1547,6 @@ function renderCategoryNavigation() {
             selectedParentCategory =
                 null;
 
-
             selectedSubCategory =
                 null;
 
@@ -1630,175 +1564,171 @@ function renderCategoryNavigation() {
     );
 
 
-    Object.entries(categoryData)
+    Object.entries(
+        categoryData
+    ).forEach(
+        ([parent, children]) => {
 
-    
-        .forEach(
-            ([parent, children]) => {
-
-                const parentBox =
-                    document.createElement(
-                        "div"
-                    );
-
-
-                parentBox.className =
-                    "category-parent";
+            const parentBox =
+                document.createElement(
+                    "div"
+                );
 
 
-                if (
-                    selectedParentCategory ===
-                    parent
-                ) {
+            parentBox.className =
+                "category-parent";
 
-                    parentBox.classList.add(
-                        "open"
-                    );
+
+            if (
+                selectedParentCategory ===
+                parent
+            ) {
+
+                parentBox.classList.add(
+                    "open"
+                );
+
+            }
+
+
+            const parentButton =
+                document.createElement(
+                    "button"
+                );
+
+
+            parentButton.className =
+                "category-parent-header";
+
+
+            parentButton.innerHTML = `
+                <span>
+                    ${
+                        selectedParentCategory === parent
+                            ? "▼"
+                            : "▶"
+                    }
+                    ${escapeHTML(parent)}
+                </span>
+            `;
+
+
+            parentButton.addEventListener(
+                "click",
+                () => {
+
+                    if (
+                        selectedParentCategory ===
+                        parent
+                    ) {
+
+                        selectedParentCategory =
+                            null;
+
+                        selectedSubCategory =
+                            null;
+
+                    } else {
+
+                        selectedParentCategory =
+                            parent;
+
+                        selectedSubCategory =
+                            null;
+
+                    }
+
+
+                    updateCategoryBreadcrumb();
+
+                    loadProducts();
 
                 }
+            );
 
 
-                const parentButton =
-                    document.createElement(
-                        "button"
-                    );
+            parentBox.appendChild(
+                parentButton
+            );
 
 
-                parentButton.className =
-                    "category-parent-header";
+            const childrenBox =
+                document.createElement(
+                    "div"
+                );
 
 
-                parentButton.innerHTML = `
-                    <span>
-                        ${
-                            selectedParentCategory === parent
-                                ? "▼"
-                                : "▶"
-                        }
-                        ${escapeHTML(parent)}
-                    </span>
-                `;
+            childrenBox.className =
+                "category-children";
 
 
-                parentButton.addEventListener(
-                    "click",
-                    () => {
+            children.forEach(
+                child => {
 
-                        if (
-                            selectedParentCategory ===
-                            parent
-                        ) {
-
-                            selectedParentCategory =
-                                null;
+                    const childButton =
+                        document.createElement(
+                            "button"
+                        );
 
 
-                            selectedSubCategory =
-                                null;
+                    childButton.className =
+                        "category-child-button";
 
-                        } else {
+
+                    if (
+                        selectedParentCategory === parent &&
+                        selectedSubCategory === child
+                    ) {
+
+                        childButton.classList.add(
+                            "active"
+                        );
+
+                    }
+
+
+                    childButton.textContent =
+                        child;
+
+
+                    childButton.addEventListener(
+                        "click",
+                        () => {
 
                             selectedParentCategory =
                                 parent;
 
-
                             selectedSubCategory =
-                                null;
+                                child;
+
+
+                            updateCategoryBreadcrumb();
+
+                            loadProducts();
 
                         }
-
-
-                        updateCategoryBreadcrumb();
-
-                        loadProducts();
-
-                    }
-                );
-
-
-                parentBox.appendChild(
-                    parentButton
-                );
-
-
-                const childrenBox =
-                    document.createElement(
-                        "div"
                     );
 
 
-                childrenBox.className =
-                    "category-children";
+                    childrenBox.appendChild(
+                        childButton
+                    );
+
+                }
+            );
 
 
-                children.forEach(
-                    child => {
-
-                        const childButton =
-                            document.createElement(
-                                "button"
-                            );
+            parentBox.appendChild(
+                childrenBox
+            );
 
 
-                        childButton.className =
-                            "category-child-button";
+            container.appendChild(
+                parentBox
+            );
 
-
-                        if (
-                            selectedParentCategory === parent &&
-                            selectedSubCategory === child
-                        ) {
-
-                            childButton.classList.add(
-                                "active"
-                            );
-
-                        }
-
-
-                        childButton.textContent =
-                            child;
-
-
-                        childButton.addEventListener(
-                            "click",
-                            () => {
-
-                                selectedParentCategory =
-                                    parent;
-
-
-                                selectedSubCategory =
-                                    child;
-
-
-                                updateCategoryBreadcrumb();
-
-                                loadProducts();
-
-                            }
-                        );
-
-
-                        childrenBox.appendChild(
-                            childButton
-                        );
-
-                    }
-                );
-
-
-                parentBox.appendChild(
-                    childrenBox
-                );
-
-
-                container.appendChild(
-                    parentBox
-                );
-
-            }
-        );
+        }
+    );
 
 }
 
@@ -1816,7 +1746,9 @@ function updateCategoryBreadcrumb() {
 
 
     if (!element) {
+
         return;
+
     }
 
 
@@ -1824,7 +1756,6 @@ function updateCategoryBreadcrumb() {
 
         element.textContent =
             "すべての商品";
-
 
         return;
 
@@ -1835,7 +1766,6 @@ function updateCategoryBreadcrumb() {
 
         element.textContent =
             selectedParentCategory;
-
 
         return;
 
@@ -1863,48 +1793,51 @@ function populateParentCategories(
 
 
     if (!select) {
+
         return;
+
     }
 
 
     select.innerHTML = "";
 
 
-    Object.keys(categoryData)
-        .forEach(
-            parent => {
+    Object.keys(
+        categoryData
+    ).forEach(
+        parent => {
 
-                const option =
-                    document.createElement(
-                        "option"
-                    );
-
-
-                option.value =
-                    parent;
-
-
-                option.textContent =
-                    parent;
-
-
-                if (
-                    parent ===
-                    selectedParent
-                ) {
-
-                    option.selected =
-                        true;
-
-                }
-
-
-                select.appendChild(
-                    option
+            const option =
+                document.createElement(
+                    "option"
                 );
 
+
+            option.value =
+                parent;
+
+
+            option.textContent =
+                parent;
+
+
+            if (
+                parent ===
+                selectedParent
+            ) {
+
+                option.selected =
+                    true;
+
             }
-        );
+
+
+            select.appendChild(
+                option
+            );
+
+        }
+    );
 
 
     populateSubCategories(
@@ -1931,7 +1864,9 @@ function populateSubCategories(
 
 
     if (!select) {
+
         return;
+
     }
 
 
@@ -2043,7 +1978,9 @@ async function openProductModal(
 
 
         if (!product) {
+
             return;
+
         }
 
 
@@ -2106,11 +2043,16 @@ async function openProductModal(
             "商品を追加";
 
 
-        name.value = "";
+        name.value =
+            "";
 
-        price.value = "";
 
-        stock.value = "";
+        price.value =
+            "";
+
+
+        stock.value =
+            "";
 
 
         populateParentCategories(
@@ -2138,8 +2080,6 @@ async function openProductModal(
     );
 
 }
-
-
 // ============================================================
 // 商品モーダルを閉じる
 // ============================================================
@@ -2316,7 +2256,6 @@ async function saveProduct() {
             "商品名を入力してください。"
         );
 
-
         return;
 
     }
@@ -2330,7 +2269,6 @@ async function saveProduct() {
         alert(
             "価格を正しく入力してください。"
         );
-
 
         return;
 
@@ -2346,7 +2284,6 @@ async function saveProduct() {
             "在庫数は0以上の整数で入力してください。"
         );
 
-
         return;
 
     }
@@ -2354,6 +2291,10 @@ async function saveProduct() {
 
     let oldProduct = null;
 
+
+    // --------------------------------------------------------
+    // 編集時
+    // --------------------------------------------------------
 
     if (editingProductId) {
 
@@ -2368,7 +2309,6 @@ async function saveProduct() {
             alert(
                 "商品が見つかりません。"
             );
-
 
             return;
 
@@ -2390,13 +2330,16 @@ async function saveProduct() {
                 `現在の予約数：${reserved}個`
             );
 
-
             return;
 
         }
 
     }
 
+
+    // --------------------------------------------------------
+    // 画像
+    // --------------------------------------------------------
 
     let image =
         oldProduct?.image || null;
@@ -2414,6 +2357,10 @@ async function saveProduct() {
 
     }
 
+
+    // --------------------------------------------------------
+    // 商品データ
+    // --------------------------------------------------------
 
     const product = {
 
@@ -2449,26 +2396,19 @@ async function saveProduct() {
     };
 
 
+    // --------------------------------------------------------
+    // DB保存
+    // --------------------------------------------------------
+
     return new Promise(
         (resolve, reject) => {
 
-            const storeNames =
-                editingProductId
-
-                    ? [
-                        "products",
-                        "inventoryHistory"
-                    ]
-
-                    : [
-                        "products",
-                        "inventoryHistory"
-                    ];
-
-
             const transaction =
                 db.transaction(
-                    storeNames,
+                    [
+                        "products",
+                        "inventoryHistory"
+                    ],
                     "readwrite"
                 );
 
@@ -2545,26 +2485,33 @@ async function saveProduct() {
 
 
             transaction.oncomplete =
-                () => {
+                async () => {
 
-                    closeProductModal();
+                    try {
 
+                        closeProductModal();
 
-                    loadProducts();
+                        await loadProducts();
 
-                    loadRegisterProducts();
+                        await loadRegisterProducts();
 
-                    loadInventory();
-
-
-                    alert(
-                        editingProductId
-                            ? "商品を更新しました。"
-                            : "商品を登録しました。"
-                    );
+                        await loadInventory();
 
 
-                    resolve();
+                        alert(
+                            editingProductId
+                                ? "商品を更新しました。"
+                                : "商品を登録しました。"
+                        );
+
+
+                        resolve();
+
+                    } catch (error) {
+
+                        reject(error);
+
+                    }
 
                 };
 
@@ -2579,6 +2526,19 @@ async function saveProduct() {
 
                     reject(
                         transaction.error
+                    );
+
+                };
+
+
+            transaction.onabort =
+                () => {
+
+                    reject(
+                        transaction.error ||
+                        new Error(
+                            "商品保存が中断されました。"
+                        )
                     );
 
                 };
@@ -2600,20 +2560,30 @@ function openBulkProductModal() {
             "bulk-product-modal"
         );
 
+
     if (!modal) {
+
         return;
+
     }
+
 
     const list =
         document.getElementById(
             "bulk-product-list"
         );
 
+
     list.innerHTML = "";
+
 
     addBulkProductRow();
 
-    modal.classList.add("show");
+
+    modal.classList.add(
+        "show"
+    );
+
 }
 
 
@@ -2627,6 +2597,7 @@ function closeBulkProductModal() {
         document.getElementById(
             "bulk-product-modal"
         );
+
 
     if (modal) {
 
@@ -2654,6 +2625,7 @@ function createBulkCategoryOptions(
         </option>
     `;
 
+
     Object.keys(
         categoryData
     ).forEach(
@@ -2675,7 +2647,9 @@ function createBulkCategoryOptions(
         }
     );
 
+
     return html;
+
 }
 
 
@@ -2692,17 +2666,23 @@ function addBulkProductRow(
             "bulk-product-list"
         );
 
+
     if (!list) {
+
         return;
+
     }
+
 
     const row =
         document.createElement(
             "div"
         );
 
+
     row.className =
         "bulk-product-row";
+
 
     row.style.cssText = `
         border:1px solid #ddd;
@@ -2710,6 +2690,7 @@ function addBulkProductRow(
         padding:10px;
         background:#fff;
     `;
+
 
     row.innerHTML = `
 
@@ -2771,17 +2752,22 @@ function addBulkProductRow(
             <select
                 class="bulk-product-parent"
             >
+
                 ${createBulkCategoryOptions(
                     data.parentCategory || ""
                 )}
+
             </select>
+
 
             <select
                 class="bulk-product-sub"
             >
+
                 <option value="">
                     小カテゴリ
                 </option>
+
             </select>
 
         </div>
@@ -2811,6 +2797,7 @@ function addBulkProductRow(
         </div>
     `;
 
+
     list.appendChild(
         row
     );
@@ -2820,6 +2807,7 @@ function addBulkProductRow(
         row.querySelector(
             ".bulk-product-parent"
         );
+
 
     const subSelect =
         row.querySelector(
@@ -2832,18 +2820,23 @@ function addBulkProductRow(
         const parent =
             parentSelect.value;
 
+
         subSelect.innerHTML = `
             <option value="">
                 小カテゴリ
             </option>
         `;
 
+
         if (
             !parent ||
             !categoryData[parent]
         ) {
+
             return;
+
         }
+
 
         categoryData[parent]
             .forEach(
@@ -2854,19 +2847,25 @@ function addBulkProductRow(
                             "option"
                         );
 
+
                     option.value =
                         sub;
 
+
                     option.textContent =
                         sub;
+
 
                     if (
                         sub ===
                         data.subCategory
                     ) {
+
                         option.selected =
                             true;
+
                     }
+
 
                     subSelect.appendChild(
                         option
@@ -2919,8 +2918,11 @@ async function saveBulkProducts() {
             "bulk-product-list"
         );
 
+
     if (!list) {
+
         return;
+
     }
 
 
@@ -2956,24 +2958,36 @@ async function saveBulkProducts() {
                 ".bulk-product-name"
             ).value.trim();
 
+
+        const priceInput =
+            row.querySelector(
+                ".bulk-product-price"
+            );
+
+
+        const stockInput =
+            row.querySelector(
+                ".bulk-product-stock"
+            );
+
+
         const price =
             Number(
-                row.querySelector(
-                    ".bulk-product-price"
-                ).value
+                priceInput.value
             );
+
 
         const stock =
             Number(
-                row.querySelector(
-                    ".bulk-product-stock"
-                ).value
+                stockInput.value
             );
+
 
         const parentCategory =
             row.querySelector(
                 ".bulk-product-parent"
             ).value;
+
 
         const subCategory =
             row.querySelector(
@@ -2981,19 +2995,20 @@ async function saveBulkProducts() {
             ).value;
 
 
+        // ----------------------------------------------------
         // 完全に空の行は無視
+        // ----------------------------------------------------
+
         if (
             !name &&
-            !row.querySelector(
-                ".bulk-product-price"
-            ).value &&
-            !row.querySelector(
-                ".bulk-product-stock"
-            ).value &&
+            !priceInput.value &&
+            !stockInput.value &&
             !parentCategory &&
             !subCategory
         ) {
+
             continue;
+
         }
 
 
@@ -3110,7 +3125,9 @@ async function saveBulkProducts() {
 
 
     if (!confirmed) {
+
         return;
+
     }
 
 
@@ -3245,6 +3262,7 @@ async function saveBulkProducts() {
             error
         );
 
+
         alert(
             "商品の一括登録に失敗しました。\n\n" +
             "エラー：" +
@@ -3258,6 +3276,7 @@ async function saveBulkProducts() {
 
 }
 
+
 // ============================================================
 // 商品削除
 // ============================================================
@@ -3265,7 +3284,9 @@ async function saveBulkProducts() {
 async function deleteProduct() {
 
     if (!currentProductId) {
+
         return;
+
     }
 
 
@@ -3276,18 +3297,21 @@ async function deleteProduct() {
 
 
     if (!product) {
+
         return;
+
     }
 
 
     if (
-        Number(product.reserved || 0) > 0
+        Number(
+            product.reserved || 0
+        ) > 0
     ) {
 
         alert(
             "予約が入っている商品は削除できません。"
         );
-
 
         return;
 
@@ -3301,7 +3325,9 @@ async function deleteProduct() {
 
 
     if (!ok) {
+
         return;
+
     }
 
 
@@ -3325,24 +3351,31 @@ async function deleteProduct() {
 
 
             transaction.oncomplete =
-                () => {
+                async () => {
 
-                    closeProductModal();
+                    try {
 
+                        closeProductModal();
 
-                    loadProducts();
+                        await loadProducts();
 
-                    loadRegisterProducts();
+                        await loadRegisterProducts();
 
-                    loadInventory();
-
-
-                    alert(
-                        "商品を削除しました。"
-                    );
+                        await loadInventory();
 
 
-                    resolve();
+                        alert(
+                            "商品を削除しました。"
+                        );
+
+
+                        resolve();
+
+                    } catch (error) {
+
+                        reject(error);
+
+                    }
 
                 };
 
@@ -3361,57 +3394,59 @@ async function deleteProduct() {
 
                 };
 
+
+            transaction.onabort =
+                () => {
+
+                    reject(
+                        transaction.error ||
+                        new Error(
+                            "商品削除が中断されました。"
+                        )
+                    );
+
+                };
+
         }
     );
 
 }
-
-
 // ============================================================
 // 予約一覧取得
 // ============================================================
 
 function getAllReservations() {
 
-    return new Promise(
-        (resolve, reject) => {
+    return new Promise((resolve, reject) => {
 
-            const transaction =
-                db.transaction(
-                    "reservations",
-                    "readonly"
-                );
+        const transaction =
+            db.transaction(
+                "reservations",
+                "readonly"
+            );
 
+        const request =
+            transaction
+                .objectStore("reservations")
+                .getAll();
 
-            const request =
-                transaction
-                    .objectStore(
-                        "reservations"
-                    )
-                    .getAll();
+        request.onsuccess = () => {
 
+            resolve(
+                request.result || []
+            );
 
-            request.onsuccess =
-                () => {
+        };
 
-                    resolve(
-                        request.result || []
-                    );
+        request.onerror = () => {
 
-                };
+            reject(
+                request.error
+            );
 
+        };
 
-            request.onerror =
-                () => {
-
-                    reject(
-                        request.error
-                    );
-
-                };
-
-        }
-    );
+    });
 
 }
 
@@ -3427,102 +3462,75 @@ async function loadReservations() {
             "reservation-list"
         );
 
-
     if (!container) {
         return;
     }
 
+    try {
 
-    const reservations =
-        await getAllReservations();
+        const reservations =
+            await getAllReservations();
 
+        reservations.sort(
+            (a, b) =>
+                new Date(b.createdAt) -
+                new Date(a.createdAt)
+        );
 
-    reservations.sort(
-        (a, b) =>
-            new Date(b.createdAt) -
-            new Date(a.createdAt)
-    );
+        container.innerHTML = "";
 
+        if (reservations.length === 0) {
 
-    container.innerHTML = "";
+            container.innerHTML = `
+                <div style="
+                    padding:40px;
+                    text-align:center;
+                    color:#999;
+                    background:white;
+                    border-radius:12px;
+                ">
+                    予約はありません
+                </div>
+            `;
 
+            return;
+        }
 
-    if (
-        reservations.length === 0
-    ) {
-
-        container.innerHTML = `
-            <div style="
-                padding:40px;
-                text-align:center;
-                color:#999;
-                background:white;
-                border-radius:12px;
-            ">
-                予約はありません
-            </div>
-        `;
-
-
-        return;
-
-    }
-
-
-    reservations.forEach(
-        reservation => {
+        reservations.forEach(reservation => {
 
             const card =
-                document.createElement(
-                    "div"
-                );
-
+                document.createElement("div");
 
             card.className =
                 "reservation-card";
 
-
             const statusClass =
-                reservation.status ===
-                "received"
+                reservation.status === "received"
                     ? "received"
                     : "";
 
-
             const statusText =
-                reservation.status ===
-                "received"
+                reservation.status === "received"
                     ? "受け渡し済み"
                     : "未受け取り";
 
-
             const itemsHTML =
-                reservation.items
+                (reservation.items || [])
                     .map(
                         item => `
-
                             <div>
-
-                                ${escapeHTML(
-                                    item.name
-                                )}
-
+                                ${escapeHTML(item.name)}
                                 ×
                                 ${item.quantity}
-
                                　
-
                                 ${formatYen(
                                     item.price *
                                     item.quantity
                                 )}
-
                             </div>
-
                         `
                     )
                     .join("");
-
 
             card.innerHTML = `
 
@@ -3530,22 +3538,18 @@ async function loadReservations() {
 
                     <div class="reservation-name">
                         ${escapeHTML(
-                            reservation.name
+                            reservation.name || ""
                         )}
                     </div>
 
-
-                    <div
-                        class="
-                            reservation-status
-                            ${statusClass}
-                        "
-                    >
+                    <div class="
+                        reservation-status
+                        ${statusClass}
+                    ">
                         ${statusText}
                     </div>
 
                 </div>
-
 
                 <div class="reservation-items">
 
@@ -3553,64 +3557,52 @@ async function loadReservations() {
 
                 </div>
 
-
                 <div class="reservation-total-row">
 
                     <span>
                         合計
                     </span>
 
-
                     <span class="
                         reservation-total-price
                     ">
                         ${formatYen(
-                            reservation.total
+                            reservation.total || 0
                         )}
                     </span>
 
                 </div>
 
+                ${
+                    reservation.status !== "received"
+                        ? `
+                            <button
+                                class="
+                                    reservation-receive-button
+                                "
+                                data-reservation-id="${reservation.id}"
+                            >
+                                受け渡し完了
+                            </button>
+                        `
+                        : ""
+                }
 
-                           ${
-                reservation.status !==
-                "received"
+                <button
+                    class="
+                        reservation-delete-button
+                    "
+                    data-reservation-id="${reservation.id}"
+                >
+                    予約を削除
+                </button>
 
-                    ? `
-                        <button
-                            class="
-                                reservation-receive-button
-                            "
-                            data-reservation-id="
-                                ${reservation.id}
-                            "
-                        >
-                            受け渡し完了
-                        </button>
-                    `
-
-                    : ""
-            }
-
-            <button
-                class="
-                    reservation-delete-button
-                "
-                data-reservation-id="
-                    ${reservation.id}
-                "
-            >
-                予約を削除
-            </button>
-
-        `;
-
+            `;
 
             const receiveButton =
                 card.querySelector(
                     ".reservation-receive-button"
                 );
-
 
             if (receiveButton) {
 
@@ -3627,16 +3619,10 @@ async function loadReservations() {
 
             }
 
-
-            // ------------------------------------------------
-            // 予約削除ボタン
-            // ------------------------------------------------
-
             const deleteButton =
                 card.querySelector(
                     ".reservation-delete-button"
                 );
-
 
             if (deleteButton) {
 
@@ -3653,12 +3639,18 @@ async function loadReservations() {
 
             }
 
+            container.appendChild(card);
 
-            container.appendChild(
-                card
-            );
-        }
-    );
+        });
+
+    } catch (error) {
+
+        console.error(
+            "予約一覧読み込みエラー:",
+            error
+        );
+
+    }
 
 }
 
@@ -3674,27 +3666,21 @@ async function loadReservationProducts() {
             "reservation-product-list"
         );
 
-
     if (!container) {
         return;
     }
 
+    try {
 
-    const products =
-        await getAllProducts();
+        const products =
+            await getAllProducts();
 
+        container.innerHTML = "";
 
-    container.innerHTML = "";
-
-
-    products.forEach(
-        product => {
+        products.forEach(product => {
 
             const sellable =
-                getSellableStock(
-                    product
-                );
-
+                getSellableStock(product);
 
             const selected =
                 reservationCart.find(
@@ -3703,16 +3689,11 @@ async function loadReservationProducts() {
                         product.id
                 );
 
-
             const card =
-                document.createElement(
-                    "div"
-                );
-
+                document.createElement("div");
 
             card.className =
                 "reservation-product-card";
-
 
             if (selected) {
 
@@ -3722,7 +3703,6 @@ async function loadReservationProducts() {
 
             }
 
-
             card.innerHTML = `
 
                 <div class="
@@ -3731,7 +3711,6 @@ async function loadReservationProducts() {
 
                     ${
                         product.image
-
                             ? `
                                 <img
                                     src="${product.image}"
@@ -3740,14 +3719,12 @@ async function loadReservationProducts() {
                                     )}"
                                 >
                             `
-
                             : `
                                 <span>📦</span>
                             `
                     }
 
                 </div>
-
 
                 <div class="
                     reservation-product-info
@@ -3761,7 +3738,6 @@ async function loadReservationProducts() {
                         )}
                     </div>
 
-
                     <div class="
                         reservation-product-price
                     ">
@@ -3770,23 +3746,18 @@ async function loadReservationProducts() {
                         )}
                     </div>
 
-
-                    <div
-                        class="
-                            reservation-product-stock
-                            ${
-                                sellable <= 0
-                                    ? "stock-warning"
-                                    : ""
-                            }
-                        "
-                    >
+                    <div class="
+                        reservation-product-stock
+                        ${
+                            sellable <= 0
+                                ? "stock-warning"
+                                : ""
+                        }
+                    ">
 
                         ${
                             sellable > 0
-
                                 ? `予約可能 ${sellable}個`
-
                                 : "予約不可"
                         }
 
@@ -3796,10 +3767,7 @@ async function loadReservationProducts() {
 
             `;
 
-
-            if (
-                sellable > 0
-            ) {
+            if (sellable > 0) {
 
                 card.addEventListener(
                     "click",
@@ -3814,22 +3782,23 @@ async function loadReservationProducts() {
 
             } else {
 
-                card.style.opacity =
-                    "0.5";
-
-
-                card.style.cursor =
-                    "not-allowed";
+                card.style.opacity = "0.5";
+                card.style.cursor = "not-allowed";
 
             }
 
+            container.appendChild(card);
 
-            container.appendChild(
-                card
-            );
+        });
 
-        }
-    );
+    } catch (error) {
+
+        console.error(
+            "予約商品一覧読み込みエラー:",
+            error
+        );
+
+    }
 
 }
 
@@ -3838,15 +3807,10 @@ async function loadReservationProducts() {
 // 予約カート追加
 // ============================================================
 
-function addToReservationCart(
-    product
-) {
+function addToReservationCart(product) {
 
     const sellable =
-        getSellableStock(
-            product
-        );
-
+        getSellableStock(product);
 
     const existing =
         reservationCart.find(
@@ -3854,7 +3818,6 @@ function addToReservationCart(
                 item.productId ===
                 product.id
         );
-
 
     if (existing) {
 
@@ -3867,11 +3830,8 @@ function addToReservationCart(
                 "予約可能な在庫数を超えています。"
             );
 
-
             return;
-
         }
-
 
         existing.quantity++;
 
@@ -3895,9 +3855,7 @@ function addToReservationCart(
 
     }
 
-
     renderReservationCart();
-
     loadReservationProducts();
 
 }
@@ -3919,47 +3877,30 @@ async function changeReservationQuantity(
                 productId
         );
 
-
     if (!item) {
         return;
     }
 
-
     const product =
-        await getProduct(
-            productId
-        );
-
+        await getProduct(productId);
 
     if (!product) {
         return;
     }
 
-
     const sellable =
-        getSellableStock(
-            product
-        );
+        getSellableStock(product);
 
+    item.quantity += delta;
 
-    item.quantity +=
-        delta;
-
-
-    if (
-        item.quantity >
-        sellable
-    ) {
+    if (item.quantity > sellable) {
 
         item.quantity =
             sellable;
 
     }
 
-
-    if (
-        item.quantity <= 0
-    ) {
+    if (item.quantity <= 0) {
 
         reservationCart =
             reservationCart.filter(
@@ -3970,9 +3911,7 @@ async function changeReservationQuantity(
 
     }
 
-
     renderReservationCart();
-
     loadReservationProducts();
 
 }
@@ -3989,7 +3928,6 @@ function getReservationTotal() {
             total +
             item.price *
             item.quantity,
-
         0
     );
 
@@ -4007,21 +3945,16 @@ function renderReservationCart() {
             "reservation-cart"
         );
 
-
     const totalElement =
         document.getElementById(
             "reservation-total"
         );
 
-
     if (!container) {
         return;
     }
 
-
-    if (
-        reservationCart.length === 0
-    ) {
+    if (reservationCart.length === 0) {
 
         container.innerHTML =
             "商品が選択されていません";
@@ -4030,75 +3963,71 @@ function renderReservationCart() {
 
         container.innerHTML = "";
 
+        reservationCart.forEach(item => {
 
-        reservationCart.forEach(
-            item => {
+            const row =
+                document.createElement("div");
 
-                const row =
-                    document.createElement(
-                        "div"
-                    );
+            row.className =
+                "reservation-cart-item";
 
+            row.innerHTML = `
 
-                row.className =
-                    "reservation-cart-item";
+                <div class="
+                    reservation-cart-item-name
+                ">
 
+                    ${escapeHTML(
+                        item.name
+                    )}
 
-                row.innerHTML = `
+                </div>
 
-                    <div class="
-                        reservation-cart-item-name
+                <div class="
+                    reservation-quantity-controls
+                ">
+
+                    <button
+                        class="
+                            reservation-quantity-button
+                        "
+                        data-minus="${item.productId}"
+                    >
+                        −
+                    </button>
+
+                    <span class="
+                        reservation-quantity
                     ">
+                        ${item.quantity}
+                    </span>
 
-                        ${escapeHTML(
-                            item.name
-                        )}
+                    <button
+                        class="
+                            reservation-quantity-button
+                        "
+                        data-plus="${item.productId}"
+                    >
+                        ＋
+                    </button>
 
-                    </div>
+                </div>
 
+            `;
 
-                    <div class="
-                        reservation-quantity-controls
-                    ">
-
-                        <button
-                            class="
-                                reservation-quantity-button
-                            "
-                            data-minus="
-                                ${item.productId}
-                            "
-                        >
-                            −
-                        </button>
-
-
-                        <span class="
-                            reservation-quantity
-                        ">
-                            ${item.quantity}
-                        </span>
-
-
-                        <button
-                            class="
-                                reservation-quantity-button
-                            "
-                            data-plus="
-                                ${item.productId}
-                            "
-                        >
-                            ＋
-                        </button>
-
-                    </div>
-
-                `;
-
-
+            const minusButton =
                 row.querySelector(
                     "[data-minus]"
-                ).addEventListener(
+                );
+
+            const plusButton =
+                row.querySelector(
+                    "[data-plus]"
+                );
+
+            if (minusButton) {
+
+                minusButton.addEventListener(
                     "click",
                     () => {
 
@@ -4110,10 +4039,11 @@ function renderReservationCart() {
                     }
                 );
 
+            }
 
-                row.querySelector(
-                    "[data-plus]"
-                ).addEventListener(
+            if (plusButton) {
+
+                plusButton.addEventListener(
                     "click",
                     () => {
 
@@ -4125,16 +4055,13 @@ function renderReservationCart() {
                     }
                 );
 
-
-                container.appendChild(
-                    row
-                );
-
             }
-        );
+
+            container.appendChild(row);
+
+        });
 
     }
-
 
     if (totalElement) {
 
@@ -4159,40 +4086,28 @@ async function saveReservation() {
             "reservation-name"
         ).value.trim();
 
-
     if (!name) {
 
         alert(
             "予約者名を入力してください。"
         );
 
-
         return;
-
     }
 
-
-    if (
-        reservationCart.length === 0
-    ) {
+    if (reservationCart.length === 0) {
 
         alert(
             "商品を1つ以上選択してください。"
         );
 
-
         return;
-
     }
-
 
     const products =
         await getAllProducts();
 
-
-    for (
-        const item of reservationCart
-    ) {
+    for (const item of reservationCart) {
 
         const product =
             products.find(
@@ -4201,24 +4116,17 @@ async function saveReservation() {
                     item.productId
             );
 
-
         if (!product) {
 
             alert(
                 `商品「${item.name}」が見つかりません。`
             );
 
-
             return;
-
         }
 
-
         const sellable =
-            getSellableStock(
-                product
-            );
-
+            getSellableStock(product);
 
         if (
             item.quantity >
@@ -4229,153 +4137,135 @@ async function saveReservation() {
                 `「${item.name}」の予約可能数が不足しています。`
             );
 
-
             return;
-
         }
 
     }
 
+    return new Promise((resolve, reject) => {
 
-    return new Promise(
-        (resolve, reject) => {
-
-            const transaction =
-                db.transaction(
-                    [
-                        "products",
-                        "reservations"
-                    ],
-                    "readwrite"
-                );
-
-
-            const productStore =
-                transaction.objectStore(
-                    "products"
-                );
-
-
-            const reservationStore =
-                transaction.objectStore(
+        const transaction =
+            db.transaction(
+                [
+                    "products",
                     "reservations"
+                ],
+                "readwrite"
+            );
+
+        const productStore =
+            transaction.objectStore(
+                "products"
+            );
+
+        const reservationStore =
+            transaction.objectStore(
+                "reservations"
+            );
+
+        reservationCart.forEach(item => {
+
+            const product =
+                products.find(
+                    product =>
+                        product.id ===
+                        item.productId
                 );
 
+            product.reserved =
+                Number(
+                    product.reserved || 0
+                ) +
+                item.quantity;
 
-            reservationCart.forEach(
-                item => {
+            productStore.put(product);
 
-                    const product =
-                        products.find(
-                            product =>
-                                product.id ===
-                                item.productId
-                        );
+        });
 
+        const reservation = {
 
-                    product.reserved =
-                        Number(
-                            product.reserved || 0
-                        ) +
-                        item.quantity;
+            id:
+                createId(),
 
+            name,
 
-                    productStore.put(
-                        product
-                    );
+            items:
+                reservationCart.map(
+                    item => ({
 
-                }
+                        productId:
+                            item.productId,
+
+                        name:
+                            item.name,
+
+                        price:
+                            item.price,
+
+                        quantity:
+                            item.quantity
+
+                    })
+                ),
+
+            total:
+                getReservationTotal(),
+
+            status:
+                "unreceived",
+
+            createdAt:
+                new Date().toISOString()
+
+        };
+
+        reservationStore.add(
+            reservation
+        );
+
+        transaction.oncomplete = () => {
+
+            reservationCart = [];
+
+            closeReservationModal();
+
+            loadReservations();
+            loadProducts();
+            loadRegisterProducts();
+            loadInventory();
+
+            alert(
+                "予約を保存しました。"
             );
 
+            resolve();
 
-            const reservation = {
+        };
 
-                id:
-                    createId(),
+        transaction.onerror = () => {
 
-                name,
-
-                items:
-                    reservationCart.map(
-                        item => ({
-
-                            productId:
-                                item.productId,
-
-                            name:
-                                item.name,
-
-                            price:
-                                item.price,
-
-                            quantity:
-                                item.quantity
-
-                        })
-                    ),
-
-                total:
-                    getReservationTotal(),
-
-                status:
-                    "unreceived",
-
-                createdAt:
-                    new Date().toISOString()
-
-            };
-
-
-            reservationStore.add(
-                reservation
+            alert(
+                "予約の保存に失敗しました。"
             );
 
+            reject(
+                transaction.error
+            );
 
-            transaction.oncomplete =
-                () => {
+        };
 
-                    reservationCart =
-                        [];
+        transaction.onabort = () => {
 
+            reject(
+                transaction.error ||
+                new Error(
+                    "予約保存トランザクションが中止されました。"
+                )
+            );
 
-                    closeReservationModal();
+        };
 
-
-                    loadReservations();
-
-                    loadProducts();
-
-                    loadRegisterProducts();
-
-                    loadInventory();
-
-
-                    alert(
-                        "予約を保存しました。"
-                    );
-
-
-                    resolve();
-
-                };
-
-
-            transaction.onerror =
-                () => {
-
-                    alert(
-                        "予約の保存に失敗しました。"
-                    );
-
-
-                    reject(
-                        transaction.error
-                    );
-
-                };
-
-        }
-    );
+    });
 
 }
 
@@ -4398,7 +4288,6 @@ async function markReservationReceived(
                         "readonly"
                     );
 
-
                 const request =
                     transaction
                         .objectStore(
@@ -4408,34 +4297,28 @@ async function markReservationReceived(
                             reservationId
                         );
 
+                request.onsuccess = () => {
 
-                request.onsuccess =
-                    () => {
+                    resolve(
+                        request.result
+                    );
 
-                        resolve(
-                            request.result
-                        );
+                };
 
-                    };
+                request.onerror = () => {
 
+                    reject(
+                        request.error
+                    );
 
-                request.onerror =
-                    () => {
-
-                        reject(
-                            request.error
-                        );
-
-                    };
+                };
 
             }
         );
 
-
     if (!reservation) {
         return;
     }
-
 
     if (
         reservation.status ===
@@ -4443,20 +4326,16 @@ async function markReservationReceived(
     ) {
 
         return;
-
     }
-
 
     const ok =
         confirm(
             `${reservation.name}さんの予約を\n受け渡し完了にしますか？`
         );
 
-
     if (!ok) {
         return;
     }
-
 
     return new Promise(
         (resolve, reject) => {
@@ -4470,117 +4349,136 @@ async function markReservationReceived(
                     "readwrite"
                 );
 
-
             const productStore =
                 transaction.objectStore(
                     "products"
                 );
 
+            const reservationStore =
+                transaction.objectStore(
+                    "reservations"
+                );
 
-            reservation.items.forEach(
-                item => {
+            let failed = false;
 
-                    const request =
-                        productStore.get(
-                            item.productId
+            reservation.items.forEach(item => {
+
+                const request =
+                    productStore.get(
+                        item.productId
+                    );
+
+                request.onsuccess = () => {
+
+                    const product =
+                        request.result;
+
+                    if (!product) {
+
+                        failed = true;
+
+                        try {
+                            transaction.abort();
+                        } catch (error) {
+                            console.error(
+                                "予約受け渡し中止エラー:",
+                                error
+                            );
+                        }
+
+                        return;
+                    }
+
+                    product.reserved =
+                        Math.max(
+                            0,
+                            Number(
+                                product.reserved || 0
+                            ) -
+                            Number(
+                                item.quantity || 0
+                            )
                         );
 
+                    productStore.put(
+                        product
+                    );
 
-                    request.onsuccess =
-                        () => {
+                };
 
-                            const product =
-                                request.result;
+                request.onerror = () => {
 
+                    failed = true;
 
-                            if (!product) {
-                                return;
-                            }
+                    try {
+                        transaction.abort();
+                    } catch (error) {
+                        console.error(
+                            "予約受け渡し中止エラー:",
+                            error
+                        );
+                    }
 
+                };
 
-                            product.reserved =
-                                Math.max(
-                                    0,
-                                    Number(
-                                        product.reserved ||
-                                        0
-                                    ) -
-                                    Number(
-                                        item.quantity ||
-                                        0
-                                    )
-                                );
-
-
-                            productStore.put(
-                                product
-                            );
-
-                        };
-
-                }
-            );
-
+            });
 
             reservation.status =
                 "received";
 
-
             reservation.receivedAt =
                 new Date().toISOString();
 
+            reservationStore.put(
+                reservation
+            );
 
-            transaction
-                .objectStore(
-                    "reservations"
-                )
-                .put(
-                    reservation
+            transaction.oncomplete = () => {
+
+                if (failed) {
+                    return;
+                }
+
+                loadReservations();
+                loadProducts();
+                loadRegisterProducts();
+                loadInventory();
+
+                alert(
+                    "受け渡しを完了しました。"
                 );
 
+                resolve();
 
-            transaction.oncomplete =
-                () => {
+            };
 
-                    loadReservations();
+            transaction.onerror = () => {
 
-                    loadProducts();
+                reject(
+                    transaction.error
+                );
 
-                    loadRegisterProducts();
+            };
 
-                    loadInventory();
+            transaction.onabort = () => {
 
+                alert(
+                    "受け渡し処理に失敗しました。"
+                );
 
-                    alert(
-                        "受け渡しを完了しました。"
-                    );
+                reject(
+                    transaction.error ||
+                    new Error(
+                        "受け渡し処理が中止されました。"
+                    )
+                );
 
-
-                    resolve();
-
-                };
-
-
-            transaction.onerror =
-                () => {
-
-                    alert(
-                        "受け渡し処理に失敗しました。"
-                    );
-
-
-                    reject(
-                        transaction.error
-                    );
-
-                };
+            };
 
         }
     );
 
 }
-
-
 // ============================================================
 // レジ販売イベント取得
 // ============================================================
@@ -4604,6 +4502,10 @@ async function getRegisterEvents() {
 
 }
 
+
+// ============================================================
+// レジ販売イベント選択欄
+// ============================================================
 
 // ============================================================
 // レジ販売イベント選択欄
@@ -4713,17 +4615,28 @@ async function ensureRegisterEventSelector() {
             "change",
             async () => {
 
-                selectedRegisterEventId =
+                // 変更前のイベント
+                const previousEventId =
+                    selectedRegisterEventId || "";
+
+
+                // 今選択されたイベント
+                const newEventId =
                     select.value || "";
 
 
-                /*
-                 * イベントを変更した場合、
-                 * 現在のカートをそのまま使うと
-                 * 別イベントの商品として販売される
-                 * 可能性があるため、一度空にする。
-                 */
+                // 同じイベントなら何もしない
+                if (
+                    previousEventId ===
+                    newEventId
+                ) {
 
+                    return;
+
+                }
+
+
+                // カートがある場合
                 if (
                     registerCart.length > 0
                 ) {
@@ -4735,22 +4648,29 @@ async function ensureRegisterEventSelector() {
                         );
 
 
+                    // キャンセル
                     if (!confirmed) {
 
+                        // 変更前に戻す
                         select.value =
-                            selectedRegisterEventId === ""
-                                ? ""
-                                : selectedRegisterEventId;
+                            previousEventId;
 
                         return;
 
                     }
 
+
+                    // 変更確定ならカートを空にする
                     registerCart = [];
 
                     renderRegisterCart();
 
                 }
+
+
+                // ここで初めてイベントIDを変更
+                selectedRegisterEventId =
+                    newEventId;
 
 
                 await loadRegisterProducts();
@@ -4805,7 +4725,7 @@ async function ensureRegisterEventSelector() {
 
 
             option.textContent =
-                `${event.name} ${
+                `${event.name}${
                     event.date
                         ? `（${event.date}）`
                         : ""
@@ -4887,7 +4807,6 @@ async function ensureRegisterEventSelector() {
     return selectedRegisterEventId;
 
 }
-
 
 // ============================================================
 // イベント在庫取得
@@ -6013,17 +5932,7 @@ async function changeRegisterQuantity(
     }
 
 
-    const product =
-        await getProduct(
-            productId
-        );
-
-
-    if (!product) {
-        return;
-    }
-
-
+    // 現在の販売可能数を取得
     const sellable =
         await getRegisterSellableQuantity(
             productId
@@ -6034,6 +5943,7 @@ async function changeRegisterQuantity(
         delta;
 
 
+    // 販売可能数を超えない
     if (
         item.quantity >
         sellable
@@ -6045,6 +5955,7 @@ async function changeRegisterQuantity(
     }
 
 
+    // 0以下ならカートから削除
     if (
         item.quantity <= 0
     ) {
@@ -6062,7 +5973,6 @@ async function changeRegisterQuantity(
     renderRegisterCart();
 
 }
-
 
 // ============================================================
 // レジ合計
@@ -6394,6 +6304,17 @@ async function completeSale() {
         );
 
 
+    if (!cashInput) {
+
+        alert(
+            "預かり金入力欄が見つかりません。"
+        );
+
+        return;
+
+    }
+
+
     const cashReceived =
         Number(
             cashInput.value || 0
@@ -6407,7 +6328,6 @@ async function completeSale() {
         alert(
             "預かり金が不足しています。"
         );
-
 
         return;
 
@@ -6430,6 +6350,10 @@ async function completeSale() {
         null;
 
 
+    // ========================================================
+    // イベント確認
+    // ========================================================
+
     if (eventId) {
 
         selectedEvent =
@@ -6444,9 +6368,7 @@ async function completeSale() {
                 "選択された販売イベントが見つかりません。"
             );
 
-
             await loadRegisterProducts();
-
 
             return;
 
@@ -6474,12 +6396,14 @@ async function completeSale() {
 
 
             if (select) {
-                select.value = "";
+
+                select.value =
+                    "";
+
             }
 
 
             await loadRegisterProducts();
-
 
             return;
 
@@ -6488,15 +6412,17 @@ async function completeSale() {
     }
 
 
+    // ========================================================
+    // 最新の商品情報を取得
+    // ========================================================
+
     const products =
         await getAllProducts();
 
 
-    /*
-     * --------------------------------------------------------
-     * 販売可能数を再確認
-     * --------------------------------------------------------
-     */
+    // ========================================================
+    // イベント在庫を取得
+    // ========================================================
 
     const eventInventoryMap =
         eventId
@@ -6505,6 +6431,10 @@ async function completeSale() {
             )
             : new Map();
 
+
+    // ========================================================
+    // 販売可能数を再確認
+    // ========================================================
 
     for (
         const item of registerCart
@@ -6528,14 +6458,18 @@ async function completeSale() {
                 `商品「${item.name}」が見つかりません。`
             );
 
-
             return;
 
         }
 
 
-        let sellable = 0;
+        let sellable =
+            0;
 
+
+        // ----------------------------------------------------
+        // イベント販売
+        // ----------------------------------------------------
 
         if (eventId) {
 
@@ -6553,9 +6487,7 @@ async function completeSale() {
                     `「${item.name}」は、このイベントの開始在庫に登録されていません。`
                 );
 
-
                 await loadRegisterProducts();
-
 
                 return;
 
@@ -6566,8 +6498,7 @@ async function completeSale() {
                 Math.max(
                     0,
                     Number(
-                        inventory.quantity ||
-                        0
+                        inventory.quantity || 0
                     )
                 );
 
@@ -6576,8 +6507,7 @@ async function completeSale() {
                 Math.max(
                     0,
                     Number(
-                        inventory.soldQuantity ||
-                        0
+                        inventory.soldQuantity || 0
                     )
                 );
 
@@ -6589,7 +6519,13 @@ async function completeSale() {
                     soldQuantity
                 );
 
-        } else {
+        }
+
+        // ----------------------------------------------------
+        // 通常販売
+        // ----------------------------------------------------
+
+        else {
 
             sellable =
                 getSellableStock(
@@ -6609,9 +6545,7 @@ async function completeSale() {
                 `販売可能数：${sellable}個`
             );
 
-
             await loadRegisterProducts();
-
 
             return;
 
@@ -6620,10 +6554,18 @@ async function completeSale() {
     }
 
 
+    // ========================================================
+    // お釣り
+    // ========================================================
+
     const change =
         cashReceived -
         total;
 
+
+    // ========================================================
+    // 売上データ
+    // ========================================================
 
     const sale = {
 
@@ -6672,11 +6614,9 @@ async function completeSale() {
     };
 
 
-    /*
-     * --------------------------------------------------------
-     * 通常販売
-     * --------------------------------------------------------
-     */
+    // ========================================================
+    // 通常販売
+    // ========================================================
 
     if (!eventId) {
 
@@ -6727,6 +6667,15 @@ async function completeSale() {
                             );
 
 
+                        if (!product) {
+
+                            transaction.abort();
+
+                            return;
+
+                        }
+
+
                         const beforeStock =
                             Number(
                                 product.stock || 0
@@ -6770,8 +6719,7 @@ async function completeSale() {
 
                                 reserved:
                                     Number(
-                                        product.reserved ||
-                                        0
+                                        product.reserved || 0
                                     ),
 
                                 reason:
@@ -6793,23 +6741,22 @@ async function completeSale() {
 
 
                 transaction.oncomplete =
-                    () => {
+                    async () => {
 
                         registerCart =
                             [];
 
-
                         cashInput.value =
                             "";
 
-
                         renderRegisterCart();
 
-                        loadRegisterProducts();
 
-                        loadProducts();
+                        await loadRegisterProducts();
 
-                        loadInventory();
+                        await loadProducts();
+
+                        await loadInventory();
 
 
                         alert(
@@ -6839,23 +6786,33 @@ async function completeSale() {
 
                     };
 
+
+                transaction.onabort =
+                    () => {
+
+                        reject(
+                            transaction.error ||
+                            new Error(
+                                "販売処理が中断されました。"
+                            )
+                        );
+
+                    };
+
             }
         );
 
     }
 
 
-    /*
-     * --------------------------------------------------------
-     * イベント販売
-     *
-     * イベント開始時点ですでにマスター在庫から
-     * イベント持ち出し分を引いているため、
-     * ここでは products.stock を変更しない。
-     *
-     * eventInventory.soldQuantity のみ増やす。
-     * --------------------------------------------------------
-     */
+    // ========================================================
+    // イベント販売
+    //
+    // イベント開始時にマスター在庫から持ち出し分を
+    // 引いているため、products.stock は変更しない。
+    //
+    // eventInventory.soldQuantity のみ増やす。
+    // ========================================================
 
     return new Promise(
         (resolve, reject) => {
@@ -6882,6 +6839,10 @@ async function completeSale() {
                 );
 
 
+            // ------------------------------------------------
+            // イベント在庫を更新
+            // ------------------------------------------------
+
             registerCart.forEach(
                 item => {
 
@@ -6893,17 +6854,11 @@ async function completeSale() {
                         );
 
 
+                    // ここまで来て存在しないのは
+                    // 通常は起こらないが、安全策として中断
                     if (!inventory) {
 
                         transaction.abort();
-
-
-                        reject(
-                            new Error(
-                                `イベント在庫が見つかりません：${item.name}`
-                            )
-                        );
-
 
                         return;
 
@@ -6914,8 +6869,7 @@ async function completeSale() {
                         Math.max(
                             0,
                             Number(
-                                inventory.quantity ||
-                                0
+                                inventory.quantity || 0
                             )
                         );
 
@@ -6924,8 +6878,7 @@ async function completeSale() {
                         Math.max(
                             0,
                             Number(
-                                inventory.soldQuantity ||
-                                0
+                                inventory.soldQuantity || 0
                             )
                         );
 
@@ -6941,14 +6894,6 @@ async function completeSale() {
                     ) {
 
                         transaction.abort();
-
-
-                        reject(
-                            new Error(
-                                `イベント在庫を超えて販売しようとしています：${item.name}`
-                            )
-                        );
-
 
                         return;
 
@@ -6967,10 +6912,18 @@ async function completeSale() {
             );
 
 
+            // ------------------------------------------------
+            // 売上記録
+            // ------------------------------------------------
+
             salesStore.add(
                 sale
             );
 
+
+            // ------------------------------------------------
+            // 完了
+            // ------------------------------------------------
 
             transaction.oncomplete =
                 async () => {
@@ -6978,47 +6931,37 @@ async function completeSale() {
                     registerCart =
                         [];
 
-
                     cashInput.value =
                         "";
-
 
                     renderRegisterCart();
 
 
-await loadRegisterProducts();
+                    // 商品・通常在庫表示を更新
+                    await loadRegisterProducts();
+
+                    await loadProducts();
+
+                    await loadInventory();
 
 
-await loadProducts();
-
-await loadInventory();
-
-
-/*
- * イベント販売状況を更新
- */
-
-await loadEventStartInventory(
-    eventId
-);
+                    // イベント販売状況を更新
+                    await loadEventStartInventory(
+                        eventId
+                    );
 
 
-/*
- * 売上表示を更新
- */
-
-await loadEventSalesSummary(
-    eventId
-);
+                    // 売上表示を更新
+                    await loadEventSalesSummary(
+                        eventId
+                    );
 
 
-/*
- * 利益集計も更新
- */
+                    // 利益集計を更新
+                    await loadEventProfitSummary(
+                        eventId
+                    );
 
-await loadEventProfitSummary(
-    eventId
-);
 
                     alert(
                         "イベント販売を確定しました。\n\n" +
@@ -7052,15 +6995,12 @@ await loadEventProfitSummary(
             transaction.onabort =
                 () => {
 
-                    if (
-                        transaction.error
-                    ) {
-
-                        reject(
-                            transaction.error
-                        );
-
-                    }
+                    reject(
+                        transaction.error ||
+                        new Error(
+                            "イベント販売処理が中断されました。"
+                        )
+                    );
 
                 };
 
@@ -7094,7 +7034,6 @@ function createInventoryAdjustModal() {
 
     modal.id =
         "inventory-adjust-modal";
-
 
     modal.className =
         "modal";
@@ -7222,42 +7161,44 @@ function createInventoryAdjustModal() {
 
             <div class="form-group">
 
-    <label
-        for="inventory-new-stock"
-    >
-        修正後の在庫数
-    </label>
-
-    <input
-        type="number"
-        id="inventory-new-stock"
-        min="0"
-        step="1"
-        inputmode="numeric"
-        placeholder="0"
-    >
-
-</div>
+                <label
+                    for="inventory-new-stock"
+                >
+                    修正後の在庫数
+                </label>
 
 
-<div class="form-group">
+                <input
+                    type="number"
+                    id="inventory-new-stock"
+                    min="0"
+                    step="1"
+                    inputmode="numeric"
+                    placeholder="0"
+                >
 
-    <label
-        for="inventory-new-reserved"
-    >
-        修正後の予約確保数
-    </label>
+            </div>
 
-    <input
-        type="number"
-        id="inventory-new-reserved"
-        min="0"
-        step="1"
-        inputmode="numeric"
-        placeholder="0"
-    >
 
-</div>
+            <div class="form-group">
+
+                <label
+                    for="inventory-new-reserved"
+                >
+                    修正後の予約確保数
+                </label>
+
+
+                <input
+                    type="number"
+                    id="inventory-new-reserved"
+                    min="0"
+                    step="1"
+                    inputmode="numeric"
+                    placeholder="0"
+                >
+
+            </div>
 
 
             <div
@@ -7267,7 +7208,7 @@ function createInventoryAdjustModal() {
                     font-weight:bold;
                 "
             >
-                増減：0個
+                在庫増減：0個　/　予約増減：0個
             </div>
 
 
@@ -7363,44 +7304,84 @@ function createInventoryAdjustModal() {
     );
 
 
-    document
-        .getElementById(
+    const closeButton =
+        document.getElementById(
             "close-inventory-adjust-modal"
-        )
-        .addEventListener(
+        );
+
+
+    if (closeButton) {
+
+        closeButton.addEventListener(
             "click",
             closeInventoryAdjustModal
         );
 
+    }
 
-    document
-        .getElementById(
+
+    const cancelButton =
+        document.getElementById(
             "cancel-inventory-adjust"
-        )
-        .addEventListener(
+        );
+
+
+    if (cancelButton) {
+
+        cancelButton.addEventListener(
             "click",
             closeInventoryAdjustModal
         );
 
+    }
 
-    document
-        .getElementById(
+
+    const saveButton =
+        document.getElementById(
             "save-inventory-adjust"
-        )
-        .addEventListener(
+        );
+
+
+    if (saveButton) {
+
+        saveButton.addEventListener(
             "click",
             saveInventoryAdjustment
         );
 
+    }
 
-    document
-        .getElementById(
+
+    const stockInput =
+        document.getElementById(
             "inventory-new-stock"
-        )
-        .addEventListener(
+        );
+
+
+    if (stockInput) {
+
+        stockInput.addEventListener(
             "input",
             updateInventoryAdjustDifference
         );
+
+    }
+
+
+    const reservedInput =
+        document.getElementById(
+            "inventory-new-reserved"
+        );
+
+
+    if (reservedInput) {
+
+        reservedInput.addEventListener(
+            "input",
+            updateInventoryAdjustDifference
+        );
+
+    }
 
 }
 
@@ -7428,7 +7409,6 @@ async function openInventoryAdjustModal(
             "商品が見つかりません。"
         );
 
-
         return;
 
     }
@@ -7438,64 +7418,154 @@ async function openInventoryAdjustModal(
         productId;
 
 
-    document.getElementById(
-        "inventory-adjust-product-name"
-    ).textContent =
-        product.name;
-
-
-    document.getElementById(
-        "inventory-current-stock"
-    ).textContent =
-        Number(
-            product.stock || 0
+    const stock =
+        Math.max(
+            0,
+            Number(
+                product.stock || 0
+            )
         );
 
 
-    document.getElementById(
-        "inventory-reserved-stock"
-    ).textContent =
-        Number(
-            product.reserved || 0
+    const reserved =
+        Math.max(
+            0,
+            Number(
+                product.reserved || 0
+            )
         );
 
 
-    document.getElementById(
-        "inventory-current-sellable"
-    ).textContent =
-        getSellableStock(
-            product
+    const productNameElement =
+        document.getElementById(
+            "inventory-adjust-product-name"
         );
 
 
-    document.getElementById(
-        "inventory-new-stock"
-    ).value =
-        Number(
-            product.stock || 0
+    if (productNameElement) {
+
+        productNameElement.textContent =
+            product.name || "";
+
+    }
+
+
+    const currentStockElement =
+        document.getElementById(
+            "inventory-current-stock"
         );
 
 
-    document.getElementById(
-        "inventory-adjust-reason"
-    ).value =
-        "数え間違い";
+    if (currentStockElement) {
+
+        currentStockElement.textContent =
+            stock;
+
+    }
 
 
-    document.getElementById(
-        "inventory-adjust-memo"
-    ).value =
-        "";
+    const reservedElement =
+        document.getElementById(
+            "inventory-reserved-stock"
+        );
 
 
-    updateInventoryAdjustDifference();
+    if (reservedElement) {
+
+        reservedElement.textContent =
+            reserved;
+
+    }
 
 
-    document.getElementById(
-        "inventory-adjust-modal"
-    ).classList.add(
-        "show"
-    );
+    const sellableElement =
+        document.getElementById(
+            "inventory-current-sellable"
+        );
+
+
+    if (sellableElement) {
+
+        sellableElement.textContent =
+            getSellableStock(
+                product
+            );
+
+    }
+
+
+    const newStockInput =
+        document.getElementById(
+            "inventory-new-stock"
+        );
+
+
+    if (newStockInput) {
+
+        newStockInput.value =
+            stock;
+
+    }
+
+
+    const newReservedInput =
+        document.getElementById(
+            "inventory-new-reserved"
+        );
+
+
+    if (newReservedInput) {
+
+        newReservedInput.value =
+            reserved;
+
+    }
+
+
+    const reasonElement =
+        document.getElementById(
+            "inventory-adjust-reason"
+        );
+
+
+    if (reasonElement) {
+
+        reasonElement.value =
+            "数え間違い";
+
+    }
+
+
+    const memoElement =
+        document.getElementById(
+            "inventory-adjust-memo"
+        );
+
+
+    if (memoElement) {
+
+        memoElement.value =
+            "";
+
+    }
+
+
+    await updateInventoryAdjustDifference();
+
+
+    const modal =
+        document.getElementById(
+            "inventory-adjust-modal"
+        );
+
+
+    if (modal) {
+
+        modal.classList.add(
+            "show"
+        );
+
+    }
 
 }
 
@@ -7549,22 +7619,21 @@ async function updateInventoryAdjustDifference() {
 
 
     if (!product) {
+
         return;
+
     }
 
 
-    const newStock =
-        Number(
-            document.getElementById(
-                "inventory-new-stock"
-            ).value
+    const stockInput =
+        document.getElementById(
+            "inventory-new-stock"
         );
 
 
-    const difference =
-        newStock -
-        Number(
-            product.stock || 0
+    const reservedInput =
+        document.getElementById(
+            "inventory-new-reserved"
         );
 
 
@@ -7574,31 +7643,95 @@ async function updateInventoryAdjustDifference() {
         );
 
 
-    if (!element) {
+    if (
+        !stockInput ||
+        !reservedInput ||
+        !element
+    ) {
+
         return;
+
     }
+
+
+    const newStock =
+        Number(
+            stockInput.value
+        );
+
+
+    const currentStock =
+        Number(
+            product.stock || 0
+        );
+
+
+    const newReserved =
+        Number(
+            reservedInput.value
+        );
+
+
+    const currentReserved =
+        Number(
+            product.reserved || 0
+        );
+
+
+    const stockDifference =
+        newStock -
+        currentStock;
+
+
+    const reservedDifference =
+        newReserved -
+        currentReserved;
+
+
+    let stockText =
+        "在庫増減：0個";
 
 
     if (
-        difference > 0
+        stockDifference > 0
     ) {
 
-        element.textContent =
-            `増減：＋${difference}個`;
+        stockText =
+            `在庫増減：＋${stockDifference}個`;
 
     } else if (
-        difference < 0
+        stockDifference < 0
     ) {
 
-        element.textContent =
-            `増減：${difference}個`;
-
-    } else {
-
-        element.textContent =
-            "増減：0個";
+        stockText =
+            `在庫増減：${stockDifference}個`;
 
     }
+
+
+    let reservedText =
+        "予約増減：0個";
+
+
+    if (
+        reservedDifference > 0
+    ) {
+
+        reservedText =
+            `予約増減：＋${reservedDifference}個`;
+
+    } else if (
+        reservedDifference < 0
+    ) {
+
+        reservedText =
+            `予約増減：${reservedDifference}個`;
+
+    }
+
+
+    element.textContent =
+        `${stockText}　/　${reservedText}`;
 
 }
 
@@ -7630,6 +7763,31 @@ async function saveInventoryAdjustment() {
             "商品が見つかりません。"
         );
 
+        return;
+
+    }
+
+
+    const stockInput =
+        document.getElementById(
+            "inventory-new-stock"
+        );
+
+
+    const reservedInput =
+        document.getElementById(
+            "inventory-new-reserved"
+        );
+
+
+    if (
+        !stockInput ||
+        !reservedInput
+    ) {
+
+        alert(
+            "在庫修正欄が見つかりません。"
+        );
 
         return;
 
@@ -7638,46 +7796,14 @@ async function saveInventoryAdjustment() {
 
     const newStock =
         Number(
-            document.getElementById(
-                "inventory-new-stock"
-            ).value
+            stockInput.value
         );
 
 
-    const reserved =
+    const newReserved =
         Number(
-            product.reserved || 0
+            reservedInput.value
         );
-
-
-    if (
-        !Number.isInteger(newStock) ||
-        newStock < 0
-    ) {
-
-        alert(
-            "在庫数は0以上の整数で入力してください。"
-        );
-
-
-        return;
-
-    }
-
-
-    if (
-        newStock < reserved
-    ) {
-
-        alert(
-            "修正後の在庫数を予約確保数より少なくすることはできません。\n\n" +
-            `予約確保：${reserved}個`
-        );
-
-
-        return;
-
-    }
 
 
     const beforeStock =
@@ -7686,48 +7812,135 @@ async function saveInventoryAdjustment() {
         );
 
 
-    const delta =
-        newStock -
-        beforeStock;
+    const beforeReserved =
+        Number(
+            product.reserved || 0
+        );
 
 
     if (
-        delta === 0
+        !Number.isInteger(
+            newStock
+        ) ||
+        newStock < 0
     ) {
 
         alert(
-            "在庫数が変更されていません。"
+            "在庫数は0以上の整数で入力してください。"
         );
-
 
         return;
 
     }
 
 
-    const reason =
+    if (
+        !Number.isInteger(
+            newReserved
+        ) ||
+        newReserved < 0
+    ) {
+
+        alert(
+            "予約確保数は0以上の整数で入力してください。"
+        );
+
+        return;
+
+    }
+
+
+    if (
+        newReserved >
+        newStock
+    ) {
+
+        alert(
+            "予約確保数を在庫数より多くすることはできません。\n\n" +
+            `修正後の在庫：${newStock}個\n` +
+            `修正後の予約確保：${newReserved}個`
+        );
+
+        return;
+
+    }
+
+
+    const stockDelta =
+        newStock -
+        beforeStock;
+
+
+    const reservedDelta =
+        newReserved -
+        beforeReserved;
+
+
+    if (
+        stockDelta === 0 &&
+        reservedDelta === 0
+    ) {
+
+        alert(
+            "在庫数・予約確保数が変更されていません。"
+        );
+
+        return;
+
+    }
+
+
+    const reasonElement =
         document.getElementById(
             "inventory-adjust-reason"
-        ).value;
+        );
+
+
+    const memoElement =
+        document.getElementById(
+            "inventory-adjust-memo"
+        );
+
+
+    const reason =
+        reasonElement
+            ? reasonElement.value
+            : "";
 
 
     const memo =
-        document.getElementById(
-            "inventory-adjust-memo"
-        ).value.trim();
+        memoElement
+            ? memoElement.value.trim()
+            : "";
 
 
     return new Promise(
         (resolve, reject) => {
 
-            const transaction =
-                db.transaction(
-                    [
-                        "products",
-                        "inventoryHistory"
-                    ],
-                    "readwrite"
+            let transaction;
+
+            try {
+
+                transaction =
+                    db.transaction(
+                        [
+                            "products",
+                            "inventoryHistory"
+                        ],
+                        "readwrite"
+                    );
+
+            } catch (error) {
+
+                alert(
+                    "在庫修正に失敗しました。"
                 );
+
+                reject(error);
+
+                return;
+
+            }
 
 
             const productStore =
@@ -7746,6 +7959,10 @@ async function saveInventoryAdjustment() {
                 newStock;
 
 
+            product.reserved =
+                newReserved;
+
+
             product.updatedAt =
                 new Date().toISOString();
 
@@ -7755,55 +7972,75 @@ async function saveInventoryAdjustment() {
             );
 
 
-            addInventoryHistory(
-                historyStore,
-                {
+            // ------------------------------------------------
+            // 在庫数が変更された場合だけ履歴を作成
+            // ------------------------------------------------
 
-                    productId:
-                        product.id,
+            if (
+                stockDelta !== 0
+            ) {
 
-                    productName:
-                        product.name,
+                addInventoryHistory(
+                    historyStore,
+                    {
 
-                    type:
-                        "adjustment",
+                        productId:
+                            product.id,
 
-                    delta,
+                        productName:
+                            product.name,
 
-                    beforeStock,
+                        type:
+                            "adjustment",
 
-                    afterStock:
-                        newStock,
+                        delta:
+                            stockDelta,
 
-                    reserved,
+                        beforeStock,
 
-                    reason,
+                        afterStock:
+                            newStock,
 
-                    memo
+                        reserved:
+                            newReserved,
 
-                }
-            );
+                        reason,
+
+                        memo
+
+                    }
+                );
+
+            }
 
 
             transaction.oncomplete =
-                () => {
+                async () => {
 
-                    closeInventoryAdjustModal();
+                    try {
 
-
-                    loadInventory();
-
-                    loadProducts();
-
-                    loadRegisterProducts();
+                        closeInventoryAdjustModal();
 
 
-                    alert(
-                        "在庫を修正しました。"
-                    );
+                        await loadInventory();
+
+                        await loadProducts();
+
+                        await loadRegisterProducts();
 
 
-                    resolve();
+                        alert(
+                            "在庫を修正しました。"
+                        );
+
+
+                        resolve();
+
+                    } catch (error) {
+
+                        reject(error);
+
+                    }
 
                 };
 
@@ -7817,7 +8054,23 @@ async function saveInventoryAdjustment() {
 
 
                     reject(
-                        transaction.error
+                        transaction.error ||
+                        new Error(
+                            "在庫修正に失敗しました。"
+                        )
+                    );
+
+                };
+
+
+            transaction.onabort =
+                () => {
+
+                    reject(
+                        transaction.error ||
+                        new Error(
+                            "在庫修正処理が中断されました。"
+                        )
                     );
 
                 };
@@ -7841,7 +8094,9 @@ async function loadInventory() {
 
 
     if (!container) {
+
         return;
+
     }
 
 
@@ -7864,7 +8119,6 @@ async function loadInventory() {
                 Number(
                     product.stock || 0
                 ),
-
             0
         );
 
@@ -7876,7 +8130,6 @@ async function loadInventory() {
                 Number(
                     product.reserved || 0
                 ),
-
             0
         );
 
@@ -7888,7 +8141,6 @@ async function loadInventory() {
                 getSellableStock(
                     product
                 ),
-
             0
         );
 
@@ -7953,7 +8205,8 @@ async function loadInventory() {
     // 商品一覧
     // --------------------------------------------------------
 
-    container.innerHTML = "";
+    container.innerHTML =
+        "";
 
 
     if (
@@ -7983,11 +8236,14 @@ async function loadInventory() {
 
     products.sort(
         (a, b) =>
-            String(a.name || "")
-                .localeCompare(
-                    String(b.name || ""),
-                    "ja"
-                )
+            String(
+                a.name || ""
+            ).localeCompare(
+                String(
+                    b.name || ""
+                ),
+                "ja"
+            )
     );
 
 
@@ -8038,7 +8294,8 @@ async function loadInventory() {
             `;
 
 
-            let sellableClass = "";
+            let sellableClass =
+                "";
 
 
             if (
@@ -8075,7 +8332,7 @@ async function loadInventory() {
                         "
                     >
                         ${escapeHTML(
-                            product.name
+                            product.name || ""
                         )}
                     </div>
 
@@ -8185,9 +8442,11 @@ async function loadInventory() {
                 <button
                     type="button"
                     class="inventory-adjust-button"
-                    data-product-id="
-                        ${product.id}
-                    "
+                    data-product-id="${escapeHTML(
+                        String(
+                            product.id
+                        )
+                    )}"
                     style="
                         padding:9px 12px;
                         border:1px solid #ddd;
@@ -8203,21 +8462,29 @@ async function loadInventory() {
             `;
 
 
-            row.querySelector(
-                ".inventory-adjust-button"
-            ).addEventListener(
-                "click",
-                event => {
-
-                    event.stopPropagation();
+            const adjustButton =
+                row.querySelector(
+                    ".inventory-adjust-button"
+                );
 
 
-                    openInventoryAdjustModal(
-                        product.id
-                    );
+            if (adjustButton) {
 
-                }
-            );
+                adjustButton.addEventListener(
+                    "click",
+                    event => {
+
+                        event.stopPropagation();
+
+
+                        openInventoryAdjustModal(
+                            product.id
+                        );
+
+                    }
+                );
+
+            }
 
 
             container.appendChild(
@@ -8232,7 +8499,6 @@ async function loadInventory() {
 
 }
 
-
 // ============================================================
 // 在庫履歴取得
 // ============================================================
@@ -8241,6 +8507,19 @@ function getAllInventoryHistory() {
 
     return new Promise(
         (resolve, reject) => {
+
+            if (!db) {
+
+                reject(
+                    new Error(
+                        "データベースが初期化されていません。"
+                    )
+                );
+
+                return;
+
+            }
+
 
             const transaction =
                 db.transaction(
@@ -8295,7 +8574,9 @@ async function loadInventoryHistory() {
 
 
     if (!inventorySection) {
+
         return;
+
     }
 
 
@@ -8383,14 +8664,25 @@ async function loadInventoryHistory() {
     }
 
 
+    if (!historyContainer) {
+
+        return;
+
+    }
+
+
     const histories =
         await getAllInventoryHistory();
 
 
     histories.sort(
         (a, b) =>
-            new Date(b.createdAt) -
-            new Date(a.createdAt)
+            new Date(
+                b.createdAt
+            ) -
+            new Date(
+                a.createdAt
+            )
     );
 
 
@@ -8510,7 +8802,7 @@ async function loadInventoryHistory() {
                             "
                         >
                             ${escapeHTML(
-                                history.productName
+                                history.productName || ""
                             )}
                         </div>
 
@@ -8628,6 +8920,19 @@ function getAllSales() {
     return new Promise(
         (resolve, reject) => {
 
+            if (!db) {
+
+                reject(
+                    new Error(
+                        "データベースが初期化されていません。"
+                    )
+                );
+
+                return;
+
+            }
+
+
             const transaction =
                 db.transaction(
                     "sales",
@@ -8681,7 +8986,9 @@ async function loadHistory() {
 
 
     if (!container) {
+
         return;
+
     }
 
 
@@ -8691,12 +8998,17 @@ async function loadHistory() {
 
     sales.sort(
         (a, b) =>
-            new Date(b.createdAt) -
-            new Date(a.createdAt)
+            new Date(
+                b.createdAt
+            ) -
+            new Date(
+                a.createdAt
+            )
     );
 
 
-    container.innerHTML = "";
+    container.innerHTML =
+        "";
 
 
     if (
@@ -8726,7 +9038,6 @@ async function loadHistory() {
                 Number(
                     sale.total || 0
                 ),
-
             0
         );
 
@@ -8748,7 +9059,9 @@ async function loadHistory() {
 
 
     summary.textContent =
-        `売上合計 ${formatYen(totalSales)}`;
+        `売上合計 ${formatYen(
+            totalSales
+        )}`;
 
 
     container.appendChild(
@@ -8778,12 +9091,18 @@ async function loadHistory() {
 
 
             const itemsText =
-                sale.items
-                    .map(
-                        item =>
-                            `${item.name} × ${item.quantity}`
-                    )
-                    .join(" / ");
+                Array.isArray(
+                    sale.items
+                )
+                    ? sale.items
+                        .map(
+                            item =>
+                                `${item.name || ""} × ${Number(
+                                    item.quantity || 0
+                                )}`
+                        )
+                        .join(" / ")
+                    : "";
 
 
             card.innerHTML = `
@@ -8866,7 +9185,9 @@ function showSection(
 
 
     if (!target) {
+
         return;
+
     }
 
 
@@ -8875,29 +9196,14 @@ function showSection(
 
 
     if (
-    sectionId ===
-    "products-section"
-) {
+        sectionId ===
+        "products-section"
+    ) {
 
-    console.log("商品読み込み開始");
+        loadProducts();
 
-    loadProducts()
-        .then(() => {
-            console.log("商品読み込み完了");
-        })
-        .catch(error => {
-            console.error(
-                "商品読み込みエラー",
-                error
-            );
+    }
 
-            alert(
-                "商品読み込みエラー\n\n" +
-                (error?.message || error)
-            );
-        });
-
-}
 
     if (
         sectionId ===
@@ -8941,11 +9247,14 @@ function showSection(
     }
 
 
-    if (sectionId === "events-section") {
+    if (
+        sectionId ===
+        "events-section"
+    ) {
 
-    loadEvents();
+        loadEvents();
 
-}
+    }
 
 }
 
@@ -8960,10 +9269,18 @@ function openReservationModal() {
         [];
 
 
-    document.getElementById(
-        "reservation-name"
-    ).value =
-        "";
+    const nameInput =
+        document.getElementById(
+            "reservation-name"
+        );
+
+
+    if (nameInput) {
+
+        nameInput.value =
+            "";
+
+    }
 
 
     renderReservationCart();
@@ -8971,13 +9288,19 @@ function openReservationModal() {
     loadReservationProducts();
 
 
-    document
-        .getElementById(
+    const modal =
+        document.getElementById(
             "reservation-modal"
-        )
-        .classList.add(
+        );
+
+
+    if (modal) {
+
+        modal.classList.add(
             "show"
         );
+
+    }
 
 }
 
@@ -8988,13 +9311,19 @@ function openReservationModal() {
 
 function closeReservationModal() {
 
-    document
-        .getElementById(
+    const modal =
+        document.getElementById(
             "reservation-modal"
-        )
-        .classList.remove(
+        );
+
+
+    if (modal) {
+
+        modal.classList.remove(
             "show"
         );
+
+    }
 
 
     reservationCart =
@@ -9009,67 +9338,106 @@ function closeReservationModal() {
 
 function setupEventListeners() {
 
+    // --------------------------------------------------------
+    // 売上履歴クリア
+    // --------------------------------------------------------
+
     const clearSalesHistoryButton =
-    document.getElementById(
-        "clear-sales-history-button"
-    );
+        document.getElementById(
+            "clear-sales-history-button"
+        );
 
-if (clearSalesHistoryButton) {
 
-    clearSalesHistoryButton.addEventListener(
-        "click",
-        clearSalesHistory
-    );
+    if (clearSalesHistoryButton) {
 
-}
+        clearSalesHistoryButton.addEventListener(
+            "click",
+            clearSalesHistory
+        );
+
+    }
+
 
     // --------------------------------------------------------
-    // メニュー
+    // イベント管理
     // --------------------------------------------------------
-// イベント管理
-document.getElementById("menu-events")
-    ?.addEventListener(
-        "click",
-        () => {
 
-            showSection(
-                "events-section"
-            );
+    document
+        .getElementById(
+            "menu-events"
+        )
+        ?.addEventListener(
+            "click",
+            () => {
 
-        }
-    );
+                showSection(
+                    "events-section"
+                );
 
-
-// イベント追加
-document.getElementById("add-event-button")
-    ?.addEventListener(
-        "click",
-        openEventModal
-    );
+            }
+        );
 
 
-// イベント保存
-document.getElementById("save-event")
-    ?.addEventListener(
-        "click",
-        saveEvent
-    );
+    // --------------------------------------------------------
+    // イベント追加
+    // --------------------------------------------------------
+
+    document
+        .getElementById(
+            "add-event-button"
+        )
+        ?.addEventListener(
+            "click",
+            openEventModal
+        );
 
 
-// イベントキャンセル
-document.getElementById("cancel-event")
-    ?.addEventListener(
-        "click",
-        closeEventModal
-    );
+    // --------------------------------------------------------
+    // イベント保存
+    // --------------------------------------------------------
+
+    document
+        .getElementById(
+            "save-event"
+        )
+        ?.addEventListener(
+            "click",
+            saveEvent
+        );
 
 
-// イベントモーダル閉じる
-document.getElementById("close-event-modal")
-    ?.addEventListener(
-        "click",
-        closeEventModal
-    );
+    // --------------------------------------------------------
+    // イベントキャンセル
+    // --------------------------------------------------------
+
+    document
+        .getElementById(
+            "cancel-event"
+        )
+        ?.addEventListener(
+            "click",
+            closeEventModal
+        );
+
+
+    // --------------------------------------------------------
+    // イベントモーダル閉じる
+    // --------------------------------------------------------
+
+    document
+        .getElementById(
+            "close-event-modal"
+        )
+        ?.addEventListener(
+            "click",
+            closeEventModal
+        );
+
+
+    // --------------------------------------------------------
+    // 商品
+    // --------------------------------------------------------
+
     document
         .getElementById(
             "menu-products"
@@ -9085,6 +9453,10 @@ document.getElementById("close-event-modal")
             }
         );
 
+
+    // --------------------------------------------------------
+    // 予約
+    // --------------------------------------------------------
 
     document
         .getElementById(
@@ -9102,6 +9474,10 @@ document.getElementById("close-event-modal")
         );
 
 
+    // --------------------------------------------------------
+    // レジ
+    // --------------------------------------------------------
+
     document
         .getElementById(
             "menu-register"
@@ -9117,6 +9493,10 @@ document.getElementById("close-event-modal")
             }
         );
 
+
+    // --------------------------------------------------------
+    // 在庫
+    // --------------------------------------------------------
 
     document
         .getElementById(
@@ -9134,6 +9514,10 @@ document.getElementById("close-event-modal")
         );
 
 
+    // --------------------------------------------------------
+    // 売上履歴
+    // --------------------------------------------------------
+
     document
         .getElementById(
             "menu-history"
@@ -9149,87 +9533,109 @@ document.getElementById("close-event-modal")
             }
         );
 
-        // ========================================================
-// 預かり金 加算ボタン
-// ========================================================
 
-document
-    .querySelectorAll(
-        ".cash-quick-button"
-    )
-    .forEach(
-        button => {
-            button.addEventListener(
-                "click",
-                () => {
-                    const input =
-                        document.getElementById(
-                            "cash-received"
+    // ========================================================
+    // 預かり金 加算ボタン
+    // ========================================================
+
+    document
+        .querySelectorAll(
+            ".cash-quick-button"
+        )
+        .forEach(
+            button => {
+
+                button.addEventListener(
+                    "click",
+                    () => {
+
+                        const input =
+                            document.getElementById(
+                                "cash-received"
+                            );
+
+
+                        if (!input) {
+
+                            return;
+
+                        }
+
+
+                        const current =
+                            Number(
+                                input.value
+                            ) || 0;
+
+
+                        const add =
+                            Number(
+                                button.dataset.cashAdd
+                            ) || 0;
+
+
+                        input.value =
+                            current + add;
+
+
+                        input.dispatchEvent(
+                            new Event(
+                                "input",
+                                {
+                                    bubbles:
+                                        true
+                                }
+                            )
                         );
 
-                    if (!input) {
-                        return;
                     }
-
-                    const current =
-                        Number(
-                            input.value
-                        ) || 0;
-
-                    const add =
-                        Number(
-                            button.dataset.cashAdd
-                        ) || 0;
-
-                    input.value =
-                        current + add;
-
-                    input.dispatchEvent(
-                        new Event(
-                            "input",
-                            {
-                                bubbles: true
-                            }
-                        )
-                    );
-                }
-            );
-        }
-    );
-    // ========================================================
-// 預かり金 クリアボタン
-// ========================================================
-
-document
-    .getElementById(
-        "cash-clear-button"
-    )
-    ?.addEventListener(
-        "click",
-        () => {
-
-            const input =
-                document.getElementById(
-                    "cash-received"
                 );
 
-            if (!input) {
-                return;
             }
+        );
 
-            input.value = 0;
 
-            input.dispatchEvent(
-                new Event(
-                    "input",
-                    {
-                        bubbles: true
-                    }
-                )
-            );
+    // ========================================================
+    // 預かり金 クリアボタン
+    // ========================================================
 
-        }
-    );
+    document
+        .getElementById(
+            "cash-clear-button"
+        )
+        ?.addEventListener(
+            "click",
+            () => {
+
+                const input =
+                    document.getElementById(
+                        "cash-received"
+                    );
+
+
+                if (!input) {
+
+                    return;
+
+                }
+
+
+                input.value =
+                    0;
+
+
+                input.dispatchEvent(
+                    new Event(
+                        "input",
+                        {
+                            bubbles:
+                                true
+                        }
+                    )
+                );
+
+            }
+        );
 
 
     // --------------------------------------------------------
@@ -9319,7 +9725,9 @@ document
 
 
                 if (!file) {
+
                     return;
+
                 }
 
 
@@ -9329,11 +9737,19 @@ document
                     );
 
 
-                document.getElementById(
-                    "image-preview"
-                ).innerHTML = `
-                    <img src="${image}">
-                `;
+                const preview =
+                    document.getElementById(
+                        "image-preview"
+                    );
+
+
+                if (preview) {
+
+                    preview.innerHTML = `
+                        <img src="${image}">
+                    `;
+
+                }
 
             }
         );
@@ -9438,99 +9854,126 @@ document
             completeSale
         );
 
-        document
-    .getElementById(
-        "bulk-add-product-button"
-    )
-    ?.addEventListener(
-        "click",
-        () => {
 
-            openBulkProductModal();
+    // --------------------------------------------------------
+    // 一括商品追加
+    // --------------------------------------------------------
 
-        }
-    );
+    document
+        .getElementById(
+            "bulk-add-product-button"
+        )
+        ?.addEventListener(
+            "click",
+            () => {
 
+                openBulkProductModal();
 
-document
-    .getElementById(
-        "close-bulk-product-modal"
-    )
-    ?.addEventListener(
-        "click",
-        () => {
-
-            closeBulkProductModal();
-
-        }
-    );
+            }
+        );
 
 
-document
-    .getElementById(
-        "cancel-bulk-product"
-    )
-    ?.addEventListener(
-        "click",
-        () => {
+    // --------------------------------------------------------
+    // 一括商品追加モーダルを閉じる
+    // --------------------------------------------------------
 
-            closeBulkProductModal();
+    document
+        .getElementById(
+            "close-bulk-product-modal"
+        )
+        ?.addEventListener(
+            "click",
+            () => {
 
-        }
-    );
+                closeBulkProductModal();
 
-
-document
-    .getElementById(
-        "bulk-add-row"
-    )
-    ?.addEventListener(
-        "click",
-        () => {
-
-            addBulkProductRow();
-
-        }
-    );
+            }
+        );
 
 
-document
-    .getElementById(
-        "bulk-clear-rows"
-    )
-    ?.addEventListener(
-        "click",
-        () => {
+    // --------------------------------------------------------
+    // 一括商品追加キャンセル
+    // --------------------------------------------------------
 
-            const list =
-                document.getElementById(
-                    "bulk-product-list"
-                );
+    document
+        .getElementById(
+            "cancel-bulk-product"
+        )
+        ?.addEventListener(
+            "click",
+            () => {
 
-            if (list) {
+                closeBulkProductModal();
 
-                list.innerHTML = "";
+            }
+        );
+
+
+    // --------------------------------------------------------
+    // 一括商品行追加
+    // --------------------------------------------------------
+
+    document
+        .getElementById(
+            "bulk-add-row"
+        )
+        ?.addEventListener(
+            "click",
+            () => {
 
                 addBulkProductRow();
 
             }
-
-        }
-    );
+        );
 
 
-document
-    .getElementById(
-        "save-bulk-products"
-    )
-    ?.addEventListener(
-        "click",
-        () => {
+    // --------------------------------------------------------
+    // 一括商品行クリア
+    // --------------------------------------------------------
 
-            saveBulkProducts();
+    document
+        .getElementById(
+            "bulk-clear-rows"
+        )
+        ?.addEventListener(
+            "click",
+            () => {
 
-        }
-    );
+                const list =
+                    document.getElementById(
+                        "bulk-product-list"
+                    );
+
+
+                if (list) {
+
+                    list.innerHTML =
+                        "";
+
+                    addBulkProductRow();
+
+                }
+
+            }
+        );
+
+
+    // --------------------------------------------------------
+    // 一括商品保存
+    // --------------------------------------------------------
+
+    document
+        .getElementById(
+            "save-bulk-products"
+        )
+        ?.addEventListener(
+            "click",
+            () => {
+
+                saveBulkProducts();
+
+            }
+        );
 
 }
 
@@ -9541,40 +9984,62 @@ document
 
 async function getAllEvents() {
 
-    return new Promise((resolve, reject) => {
+    return new Promise(
+        (resolve, reject) => {
 
-        const transaction =
-            db.transaction(
-                ["events"],
-                "readonly"
-            );
+            if (!db) {
 
-        const store =
-            transaction.objectStore("events");
+                reject(
+                    new Error(
+                        "データベースが初期化されていません。"
+                    )
+                );
 
-        const request =
-            store.getAll();
+                return;
 
-        request.onsuccess = () => {
+            }
 
-            resolve(
-                request.result || []
-            );
 
-        };
+            const transaction =
+                db.transaction(
+                    ["events"],
+                    "readonly"
+                );
 
-        request.onerror = () => {
 
-            reject(
-                request.error
-            );
+            const store =
+                transaction.objectStore(
+                    "events"
+                );
 
-        };
 
-    });
+            const request =
+                store.getAll();
+
+
+            request.onsuccess =
+                () => {
+
+                    resolve(
+                        request.result || []
+                    );
+
+                };
+
+
+            request.onerror =
+                () => {
+
+                    reject(
+                        request.error
+                    );
+
+                };
+
+        }
+    );
 
 }
-
 
 
 // ============================================================
@@ -9584,10 +10049,15 @@ async function getAllEvents() {
 async function loadEvents() {
 
     const eventList =
-        document.getElementById("event-list");
+        document.getElementById(
+            "event-list"
+        );
+
 
     if (!eventList) {
+
         return;
+
     }
 
 
@@ -9597,17 +10067,21 @@ async function loadEvents() {
             await getAllEvents();
 
 
-        events.sort((a, b) => {
+        events.sort(
+            (a, b) => {
 
-            return (b.date || "")
-                .localeCompare(
-                    a.date || ""
-                );
+                return (b.date || "")
+                    .localeCompare(
+                        a.date || ""
+                    );
 
-        });
+            }
+        );
 
 
-        if (events.length === 0) {
+        if (
+            events.length === 0
+        ) {
 
             eventList.innerHTML = `
                 <div style="
@@ -9620,144 +10094,173 @@ async function loadEvents() {
             `;
 
             return;
+
         }
 
 
         eventList.innerHTML =
-            events.map(event => {
+            events
+                .map(
+                    event => {
 
-                return `
-                    <div
-                        class="event-card"
-                        data-event-id="${escapeHTML(event.id)}"
-                        style="
-                            padding:16px;
-                            margin-bottom:12px;
-                            border:1px solid #ddd;
-                            border-radius:12px;
-                            cursor:pointer;
-                        "
-                    >
+                        return `
+                            <div
+                                class="event-card"
+                                data-event-id="${escapeHTML(
+                                    event.id
+                                )}"
+                                style="
+                                    padding:16px;
+                                    margin-bottom:12px;
+                                    border:1px solid #ddd;
+                                    border-radius:12px;
+                                    cursor:pointer;
+                                "
+                            >
 
-<div style="
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:10px;
-    margin-bottom:8px;
-">
+                                <div
+                                    style="
+                                        display:flex;
+                                        align-items:center;
+                                        justify-content:space-between;
+                                        gap:10px;
+                                        margin-bottom:8px;
+                                    "
+                                >
 
-    <h3 style="
-        margin:0;
-    ">
-        ${escapeHTML(event.name)}
-    </h3>
-
-    <button
-        type="button"
-        class="secondary-button event-delete-button"
-        data-event-id="${escapeHTML(event.id)}"
-    >
-        削除
-    </button>
-
-</div>
-
-
-                        <div>
-                            開催日：
-                            ${escapeHTML(
-                                event.date || "未設定"
-                            )}
-                        </div>
-
-
-                        ${
-                            event.memo
-                                ? `
-                                    <div style="
-                                        margin-top:8px;
-                                        color:#666;
-                                        white-space:pre-wrap;
-                                    ">
+                                    <h3
+                                        style="
+                                            margin:0;
+                                        "
+                                    >
                                         ${escapeHTML(
-                                            event.memo
+                                            event.name
                                         )}
-                                    </div>
-                                  `
-                                : ""
+                                    </h3>
+
+
+                                    <button
+                                        type="button"
+                                        class="secondary-button event-delete-button"
+                                        data-event-id="${escapeHTML(
+                                            event.id
+                                        )}"
+                                    >
+                                        削除
+                                    </button>
+
+                                </div>
+
+
+                                <div>
+                                    開催日：
+                                    ${escapeHTML(
+                                        event.date ||
+                                        "未設定"
+                                    )}
+                                </div>
+
+
+                                ${
+                                    event.memo
+                                        ? `
+                                            <div
+                                                style="
+                                                    margin-top:8px;
+                                                    color:#666;
+                                                    white-space:pre-wrap;
+                                                "
+                                            >
+                                                ${escapeHTML(
+                                                    event.memo
+                                                )}
+                                            </div>
+                                          `
+                                        : ""
+                                }
+
+                            </div>
+                        `;
+
+                    }
+                )
+                .join("");
+
+
+        // ----------------------------------------------------
+        // イベントカードクリック
+        // ----------------------------------------------------
+
+        eventList
+            .querySelectorAll(
+                ".event-card"
+            )
+            .forEach(
+                card => {
+
+                    card.addEventListener(
+                        "click",
+                        event => {
+
+                            // 削除ボタンを押した場合は
+                            // イベント詳細を開かない
+                            if (
+                                event.target.closest(
+                                    ".event-delete-button"
+                                )
+                            ) {
+
+                                return;
+
+                            }
+
+
+                            const eventId =
+                                card.dataset.eventId;
+
+
+                            openEventDetail(
+                                eventId
+                            );
+
                         }
-
-                    </div>
-                `;
-
-            }).join("");
-
-
-// ----------------------------------------------------
-// イベントカードクリック
-// ----------------------------------------------------
-
-eventList
-    .querySelectorAll(".event-card")
-    .forEach(card => {
-
-        card.addEventListener(
-            "click",
-            event => {
-
-                // 削除ボタンを押した場合は
-                // イベント詳細を開かない
-                if (
-                    event.target.closest(
-                        ".event-delete-button"
-                    )
-                ) {
-                    return;
-                }
-
-                const eventId =
-                    card.dataset.eventId;
-
-                openEventDetail(
-                    eventId
-                );
-
-            }
-        );
-
-    });
-
-
-// ----------------------------------------------------
-// イベント削除ボタン
-// ----------------------------------------------------
-
-eventList
-    .querySelectorAll(
-        ".event-delete-button"
-    )
-    .forEach(
-        button => {
-
-            button.addEventListener(
-                "click",
-                event => {
-
-                    event.stopPropagation();
-
-                    const eventId =
-                        button.dataset.eventId;
-
-                    deleteEvent(
-                        eventId
                     );
 
                 }
             );
 
-        }
-    );
+
+        // ----------------------------------------------------
+        // イベント削除ボタン
+        // ----------------------------------------------------
+
+        eventList
+            .querySelectorAll(
+                ".event-delete-button"
+            )
+            .forEach(
+                button => {
+
+                    button.addEventListener(
+                        "click",
+                        event => {
+
+                            event.stopPropagation();
+
+
+                            const eventId =
+                                button.dataset.eventId;
+
+
+                            deleteEvent(
+                                eventId
+                            );
+
+                        }
+                    );
+
+                }
+            );
 
 
     } catch (error) {
@@ -9781,16 +10284,21 @@ eventList
     }
 
 }
+
+
 // ============================================================
 // イベント詳細
 // ============================================================
 
-async function openEventDetail(eventId) {
+async function openEventDetail(
+    eventId
+) {
 
     const eventDetail =
         document.getElementById(
             "event-detail"
         );
+
 
     const eventList =
         document.getElementById(
@@ -9799,7 +10307,9 @@ async function openEventDetail(eventId) {
 
 
     if (!eventDetail) {
+
         return;
+
     }
 
 
@@ -9809,37 +10319,56 @@ async function openEventDetail(eventId) {
             await new Promise(
                 (resolve, reject) => {
 
+                    if (!db) {
+
+                        reject(
+                            new Error(
+                                "データベースが初期化されていません。"
+                            )
+                        );
+
+                        return;
+
+                    }
+
+
                     const transaction =
                         db.transaction(
                             ["events"],
                             "readonly"
                         );
 
+
                     const store =
                         transaction.objectStore(
                             "events"
                         );
 
+
                     const request =
-                        store.get(eventId);
-
-
-                    request.onsuccess = () => {
-
-                        resolve(
-                            request.result
+                        store.get(
+                            eventId
                         );
 
-                    };
+
+                    request.onsuccess =
+                        () => {
+
+                            resolve(
+                                request.result
+                            );
+
+                        };
 
 
-                    request.onerror = () => {
+                    request.onerror =
+                        () => {
 
-                        reject(
-                            request.error
-                        );
+                            reject(
+                                request.error
+                            );
 
-                    };
+                        };
 
                 }
             );
@@ -9852,6 +10381,7 @@ async function openEventDetail(eventId) {
             );
 
             return;
+
         }
 
 
@@ -9906,19 +10436,26 @@ async function openEventDetail(eventId) {
                 "
             >
 
-                <h2 style="
-                    margin-top:0;
-                ">
-                    ${escapeHTML(event.name)}
+                <h2
+                    style="
+                        margin-top:0;
+                    "
+                >
+                    ${escapeHTML(
+                        event.name
+                    )}
                 </h2>
 
 
-                <div style="
-                    margin-bottom:10px;
-                ">
+                <div
+                    style="
+                        margin-bottom:10px;
+                    "
+                >
                     開催日：
                     ${escapeHTML(
-                        event.date || "未設定"
+                        event.date ||
+                        "未設定"
                     )}
                 </div>
 
@@ -9926,10 +10463,12 @@ async function openEventDetail(eventId) {
                 ${
                     event.memo
                         ? `
-                            <div style="
-                                color:#666;
-                                white-space:pre-wrap;
-                            ">
+                            <div
+                                style="
+                                    color:#666;
+                                    white-space:pre-wrap;
+                                "
+                            >
                                 ${escapeHTML(
                                     event.memo
                                 )}
@@ -9955,9 +10494,11 @@ async function openEventDetail(eventId) {
 
                 <div id="event-start-inventory">
 
-                    <p style="
-                        color:#999;
-                    ">
+                    <p
+                        style="
+                            color:#999;
+                        "
+                    >
                         読み込み中...
                     </p>
 
@@ -9980,9 +10521,11 @@ async function openEventDetail(eventId) {
 
                 <div id="event-sales-summary">
 
-                    <p style="
-                        color:#999;
-                    ">
+                    <p
+                        style="
+                            color:#999;
+                        "
+                    >
                         読み込み中...
                     </p>
 
@@ -10287,9 +10830,11 @@ async function openEventDetail(eventId) {
 
                     <div id="event-expense-list">
 
-                        <p style="
-                            color:#999;
-                        ">
+                        <p
+                            style="
+                                color:#999;
+                            "
+                        >
                             読み込み中...
                         </p>
 
@@ -10350,9 +10895,11 @@ async function openEventDetail(eventId) {
                     "
                 >
 
-                    <p style="
-                        color:#999;
-                    ">
+                    <p
+                        style="
+                            color:#999;
+                        "
+                    >
                         読み込み中...
                     </p>
 
@@ -10378,9 +10925,11 @@ async function openEventDetail(eventId) {
                     "
                 >
 
-                    <h3 style="
-                        margin-top:0;
-                    ">
+                    <h3
+                        style="
+                            margin-top:0;
+                        "
+                    >
                         イベント終了
                     </h3>
 
@@ -10412,13 +10961,9 @@ async function openEventDetail(eventId) {
         `;
 
 
-               // ----------------------------------------------------
-        // ボタンの動作を先に設定
         // ----------------------------------------------------
-        // データ読み込み途中でエラーが起きても、
-        // ボタンまで使えなくならないようにする
+        // ボタンの動作を設定
         // ----------------------------------------------------
-
 
         // ----------------------------------------------------
         // イベント一覧に戻る
@@ -10429,21 +10974,24 @@ async function openEventDetail(eventId) {
                 "back-to-event-list"
             );
 
+
         if (backButton) {
 
-            backButton.onclick = () => {
+            backButton.onclick =
+                () => {
 
-                eventDetail.style.display =
-                    "none";
+                    eventDetail.style.display =
+                        "none";
 
-                if (eventList) {
 
-                    eventList.style.display =
-                        "block";
+                    if (eventList) {
 
-                }
+                        eventList.style.display =
+                            "block";
 
-            };
+                    }
+
+                };
 
         }
 
@@ -10456,6 +11004,7 @@ async function openEventDetail(eventId) {
             document.getElementById(
                 "save-event-material-cost"
             );
+
 
         if (saveMaterialCostButton) {
 
@@ -10480,6 +11029,7 @@ async function openEventDetail(eventId) {
                 "add-event-expense"
             );
 
+
         if (addExpenseButton) {
 
             addExpenseButton.onclick =
@@ -10503,6 +11053,7 @@ async function openEventDetail(eventId) {
                 "finalize-event-button"
             );
 
+
         if (finalizeEventButton) {
 
             finalizeEventButton.onclick =
@@ -10520,10 +11071,6 @@ async function openEventDetail(eventId) {
         // ----------------------------------------------------
         // 各項目を読み込む
         // ----------------------------------------------------
-        // どれか1つの読み込みに失敗しても、
-        // 他の部分まで巻き込まないようにする
-        // ----------------------------------------------------
-
 
         try {
 
@@ -10619,11 +11166,14 @@ async function openEventDetail(eventId) {
                 finalizeEventButton.disabled =
                     true;
 
+
                 finalizeEventButton.textContent =
                     "イベント終了済み";
 
+
                 finalizeEventButton.style.opacity =
                     "0.6";
+
 
                 finalizeEventButton.style.cursor =
                     "default";
@@ -10656,86 +11206,6 @@ async function openEventDetail(eventId) {
             }
 
         }
-
-        // ----------------------------------------------------
-        // 終了済みイベントの表示
-        // ----------------------------------------------------
-
-        if (
-            event.status ===
-            "completed"
-        ) {
-
-            if (finalizeEventButton) {
-
-                finalizeEventButton.disabled =
-                    true;
-
-                finalizeEventButton.textContent =
-                    "イベント終了済み";
-
-                finalizeEventButton.style.opacity =
-                    "0.6";
-
-                finalizeEventButton.style.cursor =
-                    "default";
-
-            }
-
-
-            const description =
-                document.getElementById(
-                    "event-finalize-description"
-                );
-
-
-            if (description) {
-
-                const finalizedText =
-                    event.finalizedAt
-                        ? formatDateTime(
-                            event.finalizedAt
-                        )
-                        : "日時不明";
-
-
-                description.textContent =
-                    "このイベントは終了済みです。" +
-                    "（終了日時：" +
-                    finalizedText +
-                    "）";
-
-            }
-
-        }
-
-
-        // ----------------------------------------------------
-        // イベント一覧に戻る
-        // ----------------------------------------------------
-
-        document
-            .getElementById(
-                "back-to-event-list"
-            )
-            ?.addEventListener(
-                "click",
-                () => {
-
-                    eventDetail.style.display =
-                        "none";
-
-
-                    if (eventList) {
-
-                        eventList.style.display =
-                            "block";
-
-                    }
-
-                }
-            );
-
 
     } catch (error) {
 
@@ -10754,11 +11224,6 @@ async function openEventDetail(eventId) {
     }
 
 }
-
-// ============================================================
-// イベント終了
-// ============================================================
-
 // ============================================================
 // イベント終了
 // ============================================================
@@ -10773,8 +11238,6 @@ async function finalizeEvent(eventId) {
 
         return;
     }
-
-    
 
 
     try {
@@ -10832,9 +11295,7 @@ async function finalizeEvent(eventId) {
 
 
         if (!confirmed) {
-
             return;
-
         }
 
 
@@ -10934,8 +11395,6 @@ async function finalizeEvent(eventId) {
         // 販売数をもとにマスター在庫を計算
         // ----------------------------------------------------
         //
-        // 重要：
-        //
         // inventory.quantity は
         // 「イベントに持っていった数量」なので、
         // マスター在庫の終了計算には使用しない。
@@ -10945,7 +11404,6 @@ async function finalizeEvent(eventId) {
         // 「実際に売れた数量」だけ。
         //
         // 例：
-        //
         // マスター在庫 20
         // イベント開始在庫 15
         // 3個販売
@@ -10972,9 +11430,7 @@ async function finalizeEvent(eventId) {
 
 
                 if (!product) {
-
                     return;
-
                 }
 
 
@@ -11047,9 +11503,7 @@ async function finalizeEvent(eventId) {
 
 
                         if (!product) {
-
                             return;
-
                         }
 
 
@@ -11209,23 +11663,30 @@ async function finalizeEvent(eventId) {
 
 async function clearSalesHistory() {
 
-    const confirmed = confirm(
-        "売り上げ履歴をすべて削除します。\n\n" +
-        "商品・在庫・イベントは削除されません。\n" +
-        "この操作は元に戻せません。\n\n" +
-        "本当に削除しますか？"
-    );
+    const confirmed =
+        confirm(
+            "売り上げ履歴をすべて削除します。\n\n" +
+            "商品・在庫・イベントは削除されません。\n" +
+            "この操作は元に戻せません。\n\n" +
+            "本当に削除しますか？"
+        );
+
 
     if (!confirmed) {
         return;
     }
 
+
     try {
 
+        // ----------------------------------------------------
         // DBがまだ開かれていなければ開く
+        // ----------------------------------------------------
+
         if (!db) {
             await openDatabase();
         }
+
 
         if (!db) {
             throw new Error(
@@ -11233,16 +11694,28 @@ async function clearSalesHistory() {
             );
         }
 
+
+        // ----------------------------------------------------
         // salesストア確認
+        // ----------------------------------------------------
+
         if (
-            !db.objectStoreNames.contains("sales")
+            !db.objectStoreNames.contains(
+                "sales"
+            )
         ) {
+
             throw new Error(
                 "salesストアが存在しません。"
             );
+
         }
 
+
+        // ----------------------------------------------------
         // 売り上げ履歴を全削除
+        // ----------------------------------------------------
+
         await new Promise(
             (resolve, reject) => {
 
@@ -11252,73 +11725,74 @@ async function clearSalesHistory() {
                         "readwrite"
                     );
 
+
                 const store =
                     transaction.objectStore(
                         "sales"
                     );
 
+
                 const request =
                     store.clear();
 
-                request.onsuccess = () => {
 
-                    console.log(
-                        "sales.clear() 成功"
-                    );
+                request.onerror =
+                    () => {
 
-                };
+                        reject(
+                            request.error ||
+                            new Error(
+                                "売り上げ履歴の削除に失敗しました。"
+                            )
+                        );
 
-                request.onerror = () => {
+                    };
 
-                    reject(
-                        request.error ||
-                        new Error(
-                            "売り上げ履歴の削除に失敗しました。"
-                        )
-                    );
 
-                };
+                transaction.oncomplete =
+                    () => {
 
-                transaction.oncomplete = () => {
+                        resolve();
 
-                    console.log(
-                        "売り上げ履歴削除完了"
-                    );
+                    };
 
-                    resolve();
 
-                };
+                transaction.onerror =
+                    () => {
 
-                transaction.onerror = () => {
+                        reject(
+                            transaction.error ||
+                            new Error(
+                                "IndexedDBの処理に失敗しました。"
+                            )
+                        );
 
-                    reject(
-                        transaction.error ||
-                        new Error(
-                            "IndexedDBの処理に失敗しました。"
-                        )
-                    );
+                    };
 
-                };
 
-                transaction.onabort = () => {
+                transaction.onabort =
+                    () => {
 
-                    reject(
-                        transaction.error ||
-                        new Error(
-                            "IndexedDBの処理が中断されました。"
-                        )
-                    );
+                        reject(
+                            transaction.error ||
+                            new Error(
+                                "IndexedDBの処理が中断されました。"
+                            )
+                        );
 
-                };
+                    };
 
             }
         );
 
+
         await loadHistory();
+
 
         alert(
             "売り上げ履歴をすべて削除しました。"
         );
+
 
     } catch (error) {
 
@@ -11326,6 +11800,7 @@ async function clearSalesHistory() {
             "売り上げ履歴削除エラー:",
             error
         );
+
 
         alert(
             "売り上げ履歴を削除できませんでした。\n\n" +
@@ -11337,7 +11812,10 @@ async function clearSalesHistory() {
         );
 
     }
+
 }
+
+
 
 // ============================================================
 // 予約在庫を一度だけ修復
@@ -11348,18 +11826,21 @@ async function clearSalesHistory() {
 
 async function repairReservationStock() {
 
-    const confirmed = confirm(
-        "予約在庫を再計算します。\n\n" +
-        "現在残っている未受け取り予約をもとに、" +
-        "各商品の予約数を修正します。\n\n" +
-        "過去に削除した予約によって残っている" +
-        "不要な予約数も修正されます。\n\n" +
-        "本当に実行しますか？"
-    );
+    const confirmed =
+        confirm(
+            "予約在庫を再計算します。\n\n" +
+            "現在残っている未受け取り予約をもとに、" +
+            "各商品の予約数を修正します。\n\n" +
+            "過去に削除した予約によって残っている" +
+            "不要な予約数も修正されます。\n\n" +
+            "本当に実行しますか？"
+        );
+
 
     if (!confirmed) {
         return;
     }
+
 
     try {
 
@@ -11367,11 +11848,13 @@ async function repairReservationStock() {
             await openDatabase();
         }
 
+
         if (!db) {
             throw new Error(
                 "データベースを開けませんでした。"
             );
         }
+
 
         // ----------------------------------------------------
         // 必要なストアを確認
@@ -11382,19 +11865,24 @@ async function repairReservationStock() {
                 "reservations"
             )
         ) {
+
             throw new Error(
                 "reservationsストアが存在しません。"
             );
+
         }
+
 
         if (
             !db.objectStoreNames.contains(
                 "products"
             )
         ) {
+
             throw new Error(
                 "productsストアが存在しません。"
             );
+
         }
 
 
@@ -11412,32 +11900,38 @@ async function repairReservationStock() {
                             "readonly"
                         );
 
+
                     const store =
                         transaction.objectStore(
                             "reservations"
                         );
 
+
                     const request =
                         store.getAll();
 
-                    request.onsuccess = () => {
 
-                        resolve(
-                            request.result || []
-                        );
+                    request.onsuccess =
+                        () => {
 
-                    };
+                            resolve(
+                                request.result || []
+                            );
 
-                    request.onerror = () => {
+                        };
 
-                        reject(
-                            request.error ||
-                            new Error(
-                                "予約データの取得に失敗しました。"
-                            )
-                        );
 
-                    };
+                    request.onerror =
+                        () => {
+
+                            reject(
+                                request.error ||
+                                new Error(
+                                    "予約データの取得に失敗しました。"
+                                )
+                            );
+
+                        };
 
                 }
             );
@@ -11582,13 +12076,16 @@ async function repairReservationStock() {
                                     product.reserved =
                                         correctReserved;
 
+
                                     product.updatedAt =
                                         new Date()
                                             .toISOString();
 
+
                                     productStore.put(
                                         product
                                     );
+
 
                                     console.log(
                                         "予約在庫修正:",
@@ -11679,6 +12176,7 @@ async function repairReservationStock() {
             error
         );
 
+
         alert(
             "予約在庫の修復に失敗しました。\n\n" +
             "エラー：" +
@@ -11689,97 +12187,23 @@ async function repairReservationStock() {
         );
 
     }
+
 }
+
 
 
 // ============================================================
 // 予約を個別削除
 // ============================================================
-async function removeStaleReservationOnce(productId) {
 
-    if (!db) {
-        await openDatabase();
-    }
+async function removeStaleReservationOnce(
+    productId
+) {
 
-    const transaction =
-        db.transaction(["products"], "readwrite");
-
-    const store =
-        transaction.objectStore("products");
-
-    const request =
-        store.get(productId);
-
-    request.onsuccess = () => {
-
-        const product = request.result;
-
-        if (!product) {
-            alert("商品が見つかりません。");
-            return;
-        }
-
-        const oldReserved =
-            Number(product.reserved || 0);
-
-        product.reserved =
-            Math.max(0, oldReserved - 1);
-
-        product.updatedAt =
-            new Date().toISOString();
-
-        store.put(product);
-
-        console.log(
-            "予約数を修正:",
-            product.name,
-            oldReserved,
-            "→",
-            product.reserved
-        );
-    };
-
-    request.onerror = () => {
-        console.error(
-            "商品取得エラー:",
-            request.error
-        );
-    };
-
-    transaction.oncomplete = async () => {
-
-        await loadProducts();
-
-        alert(
-            "残っていた予約数1を削除しました。"
-        );
-    };
-
-    transaction.onerror = () => {
-
-        console.error(
-            "予約数修正エラー:",
-            transaction.error
-        );
-
-        alert(
-            "予約数の修正に失敗しました。"
-        );
-    };
-}
-
-
-async function deleteReservation(reservationId) {
-
-    const confirmed = confirm(
-        "この予約を削除しますか？\n\n" +
-        "未受け取りの場合は、予約していた数量を在庫に戻します。\n\n" +
-        "この操作は元に戻せません。"
-    );
-
-    if (!confirmed) {
+    if (!productId) {
         return;
     }
+
 
     try {
 
@@ -11787,11 +12211,210 @@ async function deleteReservation(reservationId) {
             await openDatabase();
         }
 
+
         if (!db) {
             throw new Error(
                 "データベースを開けませんでした。"
             );
         }
+
+
+        const result =
+            await new Promise(
+                (resolve, reject) => {
+
+                    const transaction =
+                        db.transaction(
+                            ["products"],
+                            "readwrite"
+                        );
+
+
+                    const store =
+                        transaction.objectStore(
+                            "products"
+                        );
+
+
+                    const request =
+                        store.get(
+                            productId
+                        );
+
+
+                    request.onsuccess =
+                        () => {
+
+                            const product =
+                                request.result;
+
+
+                            if (!product) {
+
+                                reject(
+                                    new Error(
+                                        "商品が見つかりません。"
+                                    )
+                                );
+
+                                return;
+                            }
+
+
+                            const oldReserved =
+                                Math.max(
+                                    0,
+                                    Number(
+                                        product.reserved ||
+                                        0
+                                    )
+                                );
+
+
+                            product.reserved =
+                                Math.max(
+                                    0,
+                                    oldReserved - 1
+                                );
+
+
+                            product.updatedAt =
+                                new Date().toISOString();
+
+
+                            store.put(
+                                product
+                            );
+
+
+                            resolve({
+                                productName:
+                                    product.name,
+                                oldReserved:
+                                    oldReserved,
+                                newReserved:
+                                    product.reserved
+                            });
+
+                        };
+
+
+                    request.onerror =
+                        () => {
+
+                            reject(
+                                request.error ||
+                                new Error(
+                                    "商品の取得に失敗しました。"
+                                )
+                            );
+
+                        };
+
+
+                    transaction.onerror =
+                        () => {
+
+                            reject(
+                                transaction.error ||
+                                new Error(
+                                    "予約数の修正に失敗しました。"
+                                )
+                            );
+
+                        };
+
+
+                    transaction.onabort =
+                        () => {
+
+                            reject(
+                                transaction.error ||
+                                new Error(
+                                    "予約数の修正が中断されました。"
+                                )
+                            );
+
+                        };
+
+                    transaction.oncomplete =
+                        () => {
+
+                            resolve(
+                                result
+                            );
+
+                        };
+
+                }
+            );
+
+
+        await loadProducts();
+
+
+        alert(
+            "残っていた予約数1を削除しました。"
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "予約数修正エラー:",
+            error
+        );
+
+
+        alert(
+            "予約数の修正に失敗しました。\n\n" +
+            "エラー：" +
+            (
+                error?.message ||
+                error
+            )
+        );
+
+    }
+
+}
+
+
+
+// ============================================================
+// 予約削除
+// ============================================================
+
+async function deleteReservation(
+    reservationId
+) {
+
+    const confirmed =
+        confirm(
+            "この予約を削除しますか？\n\n" +
+            "未受け取りの場合は、予約していた数量を在庫に戻します。\n\n" +
+            "この操作は元に戻せません。"
+        );
+
+
+    if (!confirmed) {
+        return;
+    }
+
+
+    try {
+
+        if (!db) {
+            await openDatabase();
+        }
+
+
+        if (!db) {
+            throw new Error(
+                "データベースを開けませんでした。"
+            );
+        }
+
 
         // ----------------------------------------------------
         // 予約データを取得
@@ -11807,27 +12430,37 @@ async function deleteReservation(reservationId) {
                             "readonly"
                         );
 
+
                     const store =
                         transaction.objectStore(
                             "reservations"
                         );
+
 
                     const request =
                         store.get(
                             reservationId
                         );
 
-                    request.onsuccess = () => {
-                        resolve(
-                            request.result
-                        );
-                    };
 
-                    request.onerror = () => {
-                        reject(
-                            request.error
-                        );
-                    };
+                    request.onsuccess =
+                        () => {
+
+                            resolve(
+                                request.result
+                            );
+
+                        };
+
+
+                    request.onerror =
+                        () => {
+
+                            reject(
+                                request.error
+                            );
+
+                        };
 
                 }
             );
@@ -11840,7 +12473,6 @@ async function deleteReservation(reservationId) {
             );
 
             return;
-
         }
 
 
@@ -11884,10 +12516,15 @@ async function deleteReservation(reservationId) {
 
 
                 // ------------------------------------------------
-                // 未受け取りの場合だけ在庫を戻す
+                // 未受け取りの場合だけ予約数を戻す
                 // ------------------------------------------------
 
-                if (!isReceived) {
+                if (
+                    !isReceived &&
+                    Array.isArray(
+                        reservation.items
+                    )
+                ) {
 
                     reservation.items.forEach(
                         item => {
@@ -12056,39 +12693,293 @@ async function deleteReservation(reservationId) {
         );
 
     }
+
 }
+
+
+// ============================================================
+// イベント経費表示
+// ============================================================
+
+async function loadEventExpenses(eventId) {
+
+    const list =
+        document.getElementById(
+            "event-expense-list"
+        );
+
+    const totalElement =
+        document.getElementById(
+            "event-expense-total"
+        );
+
+    const addButton =
+        document.getElementById(
+            "event-expense-add-button"
+        );
+
+
+    if (!list) {
+        return;
+    }
+
+
+    try {
+
+        // ----------------------------------------------------
+        // イベント経費を取得
+        // ----------------------------------------------------
+
+        const expenses =
+            await new Promise(
+                (resolve, reject) => {
+
+                    const transaction =
+                        db.transaction(
+                            ["eventExpenses"],
+                            "readonly"
+                        );
+
+
+                    const store =
+                        transaction.objectStore(
+                            "eventExpenses"
+                        );
+
+
+                    const request =
+                        store.getAll();
+
+
+                    request.onsuccess =
+                        () => {
+
+                            const allData =
+                                request.result || [];
+
+
+                            const matchedData =
+                                allData.filter(
+                                    item =>
+                                        String(
+                                            item.eventId
+                                        ) ===
+                                        String(
+                                            eventId
+                                        )
+                                );
+
+
+                            resolve(
+                                matchedData
+                            );
+
+                        };
+
+
+                    request.onerror =
+                        () => {
+
+                            reject(
+                                request.error
+                            );
+
+                        };
+
+                }
+            );
+
+
+        // ----------------------------------------------------
+        // 経費合計
+        // ----------------------------------------------------
+
+        let total = 0;
+
+
+        expenses.forEach(
+            expense => {
+
+                const amount =
+                    Math.max(
+                        0,
+                        Number(
+                            expense.amount || 0
+                        )
+                    );
+
+
+                total +=
+                    amount;
+
+            }
+        );
+
+
+        // ----------------------------------------------------
+        // 経費一覧表示
+        // ----------------------------------------------------
+
+        if (
+            expenses.length === 0
+        ) {
+
+            list.innerHTML = `
+
+                <div
+                    style="
+                        padding:15px;
+                        color:#999;
+                    "
+                >
+                    登録されている経費はありません。
+                </div>
+
+            `;
+
+        } else {
+
+            list.innerHTML =
+                expenses
+                    .map(
+                        expense => {
+
+                            const amount =
+                                Math.max(
+                                    0,
+                                    Number(
+                                        expense.amount || 0
+                                    )
+                                );
+
+
+                            const date =
+                                escapeHTML(
+                                    expense.date || ""
+                                );
+
+
+                            const memo =
+                                escapeHTML(
+                                    expense.memo || ""
+                                );
+
+
+                            return `
+
+                                <div
+                                    style="
+                                        display:flex;
+                                        align-items:center;
+                                        justify-content:space-between;
+                                        gap:15px;
+                                        padding:10px 0;
+                                        border-bottom:1px solid #eee;
+                                    "
+                                >
+
+                                    <div
+                                        style="
+                                            flex:1;
+                                        "
+                                    >
+
+                                        <div>
+                                            ${date}
+                                        </div>
+
+                                        ${
+                                            memo
+                                                ? `
+                                                    <div
+                                                        style="
+                                                            color:#666;
+                                                            margin-top:3px;
+                                                        "
+                                                    >
+                                                        ${memo}
+                                                    </div>
+                                                `
+                                                : ""
+                                        }
+
+                                    </div>
+
+
+                                    <div
+                                        style="
+                                            font-weight:bold;
+                                            white-space:nowrap;
+                                        "
+                                    >
+                                        ${formatYen(
+                                            amount
+                                        )}
+                                    </div>
+
+
+                                    <button
+                                        type="button"
+                                        class="event-expense-delete"
+                                        data-expense-id="${escapeHTML(
+                                            String(
+                                                expense.id
+                                            )
+                                        )}"
+                                    >
+                                        削除
+                                    </button>
+
+                                </div>
+
+                            `;
+
+                        }
+                    )
+                    .join("");
+
+        }
+
 
         // ----------------------------------------------------
         // 合計表示
         // ----------------------------------------------------
 
-        totalElement.innerHTML = `
+        if (totalElement) {
 
-            <span>
-                経費合計
-            </span>
+            totalElement.innerHTML = `
 
-            <strong>
-                ${formatYen(
-                    total
-                )}
-            </strong>
+                <span>
+                    経費合計
+                </span>
 
-        `;
+                <strong>
+                    ${formatYen(
+                        total
+                    )}
+                </strong>
+
+            `;
+
+        }
 
 
         // ----------------------------------------------------
         // 経費追加ボタン
         // ----------------------------------------------------
 
-        addButton.onclick =
-            () => {
+        if (addButton) {
 
-                addEventExpense(
-                    eventId
-                );
+            addButton.onclick =
+                () => {
 
-            };
+                    addEventExpense(
+                        eventId
+                    );
+
+                };
+
+        }
 
 
         // ----------------------------------------------------
@@ -12132,9 +13023,11 @@ async function deleteReservation(reservationId) {
 
         list.innerHTML = `
 
-            <p style="
-                color:#c62828;
-            ">
+            <p
+                style="
+                    color:#c62828;
+                "
+            >
                 経費の読み込みに失敗しました。
             </p>
 
@@ -12143,8 +13036,6 @@ async function deleteReservation(reservationId) {
     }
 
 }
-
-
 // ============================================================
 // イベント収支表示
 // ============================================================
@@ -12269,14 +13160,20 @@ async function loadEventProfitSummary(eventId) {
 
 
                 const soldQuantity =
-                    Number(
-                        inventory.soldQuantity || 0
+                    Math.max(
+                        0,
+                        Number(
+                            inventory.soldQuantity || 0
+                        )
                     );
 
 
                 const price =
-                    Number(
-                        product.price || 0
+                    Math.max(
+                        0,
+                        Number(
+                            product.price || 0
+                        )
                     );
 
 
@@ -12299,8 +13196,11 @@ async function loadEventProfitSummary(eventId) {
 
 
         const materialCost =
-            Number(
-                event?.materialCost || 0
+            Math.max(
+                0,
+                Number(
+                    event?.materialCost || 0
+                )
             );
 
 
@@ -12372,8 +13272,11 @@ async function loadEventProfitSummary(eventId) {
             expense => {
 
                 expenseTotal +=
-                    Number(
-                        expense.amount || 0
+                    Math.max(
+                        0,
+                        Number(
+                            expense.amount || 0
+                        )
                     );
 
             }
@@ -12513,6 +13416,8 @@ async function loadEventProfitSummary(eventId) {
 
 }
 
+
+
 // ============================================================
 // イベント取得
 // ============================================================
@@ -12562,6 +13467,7 @@ async function getEventById(eventId) {
     );
 
 }
+
 
 
 // ============================================================
@@ -12633,7 +13539,6 @@ async function addEventExpense(eventId) {
         );
 
         return;
-
     }
 
 
@@ -12647,7 +13552,6 @@ async function addEventExpense(eventId) {
         );
 
         return;
-
     }
 
 
@@ -12658,7 +13562,6 @@ async function addEventExpense(eventId) {
         );
 
         return;
-
     }
 
 
@@ -12795,6 +13698,8 @@ async function addEventExpense(eventId) {
 
 }
 
+
+
 // ============================================================
 // イベント経費削除
 // ============================================================
@@ -12902,7 +13807,10 @@ async function deleteEventExpense(
     }
 
 }
- // ============================================================
+
+
+
+// ============================================================
 // イベント材料費を表示
 // ============================================================
 
@@ -12912,6 +13820,7 @@ async function loadEventMaterialCost(eventId) {
         document.getElementById(
             "event-material-cost-input"
         );
+
 
     const memoInput =
         document.getElementById(
@@ -12981,9 +13890,7 @@ async function loadEventMaterialCost(eventId) {
 
 
         if (!event) {
-
             return;
-
         }
 
 
@@ -12997,16 +13904,21 @@ async function loadEventMaterialCost(eventId) {
             event.materialMemo || "";
 
 
-        saveButton.addEventListener(
-            "click",
+        // ----------------------------------------------------
+        // 既存イベントを上書き
+        // ----------------------------------------------------
+        // addEventListenerだと詳細画面を開くたびに
+        // クリックイベントが増えてしまうためonclickを使用
+        // ----------------------------------------------------
+
+        saveButton.onclick =
             () => {
 
                 saveEventMaterialCost(
                     eventId
                 );
 
-            }
-        );
+            };
 
 
     } catch (error) {
@@ -13019,6 +13931,7 @@ async function loadEventMaterialCost(eventId) {
     }
 
 }
+
 
 
 // ============================================================
@@ -13113,7 +14026,6 @@ async function saveEventMaterialCost(eventId) {
             );
 
             return;
-
         }
 
 
@@ -13215,6 +14127,7 @@ async function saveEventMaterialCost(eventId) {
 }
 
 
+
 // ============================================================
 // イベント開始在庫・販売数を表示
 // ============================================================
@@ -13281,38 +14194,40 @@ async function loadEventStartInventory(eventId) {
                         store.getAll();
 
 
-                    request.onsuccess = () => {
+                    request.onsuccess =
+                        () => {
 
-                        const allData =
-                            request.result || [];
+                            const allData =
+                                request.result || [];
 
 
-                        const matchedData =
-                            allData.filter(
-                                item =>
-                                    String(
-                                        item.eventId
-                                    ) ===
-                                    String(
-                                        eventId
-                                    )
+                            const matchedData =
+                                allData.filter(
+                                    item =>
+                                        String(
+                                            item.eventId
+                                        ) ===
+                                        String(
+                                            eventId
+                                        )
+                                );
+
+
+                            resolve(
+                                matchedData
                             );
 
-
-                        resolve(
-                            matchedData
-                        );
-
-                    };
+                        };
 
 
-                    request.onerror = () => {
+                    request.onerror =
+                        () => {
 
-                        reject(
-                            request.error
-                        );
+                            reject(
+                                request.error
+                            );
 
-                    };
+                        };
 
                 }
             );
@@ -13366,15 +14281,21 @@ async function loadEventStartInventory(eventId) {
 
                     // 開始在庫
                     const startQuantity =
-                        Number(
-                            inventory?.quantity || 0
+                        Math.max(
+                            0,
+                            Number(
+                                inventory?.quantity || 0
+                            )
                         );
 
 
                     // 販売数
                     const soldQuantity =
-                        Number(
-                            inventory?.soldQuantity || 0
+                        Math.max(
+                            0,
+                            Number(
+                                inventory?.soldQuantity || 0
+                            )
                         );
 
 
@@ -13404,7 +14325,7 @@ async function loadEventStartInventory(eventId) {
                                 "
                             >
                                 ${escapeHTML(
-                                    product.name
+                                    product.name || ""
                                 )}
                             </div>
 
@@ -13416,8 +14337,11 @@ async function loadEventStartInventory(eventId) {
                                 "
                             >
                                 現在のマスター在庫：
-                                ${Number(
-                                    product.stock || 0
+                                ${Math.max(
+                                    0,
+                                    Number(
+                                        product.stock || 0
+                                    )
                                 )}
                                 個
                             </div>
@@ -13557,7 +14481,9 @@ async function loadEventStartInventory(eventId) {
             );
 
 
-        function updateRemaining(productId) {
+        function updateRemaining(
+            productId
+        ) {
 
             const startInput =
                 document.querySelector(
@@ -13654,7 +14580,7 @@ async function loadEventStartInventory(eventId) {
         );
 
 
-          // ----------------------------------------------------
+        // ----------------------------------------------------
         // 保存ボタン
         // ----------------------------------------------------
 
@@ -13693,10 +14619,6 @@ async function loadEventStartInventory(eventId) {
     }
 
 }
-// ============================================================
-// イベント売上集計
-// ============================================================
-
 // ============================================================
 // イベント売上集計
 // ============================================================
@@ -13837,14 +14759,20 @@ async function loadEventSalesSummary(eventId) {
 
 
                         const soldQuantity =
-                            Number(
-                                inventory.soldQuantity || 0
+                            Math.max(
+                                0,
+                                Number(
+                                    inventory.soldQuantity || 0
+                                )
                             );
 
 
                         const price =
-                            Number(
-                                product.price || 0
+                            Math.max(
+                                0,
+                                Number(
+                                    product.price || 0
+                                )
                             );
 
 
@@ -13887,7 +14815,7 @@ async function loadEventSalesSummary(eventId) {
                                     "
                                 >
                                     ${escapeHTML(
-                                        product.name
+                                        product.name || ""
                                     )}
                                 </div>
 
@@ -14037,10 +14965,6 @@ async function loadEventSalesSummary(eventId) {
 // イベント開始在庫・販売数を保存
 // ============================================================
 
-// ============================================================
-// イベント開始在庫・販売数を保存
-// ============================================================
-
 async function saveEventStartInventory(eventId) {
 
     const startInputs =
@@ -14048,10 +14972,12 @@ async function saveEventStartInventory(eventId) {
             ".event-start-stock-input"
         );
 
+
     const soldInputs =
         document.querySelectorAll(
             ".event-sold-stock-input"
         );
+
 
     if (!eventId) {
 
@@ -14062,6 +14988,7 @@ async function saveEventStartInventory(eventId) {
         return;
     }
 
+
     if (startInputs.length === 0) {
 
         alert(
@@ -14071,6 +14998,7 @@ async function saveEventStartInventory(eventId) {
         return;
     }
 
+
     try {
 
         // ----------------------------------------------------
@@ -14078,7 +15006,10 @@ async function saveEventStartInventory(eventId) {
         // ----------------------------------------------------
 
         const event =
-            await getEventById(eventId);
+            await getEventById(
+                eventId
+            );
+
 
         if (!event) {
 
@@ -14088,6 +15019,7 @@ async function saveEventStartInventory(eventId) {
 
             return;
         }
+
 
         if (
             event.status ===
@@ -14108,20 +15040,24 @@ async function saveEventStartInventory(eventId) {
 
         const inputData = [];
 
+
         startInputs.forEach(
             startInput => {
 
                 const productId =
                     startInput.dataset.productId;
 
+
                 if (!productId) {
                     return;
                 }
+
 
                 const soldInput =
                     document.querySelector(
                         `.event-sold-stock-input[data-product-id="${productId}"]`
                     );
+
 
                 const startQuantity =
                     Math.max(
@@ -14131,6 +15067,7 @@ async function saveEventStartInventory(eventId) {
                         ) || 0
                     );
 
+
                 const soldQuantity =
                     Math.max(
                         0,
@@ -14138,6 +15075,7 @@ async function saveEventStartInventory(eventId) {
                             soldInput?.value
                         ) || 0
                     );
+
 
                 // --------------------------------------------
                 // 売れた数が開始在庫を超えないようにする
@@ -14148,27 +15086,38 @@ async function saveEventStartInventory(eventId) {
                     startQuantity
                 ) {
 
+                    const productNameElement =
+                        startInput
+                            .closest(
+                                "div[style*='border:1px solid #eee']"
+                            )
+                            ?.querySelector(
+                                "div[style*='font-weight:bold']"
+                            );
+
+
+                    const productName =
+                        productNameElement
+                            ?.textContent
+                            ?.trim() ||
+                        productId;
+
+
                     throw new Error(
                         "販売数が開始在庫を超えています。\n\n" +
                         "商品：" +
-                        (
-                            document.querySelector(
-                                `[data-product-id="${productId}"]`
-                            )?.closest(
-                                ".event-product-item"
-                            )?.querySelector(
-                                ".event-product-name"
-                            )?.textContent ||
-                            productId
-                        )
+                        productName
                     );
 
                 }
 
+
                 inputData.push({
 
                     productId:
-                        String(productId),
+                        String(
+                            productId
+                        ),
 
                     quantity:
                         startQuantity,
@@ -14210,19 +15159,23 @@ async function saveEventStartInventory(eventId) {
                             "readonly"
                         );
 
+
                     const store =
                         transaction.objectStore(
                             "eventInventory"
                         );
 
+
                     const request =
                         store.getAll();
+
 
                     request.onsuccess =
                         () => {
 
                             const allData =
                                 request.result || [];
+
 
                             const matchedData =
                                 allData.filter(
@@ -14235,11 +15188,13 @@ async function saveEventStartInventory(eventId) {
                                         )
                                 );
 
+
                             resolve(
                                 matchedData
                             );
 
                         };
+
 
                     request.onerror =
                         () => {
@@ -14261,6 +15216,7 @@ async function saveEventStartInventory(eventId) {
         const existingMap =
             new Map();
 
+
         existingInventory.forEach(
             item => {
 
@@ -14278,7 +15234,7 @@ async function saveEventStartInventory(eventId) {
         // ----------------------------------------------------
         // 保存用データを作成
         //
-        // ここでは products.stock を変更しない。
+        // products.stock は変更しない。
         //
         // eventInventory.quantity
         // = イベントへ持っていく数量
@@ -14288,6 +15244,7 @@ async function saveEventStartInventory(eventId) {
         // ----------------------------------------------------
 
         const saveData = [];
+
 
         inputData.forEach(
             data => {
@@ -14299,12 +15256,17 @@ async function saveEventStartInventory(eventId) {
                         )
                     );
 
+
                 saveData.push({
 
                     id:
-                        String(eventId) +
+                        String(
+                            eventId
+                        ) +
                         "_" +
-                        String(data.productId),
+                        String(
+                            data.productId
+                        ),
 
                     eventId:
                         eventId,
@@ -14345,10 +15307,12 @@ async function saveEventStartInventory(eventId) {
                         "readwrite"
                     );
 
+
                 const inventoryStore =
                     transaction.objectStore(
                         "eventInventory"
                     );
+
 
                 saveData.forEach(
                     data => {
@@ -14448,6 +15412,7 @@ async function saveEventStartInventory(eventId) {
             error
         );
 
+
         alert(
             "イベント開始在庫・販売数の保存に失敗しました。\n\n" +
             "エラー：" +
@@ -14460,6 +15425,8 @@ async function saveEventStartInventory(eventId) {
     }
 
 }
+
+
 // ------------------------------------------------------------
 // イベント追加モーダルを開く
 // ------------------------------------------------------------
@@ -14471,24 +15438,43 @@ function openEventModal() {
             "event-modal"
         );
 
+
     if (!modal) {
         return;
     }
 
 
-    document.getElementById(
-        "event-name"
-    ).value = "";
+    const nameInput =
+        document.getElementById(
+            "event-name"
+        );
 
 
-    document.getElementById(
-        "event-date"
-    ).value = "";
+    const dateInput =
+        document.getElementById(
+            "event-date"
+        );
 
 
-    document.getElementById(
-        "event-memo"
-    ).value = "";
+    const memoInput =
+        document.getElementById(
+            "event-memo"
+        );
+
+
+    if (nameInput) {
+        nameInput.value = "";
+    }
+
+
+    if (dateInput) {
+        dateInput.value = "";
+    }
+
+
+    if (memoInput) {
+        memoInput.value = "";
+    }
 
 
     modal.style.display = "flex";
@@ -14524,22 +15510,48 @@ function closeEventModal() {
 
 async function saveEvent() {
 
-    const name =
+    const nameInput =
         document.getElementById(
             "event-name"
-        ).value.trim();
+        );
+
+
+    const dateInput =
+        document.getElementById(
+            "event-date"
+        );
+
+
+    const memoInput =
+        document.getElementById(
+            "event-memo"
+        );
+
+
+    if (
+        !nameInput ||
+        !dateInput ||
+        !memoInput
+    ) {
+
+        alert(
+            "イベント入力欄が見つかりません。"
+        );
+
+        return;
+    }
+
+
+    const name =
+        nameInput.value.trim();
 
 
     const date =
-        document.getElementById(
-            "event-date"
-        ).value;
+        dateInput.value;
 
 
     const memo =
-        document.getElementById(
-            "event-memo"
-        ).value.trim();
+        memoInput.value.trim();
 
 
     if (!name) {
@@ -14564,13 +15576,17 @@ async function saveEvent() {
 
     const eventData = {
 
-        id: createId(),
+        id:
+            createId(),
 
-        name: name,
+        name:
+            name,
 
-        date: date,
+        date:
+            date,
 
-        memo: memo,
+        memo:
+            memo,
 
         createdAt:
             new Date().toISOString()
@@ -14579,6 +15595,18 @@ async function saveEvent() {
 
 
     try {
+
+        if (!db) {
+            await openDatabase();
+        }
+
+
+        if (!db) {
+            throw new Error(
+                "データベースを開けませんでした。"
+            );
+        }
+
 
         await new Promise(
             (resolve, reject) => {
@@ -14597,38 +15625,63 @@ async function saveEvent() {
 
 
                 const request =
-                    store.add(eventData);
-
-
-                request.onsuccess = () => {
-
-                    resolve();
-
-                };
-
-
-                request.onerror = () => {
-
-                    reject(
-                        request.error
+                    store.add(
+                        eventData
                     );
 
-                };
+
+                request.onerror =
+                    () => {
+
+                        reject(
+                            request.error ||
+                            new Error(
+                                "イベントの保存に失敗しました。"
+                            )
+                        );
+
+                    };
 
 
-                transaction.onerror = () => {
+                transaction.oncomplete =
+                    () => {
 
-                    reject(
-                        transaction.error
-                    );
+                        resolve();
 
-                };
+                    };
+
+
+                transaction.onerror =
+                    () => {
+
+                        reject(
+                            transaction.error ||
+                            new Error(
+                                "イベントの保存に失敗しました。"
+                            )
+                        );
+
+                    };
+
+
+                transaction.onabort =
+                    () => {
+
+                        reject(
+                            transaction.error ||
+                            new Error(
+                                "イベント保存が中断されました。"
+                            )
+                        );
+
+                    };
 
             }
         );
 
 
         closeEventModal();
+
 
         await loadEvents();
 
@@ -14644,55 +15697,63 @@ async function saveEvent() {
         alert(
             "イベントの保存に失敗しました。\n\n" +
             "エラー：" +
-            (error?.message || error)
+            (
+                error?.message ||
+                error
+            )
         );
 
     }
 
 }
-// ============================================================
-// 初期化
-// ============================================================
 
 
 // ============================================================
 // 初期化
 // ============================================================
 
-
-// ============================================================
-// 初期化
-// ============================================================
 async function initializeApp() {
+
     try {
-        alert("① initializeApp開始");
 
         await openDatabase();
-        alert("② openDatabase完了");
+
 
         await requestPersistentStorage();
-        alert("③ requestPersistentStorage完了");
+
 
         createInventoryAdjustModal();
-        alert("④ createInventoryAdjustModal完了");
+
 
         setupEventListeners();
-        alert("⑤ setupEventListeners完了");
 
-        showSection("products-section");
-        alert("⑥ showSection完了");
 
-        alert("⑦ 初期化完了");
+        showSection(
+            "products-section"
+        );
+
 
     } catch (error) {
-        console.error("アプリ初期化エラー", error);
-        alert(
-            "アプリの初期化に失敗しました.\n\n" +
-            "エラー：" +
-            (error?.message || error)
+
+        console.error(
+            "アプリ初期化エラー",
+            error
         );
+
+
+        alert(
+            "アプリの初期化に失敗しました。\n\n" +
+            "エラー：" +
+            (
+                error?.message ||
+                error
+            )
+        );
+
     }
+
 }
+
 
 // ============================================================
 // 起動
@@ -14701,7 +15762,7 @@ async function initializeApp() {
 document.addEventListener(
     "DOMContentLoaded",
     initializeApp
-)
+);
 
 
 // ============================================================
@@ -14713,13 +15774,21 @@ document.addEventListener(
     () => {
 
         const exportButton =
-            document.getElementById("export-backup-button");
+            document.getElementById(
+                "export-backup-button"
+            );
+
 
         const importButton =
-            document.getElementById("import-backup-button");
+            document.getElementById(
+                "import-backup-button"
+            );
+
 
         const importFile =
-            document.getElementById("import-backup-file");
+            document.getElementById(
+                "import-backup-file"
+            );
 
 
         // ----------------------------------------------------
@@ -14731,7 +15800,9 @@ document.addEventListener(
             exportButton.addEventListener(
                 "click",
                 () => {
+
                     exportBackup();
+
                 }
             );
 
@@ -14764,13 +15835,19 @@ document.addEventListener(
                     const file =
                         event.target.files?.[0];
 
+
                     if (!file) {
                         return;
                     }
 
-                    importBackupFile(file);
 
-                    event.target.value = "";
+                    importBackupFile(
+                        file
+                    );
+
+
+                    event.target.value =
+                        "";
 
                 }
             );
@@ -14778,7 +15855,7 @@ document.addEventListener(
         }
 
     }
-)
+);
 
 
 // ============================================================
@@ -14788,48 +15865,55 @@ document.addEventListener(
 async function deleteEvent(eventId) {
 
     if (!eventId) {
-
         return;
-
-    }
-
-
-    const event =
-        await getEventById(
-            eventId
-        );
-
-
-    if (!event) {
-
-        alert(
-            "イベントが見つかりません。"
-        );
-
-        return;
-
-    }
-
-
-    const confirmed =
-        confirm(
-            `「${event.name}」を削除しますか？\n\n` +
-            "このイベントに登録されている\n" +
-            "・イベント在庫\n" +
-            "・イベント経費\n" +
-            "も一緒に削除されます。\n\n" +
-            "この操作は元に戻せません。"
-        );
-
-
-    if (!confirmed) {
-
-        return;
-
     }
 
 
     try {
+
+        if (!db) {
+            await openDatabase();
+        }
+
+
+        if (!db) {
+            throw new Error(
+                "データベースを開けませんでした。"
+            );
+        }
+
+
+        const event =
+            await getEventById(
+                eventId
+            );
+
+
+        if (!event) {
+
+            alert(
+                "イベントが見つかりません。"
+            );
+
+            return;
+        }
+
+
+        const confirmed =
+            confirm(
+                `「${event.name}」を削除しますか？\n\n` +
+                "このイベントに登録されている\n" +
+                "・イベント在庫\n" +
+                "・イベント経費\n" +
+                "も一緒に削除されます。\n\n" +
+                "この操作は元に戻せません。"
+            );
+
+
+        if (!confirmed) {
+            return;
+        }
+
 
         await new Promise(
             (resolve, reject) => {
@@ -14906,6 +15990,21 @@ async function deleteEvent(eventId) {
                     };
 
 
+                inventoryRequest.onerror =
+                    () => {
+
+                        try {
+                            transaction.abort();
+                        } catch (error) {
+                            console.error(
+                                "イベント在庫取得エラー",
+                                error
+                            );
+                        }
+
+                    };
+
+
                 // ------------------------------------------------
                 // イベント経費
                 // ------------------------------------------------
@@ -14952,6 +16051,21 @@ async function deleteEvent(eventId) {
                     };
 
 
+                expenseRequest.onerror =
+                    () => {
+
+                        try {
+                            transaction.abort();
+                        } catch (error) {
+                            console.error(
+                                "イベント経費取得エラー",
+                                error
+                            );
+                        }
+
+                    };
+
+
                 // ------------------------------------------------
                 // 完了
                 // ------------------------------------------------
@@ -14972,7 +16086,10 @@ async function deleteEvent(eventId) {
                     () => {
 
                         reject(
-                            transaction.error
+                            transaction.error ||
+                            new Error(
+                                "イベント削除に失敗しました。"
+                            )
                         );
 
                     };
@@ -15026,4 +16143,3 @@ async function deleteEvent(eventId) {
     }
 
 }
-
