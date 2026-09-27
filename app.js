@@ -715,6 +715,11 @@ console.log(
 // バックアップからデータを復元
 // ============================================================
 
+
+// ============================================================
+// バックアップからデータを復元
+// ============================================================
+
 async function restoreBackup(
     backupData
 ) {
@@ -731,7 +736,7 @@ async function restoreBackup(
 
 
     // ========================================================
-    // バックアップデータの確認
+    // バックアップ確認
     // ========================================================
 
     if (
@@ -745,6 +750,30 @@ async function restoreBackup(
 
     }
 
+
+    // ========================================================
+    // 商品数確認
+    // ========================================================
+
+    const backupProductCount =
+        Array.isArray(
+            backupData.stores.products
+        )
+            ? backupData.stores.products.length
+            : -1;
+
+
+    alert(
+        "復元処理を開始します。\n\n" +
+        "バックアップの商品数：" +
+        backupProductCount +
+        "個"
+    );
+
+
+    // ========================================================
+    // 各ストア確認
+    // ========================================================
 
     for (
         const storeName
@@ -769,93 +798,65 @@ async function restoreBackup(
 
 
     // ========================================================
-    // 復元前の商品数
+    // DB確認
     // ========================================================
 
-    let beforeCount = 0;
+    if (!db) {
+
+        await openDatabase();
+
+    }
 
 
-    try {
+    if (!db) {
 
-        const beforeTransaction =
-            db.transaction(
-                ["products"],
-                "readonly"
-            );
-
-
-        const beforeStore =
-            beforeTransaction.objectStore(
-                "products"
-            );
-
-
-        beforeCount =
-            await new Promise(
-                (resolve, reject) => {
-
-                    const request =
-                        beforeStore.getAll();
-
-
-                    request.onsuccess =
-                        () => {
-
-                            resolve(
-                                request.result.length
-                            );
-
-                        };
-
-
-                    request.onerror =
-                        () => {
-
-                            reject(
-                                request.error
-                            );
-
-                        };
-
-                }
-            );
-
-    } catch (error) {
-
-        console.warn(
-            "復元前の商品数取得に失敗:",
-            error
+        throw new Error(
+            "IndexedDBを開けませんでした。"
         );
 
     }
 
 
     // ========================================================
-    // バックアップの商品数
+    // トランザクション開始
     // ========================================================
 
-    const backupProductCount =
-        backupData.stores.products.length;
-
-
-    // ========================================================
-    // 現在のデータを置き換える
-    // ========================================================
-
-    await new Promise(
+    return new Promise(
         (resolve, reject) => {
+
+            let transaction;
+
 
             try {
 
-                const transaction =
+                transaction =
                     db.transaction(
                         storeNames,
                         "readwrite"
                     );
 
+            } catch (error) {
 
-                storeNames.forEach(
-                    storeName => {
+                alert(
+                    "DBトランザクション開始エラー\n\n" +
+                    error.message
+                );
+
+                reject(error);
+
+                return;
+
+            }
+
+
+            // ==================================================
+            // 各ストアを復元
+            // ==================================================
+
+            storeNames.forEach(
+                storeName => {
+
+                    try {
 
                         const store =
                             transaction.objectStore(
@@ -863,22 +864,22 @@ async function restoreBackup(
                             );
 
 
-                        // ------------------------------------
-                        // 現在のデータを削除
-                        // ------------------------------------
-
-                        store.clear();
-
-
-                        // ------------------------------------
-                        // バックアップデータを追加
-                        // ------------------------------------
-
                         const records =
                             backupData.stores[
                                 storeName
                             ];
 
+
+                        // ------------------------------
+                        // 現在のデータを削除
+                        // ------------------------------
+
+                        store.clear();
+
+
+                        // ------------------------------
+                        // バックアップを追加
+                        // ------------------------------
 
                         records.forEach(
                             record => {
@@ -890,110 +891,110 @@ async function restoreBackup(
                             }
                         );
 
+                    } catch (error) {
+
+                        alert(
+                            "復元中にエラーが発生しました\n\n" +
+                            "ストア：" +
+                            storeName +
+                            "\n\n" +
+                            error.message
+                        );
+
+                        reject(error);
+
                     }
-                );
-
-
-                transaction.oncomplete =
-                    () => {
-
-                        resolve();
-
-                    };
-
-
-                transaction.onerror =
-                    () => {
-
-                        reject(
-                            transaction.error
-                        );
-
-                    };
-
-
-                transaction.onabort =
-                    () => {
-
-                        reject(
-                            transaction.error ||
-                            new Error(
-                                "復元処理が中断されました。"
-                            )
-                        );
-
-                    };
-
-            } catch (error) {
-
-                reject(error);
-
-            }
-
-        }
-    );
-
-
-    // ========================================================
-    // 復元後の商品数を確認
-    // ========================================================
-
-    let afterCount = 0;
-
-
-    try {
-
-        const afterTransaction =
-            db.transaction(
-                ["products"],
-                "readonly"
-            );
-
-
-        const afterStore =
-            afterTransaction.objectStore(
-                "products"
-            );
-
-
-        afterCount =
-            await new Promise(
-                (resolve, reject) => {
-
-                    const request =
-                        afterStore.getAll();
-
-
-                    request.onsuccess =
-                        () => {
-
-                            resolve(
-                                request.result.length
-                            );
-
-                        };
-
-
-                    request.onerror =
-                        () => {
-
-                            reject(
-                                request.error
-                            );
-
-                        };
 
                 }
             );
 
-    } catch (error) {
 
-        throw new Error(
-            "復元後の商品数を確認できませんでした。"
-        );
+            // ==================================================
+            // 完了
+            // ==================================================
 
-    }
+            transaction.oncomplete =
+                () => {
 
+                    alert(
+                        "DBへの復元が完了しました。\n\n" +
+                        "商品数：" +
+                        backupProductCount +
+                        "個"
+                    );
+
+
+                    resolve();
+
+                };
+
+
+            // ==================================================
+            // エラー
+            // ==================================================
+
+            transaction.onerror =
+                () => {
+
+                    const error =
+                        transaction.error;
+
+
+                    alert(
+                        "復元トランザクションエラー\n\n" +
+                        (
+                            error
+                                ? error.name +
+                                  "\n" +
+                                  error.message
+                                : "原因不明"
+                        )
+                    );
+
+
+                    reject(
+                        error
+                    );
+
+                };
+
+
+            // ==================================================
+            // 中断
+            // ==================================================
+
+            transaction.onabort =
+                () => {
+
+                    const error =
+                        transaction.error;
+
+
+                    alert(
+                        "復元処理が中断されました。\n\n" +
+                        (
+                            error
+                                ? error.name +
+                                  "\n" +
+                                  error.message
+                                : "原因不明"
+                        )
+                    );
+
+
+                    reject(
+                        error ||
+                        new Error(
+                            "復元処理が中断されました。"
+                        )
+                    );
+
+                };
+
+        }
+    );
+
+}
 
     // ========================================================
     // 結果を表示
