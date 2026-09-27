@@ -3449,27 +3449,38 @@ async function loadReservations() {
                 </div>
 
 
-                ${
-                    reservation.status !==
-                    "received"
+                           ${
+                reservation.status !==
+                "received"
 
-                        ? `
-                            <button
-                                class="
-                                    reservation-receive-button
-                                "
-                                data-reservation-id="
-                                    ${reservation.id}
-                                "
-                            >
-                                受け渡し完了
-                            </button>
-                        `
+                    ? `
+                        <button
+                            class="
+                                reservation-receive-button
+                            "
+                            data-reservation-id="
+                                ${reservation.id}
+                            "
+                        >
+                            受け渡し完了
+                        </button>
+                    `
 
-                        : ""
-                }
+                    : ""
+            }
 
-            `;
+            <button
+                class="
+                    reservation-delete-button
+                "
+                data-reservation-id="
+                    ${reservation.id}
+                "
+            >
+                予約を削除
+            </button>
+
+        `;
 
 
             const receiveButton =
@@ -3494,10 +3505,35 @@ async function loadReservations() {
             }
 
 
+            // ------------------------------------------------
+            // 予約削除ボタン
+            // ------------------------------------------------
+
+            const deleteButton =
+                card.querySelector(
+                    ".reservation-delete-button"
+                );
+
+
+            if (deleteButton) {
+
+                deleteButton.addEventListener(
+                    "click",
+                    () => {
+
+                        deleteReservation(
+                            reservation.id
+                        );
+
+                    }
+                );
+
+            }
+
+
             container.appendChild(
                 card
             );
-
         }
     );
 
@@ -7063,23 +7099,42 @@ function createInventoryAdjustModal() {
 
             <div class="form-group">
 
-                <label
-                    for="inventory-new-stock"
-                >
-                    修正後の在庫数
-                </label>
+    <label
+        for="inventory-new-stock"
+    >
+        修正後の在庫数
+    </label>
+
+    <input
+        type="number"
+        id="inventory-new-stock"
+        min="0"
+        step="1"
+        inputmode="numeric"
+        placeholder="0"
+    >
+
+</div>
 
 
-                <input
-                    type="number"
-                    id="inventory-new-stock"
-                    min="0"
-                    step="1"
-                    inputmode="numeric"
-                    placeholder="0"
-                >
+<div class="form-group">
 
-            </div>
+    <label
+        for="inventory-new-reserved"
+    >
+        修正後の予約確保数
+    </label>
+
+    <input
+        type="number"
+        id="inventory-new-reserved"
+        min="0"
+        step="1"
+        inputmode="numeric"
+        placeholder="0"
+    >
+
+</div>
 
 
             <div
@@ -8816,6 +8871,19 @@ function closeReservationModal() {
 
 function setupEventListeners() {
 
+    const clearSalesHistoryButton =
+    document.getElementById(
+        "clear-sales-history-button"
+    );
+
+if (clearSalesHistoryButton) {
+
+    clearSalesHistoryButton.addEventListener(
+        "click",
+        clearSalesHistory
+    );
+
+}
 
     // --------------------------------------------------------
     // メニュー
@@ -8942,6 +9010,88 @@ document.getElementById("close-event-modal")
 
             }
         );
+
+        // ========================================================
+// 預かり金 加算ボタン
+// ========================================================
+
+document
+    .querySelectorAll(
+        ".cash-quick-button"
+    )
+    .forEach(
+        button => {
+            button.addEventListener(
+                "click",
+                () => {
+                    const input =
+                        document.getElementById(
+                            "cash-received"
+                        );
+
+                    if (!input) {
+                        return;
+                    }
+
+                    const current =
+                        Number(
+                            input.value
+                        ) || 0;
+
+                    const add =
+                        Number(
+                            button.dataset.cashAdd
+                        ) || 0;
+
+                    input.value =
+                        current + add;
+
+                    input.dispatchEvent(
+                        new Event(
+                            "input",
+                            {
+                                bubbles: true
+                            }
+                        )
+                    );
+                }
+            );
+        }
+    );
+    // ========================================================
+// 預かり金 クリアボタン
+// ========================================================
+
+document
+    .getElementById(
+        "cash-clear-button"
+    )
+    ?.addEventListener(
+        "click",
+        () => {
+
+            const input =
+                document.getElementById(
+                    "cash-received"
+                );
+
+            if (!input) {
+                return;
+            }
+
+            input.value = 0;
+
+            input.dispatchEvent(
+                new Event(
+                    "input",
+                    {
+                        bubbles: true
+                    }
+                )
+            );
+
+        }
+    );
 
 
     // --------------------------------------------------------
@@ -10486,6 +10636,8 @@ async function finalizeEvent(eventId) {
         return;
     }
 
+    
+
 
     try {
 
@@ -10909,6 +11061,937 @@ async function finalizeEvent(eventId) {
 
     }
 
+}
+
+
+
+// ============================================================
+// 売り上げ履歴を全削除
+// ============================================================
+
+async function clearSalesHistory() {
+
+    const confirmed = confirm(
+        "売り上げ履歴をすべて削除します。\n\n" +
+        "商品・在庫・イベントは削除されません。\n" +
+        "この操作は元に戻せません。\n\n" +
+        "本当に削除しますか？"
+    );
+
+    if (!confirmed) {
+        return;
+    }
+
+    try {
+
+        // DBがまだ開かれていなければ開く
+        if (!db) {
+            await openDatabase();
+        }
+
+        if (!db) {
+            throw new Error(
+                "データベースを開けませんでした。"
+            );
+        }
+
+        // salesストア確認
+        if (
+            !db.objectStoreNames.contains("sales")
+        ) {
+            throw new Error(
+                "salesストアが存在しません。"
+            );
+        }
+
+        // 売り上げ履歴を全削除
+        await new Promise(
+            (resolve, reject) => {
+
+                const transaction =
+                    db.transaction(
+                        ["sales"],
+                        "readwrite"
+                    );
+
+                const store =
+                    transaction.objectStore(
+                        "sales"
+                    );
+
+                const request =
+                    store.clear();
+
+                request.onsuccess = () => {
+
+                    console.log(
+                        "sales.clear() 成功"
+                    );
+
+                };
+
+                request.onerror = () => {
+
+                    reject(
+                        request.error ||
+                        new Error(
+                            "売り上げ履歴の削除に失敗しました。"
+                        )
+                    );
+
+                };
+
+                transaction.oncomplete = () => {
+
+                    console.log(
+                        "売り上げ履歴削除完了"
+                    );
+
+                    resolve();
+
+                };
+
+                transaction.onerror = () => {
+
+                    reject(
+                        transaction.error ||
+                        new Error(
+                            "IndexedDBの処理に失敗しました。"
+                        )
+                    );
+
+                };
+
+                transaction.onabort = () => {
+
+                    reject(
+                        transaction.error ||
+                        new Error(
+                            "IndexedDBの処理が中断されました。"
+                        )
+                    );
+
+                };
+
+            }
+        );
+
+        await loadHistory();
+
+        alert(
+            "売り上げ履歴をすべて削除しました。"
+        );
+
+    } catch (error) {
+
+        console.error(
+            "売り上げ履歴削除エラー:",
+            error
+        );
+
+        alert(
+            "売り上げ履歴を削除できませんでした。\n\n" +
+            "エラー：" +
+            (
+                error?.message ||
+                error
+            )
+        );
+
+    }
+}
+
+// ============================================================
+// 予約在庫を一度だけ修復
+// ------------------------------------------------------------
+// 現在残っている「未受け取り予約」を集計し、
+// products.reserved を正しい数量に修正する。
+// ============================================================
+
+async function repairReservationStock() {
+
+    const confirmed = confirm(
+        "予約在庫を再計算します。\n\n" +
+        "現在残っている未受け取り予約をもとに、" +
+        "各商品の予約数を修正します。\n\n" +
+        "過去に削除した予約によって残っている" +
+        "不要な予約数も修正されます。\n\n" +
+        "本当に実行しますか？"
+    );
+
+    if (!confirmed) {
+        return;
+    }
+
+    try {
+
+        if (!db) {
+            await openDatabase();
+        }
+
+        if (!db) {
+            throw new Error(
+                "データベースを開けませんでした。"
+            );
+        }
+
+        // ----------------------------------------------------
+        // 必要なストアを確認
+        // ----------------------------------------------------
+
+        if (
+            !db.objectStoreNames.contains(
+                "reservations"
+            )
+        ) {
+            throw new Error(
+                "reservationsストアが存在しません。"
+            );
+        }
+
+        if (
+            !db.objectStoreNames.contains(
+                "products"
+            )
+        ) {
+            throw new Error(
+                "productsストアが存在しません。"
+            );
+        }
+
+
+        // ----------------------------------------------------
+        // 現在の予約を取得
+        // ----------------------------------------------------
+
+        const reservations =
+            await new Promise(
+                (resolve, reject) => {
+
+                    const transaction =
+                        db.transaction(
+                            ["reservations"],
+                            "readonly"
+                        );
+
+                    const store =
+                        transaction.objectStore(
+                            "reservations"
+                        );
+
+                    const request =
+                        store.getAll();
+
+                    request.onsuccess = () => {
+
+                        resolve(
+                            request.result || []
+                        );
+
+                    };
+
+                    request.onerror = () => {
+
+                        reject(
+                            request.error ||
+                            new Error(
+                                "予約データの取得に失敗しました。"
+                            )
+                        );
+
+                    };
+
+                }
+            );
+
+
+        // ----------------------------------------------------
+        // 商品ごとの予約数を集計
+        // ----------------------------------------------------
+
+        const reservedMap =
+            new Map();
+
+
+        reservations.forEach(
+            reservation => {
+
+                // 受け渡し済みは予約在庫に含めない
+                if (
+                    reservation.status ===
+                    "received"
+                ) {
+                    return;
+                }
+
+
+                if (
+                    !Array.isArray(
+                        reservation.items
+                    )
+                ) {
+                    return;
+                }
+
+
+                reservation.items.forEach(
+                    item => {
+
+                        const productId =
+                            String(
+                                item.productId
+                            );
+
+
+                        const quantity =
+                            Math.max(
+                                0,
+                                Number(
+                                    item.quantity ||
+                                    0
+                                )
+                            );
+
+
+                        if (
+                            !productId ||
+                            quantity <= 0
+                        ) {
+                            return;
+                        }
+
+
+                        const current =
+                            reservedMap.get(
+                                productId
+                            ) || 0;
+
+
+                        reservedMap.set(
+                            productId,
+                            current +
+                            quantity
+                        );
+
+                    }
+                );
+
+            }
+        );
+
+
+        // ----------------------------------------------------
+        // 商品の reserved を修正
+        // ----------------------------------------------------
+
+        await new Promise(
+            (resolve, reject) => {
+
+                const transaction =
+                    db.transaction(
+                        [
+                            "products"
+                        ],
+                        "readwrite"
+                    );
+
+
+                const productStore =
+                    transaction.objectStore(
+                        "products"
+                    );
+
+
+                const request =
+                    productStore.getAll();
+
+
+                request.onsuccess =
+                    () => {
+
+                        const products =
+                            request.result || [];
+
+
+                        products.forEach(
+                            product => {
+
+                                const productId =
+                                    String(
+                                        product.id
+                                    );
+
+
+                                const correctReserved =
+                                    reservedMap.get(
+                                        productId
+                                    ) || 0;
+
+
+                                const oldReserved =
+                                    Number(
+                                        product.reserved ||
+                                        0
+                                    );
+
+
+                                // 変更がある商品だけ更新
+                                if (
+                                    oldReserved !==
+                                    correctReserved
+                                ) {
+
+                                    product.reserved =
+                                        correctReserved;
+
+                                    product.updatedAt =
+                                        new Date()
+                                            .toISOString();
+
+                                    productStore.put(
+                                        product
+                                    );
+
+                                    console.log(
+                                        "予約在庫修正:",
+                                        product.name,
+                                        oldReserved,
+                                        "→",
+                                        correctReserved
+                                    );
+
+                                }
+
+                            }
+                        );
+
+                    };
+
+
+                request.onerror =
+                    () => {
+
+                        reject(
+                            request.error ||
+                            new Error(
+                                "商品の取得に失敗しました。"
+                            )
+                        );
+
+                    };
+
+
+                transaction.oncomplete =
+                    () => {
+
+                        resolve();
+
+                    };
+
+
+                transaction.onerror =
+                    () => {
+
+                        reject(
+                            transaction.error ||
+                            new Error(
+                                "予約在庫の修正に失敗しました。"
+                            )
+                        );
+
+                    };
+
+
+                transaction.onabort =
+                    () => {
+
+                        reject(
+                            transaction.error ||
+                            new Error(
+                                "予約在庫の修正が中断されました。"
+                            )
+                        );
+
+                    };
+
+            }
+        );
+
+
+        // ----------------------------------------------------
+        // 画面更新
+        // ----------------------------------------------------
+
+        await loadProducts();
+
+        await loadReservations();
+
+
+        alert(
+            "予約在庫を修正しました。\n\n" +
+            "現在残っている未受け取り予約をもとに、" +
+            "予約数を再計算しました。"
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "予約在庫修復エラー:",
+            error
+        );
+
+        alert(
+            "予約在庫の修復に失敗しました。\n\n" +
+            "エラー：" +
+            (
+                error?.message ||
+                error
+            )
+        );
+
+    }
+}
+
+
+// ============================================================
+// 予約を個別削除
+// ============================================================
+async function removeStaleReservationOnce(productId) {
+
+    if (!db) {
+        await openDatabase();
+    }
+
+    const transaction =
+        db.transaction(["products"], "readwrite");
+
+    const store =
+        transaction.objectStore("products");
+
+    const request =
+        store.get(productId);
+
+    request.onsuccess = () => {
+
+        const product = request.result;
+
+        if (!product) {
+            alert("商品が見つかりません。");
+            return;
+        }
+
+        const oldReserved =
+            Number(product.reserved || 0);
+
+        product.reserved =
+            Math.max(0, oldReserved - 1);
+
+        product.updatedAt =
+            new Date().toISOString();
+
+        store.put(product);
+
+        console.log(
+            "予約数を修正:",
+            product.name,
+            oldReserved,
+            "→",
+            product.reserved
+        );
+    };
+
+    request.onerror = () => {
+        console.error(
+            "商品取得エラー:",
+            request.error
+        );
+    };
+
+    transaction.oncomplete = async () => {
+
+        await loadProducts();
+
+        alert(
+            "残っていた予約数1を削除しました。"
+        );
+    };
+
+    transaction.onerror = () => {
+
+        console.error(
+            "予約数修正エラー:",
+            transaction.error
+        );
+
+        alert(
+            "予約数の修正に失敗しました。"
+        );
+    };
+}
+
+
+async function deleteReservation(reservationId) {
+
+    const confirmed = confirm(
+        "この予約を削除しますか？\n\n" +
+        "未受け取りの場合は、予約していた数量を在庫に戻します。\n\n" +
+        "この操作は元に戻せません。"
+    );
+
+    if (!confirmed) {
+        return;
+    }
+
+    try {
+
+        if (!db) {
+            await openDatabase();
+        }
+
+        if (!db) {
+            throw new Error(
+                "データベースを開けませんでした。"
+            );
+        }
+
+        // ----------------------------------------------------
+        // 予約データを取得
+        // ----------------------------------------------------
+
+        const reservation =
+            await new Promise(
+                (resolve, reject) => {
+
+                    const transaction =
+                        db.transaction(
+                            ["reservations"],
+                            "readonly"
+                        );
+
+                    const store =
+                        transaction.objectStore(
+                            "reservations"
+                        );
+
+                    const request =
+                        store.get(
+                            reservationId
+                        );
+
+                    request.onsuccess = () => {
+                        resolve(
+                            request.result
+                        );
+                    };
+
+                    request.onerror = () => {
+                        reject(
+                            request.error
+                        );
+                    };
+
+                }
+            );
+
+
+        if (!reservation) {
+
+            alert(
+                "予約が見つかりません。"
+            );
+
+            return;
+
+        }
+
+
+        // ----------------------------------------------------
+        // 受け渡し済みか確認
+        // ----------------------------------------------------
+
+        const isReceived =
+            reservation.status ===
+            "received";
+
+
+        // ----------------------------------------------------
+        // 予約削除
+        // ＋ 未受け取りなら予約数を戻す
+        // ----------------------------------------------------
+
+        await new Promise(
+            (resolve, reject) => {
+
+                const transaction =
+                    db.transaction(
+                        [
+                            "reservations",
+                            "products"
+                        ],
+                        "readwrite"
+                    );
+
+
+                const reservationStore =
+                    transaction.objectStore(
+                        "reservations"
+                    );
+
+
+                const productStore =
+                    transaction.objectStore(
+                        "products"
+                    );
+
+
+                // ------------------------------------------------
+                // 未受け取りの場合だけ在庫を戻す
+                // ------------------------------------------------
+
+                if (!isReceived) {
+
+                    reservation.items.forEach(
+                        item => {
+
+                            const productRequest =
+                                productStore.get(
+                                    item.productId
+                                );
+
+
+                            productRequest.onsuccess =
+                                () => {
+
+                                    const product =
+                                        productRequest.result;
+
+
+                                    if (!product) {
+                                        return;
+                                    }
+
+
+                                    const quantity =
+                                        Math.max(
+                                            0,
+                                            Number(
+                                                item.quantity ||
+                                                0
+                                            )
+                                        );
+
+
+                                    const currentReserved =
+                                        Math.max(
+                                            0,
+                                            Number(
+                                                product.reserved ||
+                                                0
+                                            )
+                                        );
+
+
+                                    product.reserved =
+                                        Math.max(
+                                            0,
+                                            currentReserved -
+                                            quantity
+                                        );
+
+
+                                    product.updatedAt =
+                                        new Date().toISOString();
+
+
+                                    productStore.put(
+                                        product
+                                    );
+
+                                };
+
+
+                            productRequest.onerror =
+                                () => {
+
+                                    reject(
+                                        productRequest.error ||
+                                        new Error(
+                                            "商品の取得に失敗しました。"
+                                        )
+                                    );
+
+                                };
+
+                        }
+                    );
+
+                }
+
+
+                // ------------------------------------------------
+                // 予約そのものを削除
+                // ------------------------------------------------
+
+                reservationStore.delete(
+                    reservationId
+                );
+
+
+                // ------------------------------------------------
+                // トランザクション完了
+                // ------------------------------------------------
+
+                transaction.oncomplete =
+                    () => {
+
+                        resolve();
+
+                    };
+
+
+                transaction.onerror =
+                    () => {
+
+                        reject(
+                            transaction.error ||
+                            new Error(
+                                "予約削除処理に失敗しました。"
+                            )
+                        );
+
+                    };
+
+
+                transaction.onabort =
+                    () => {
+
+                        reject(
+                            transaction.error ||
+                            new Error(
+                                "予約削除処理が中断されました。"
+                            )
+                        );
+
+                    };
+
+            }
+        );
+
+
+        // ----------------------------------------------------
+        // 商品一覧を更新
+        // ----------------------------------------------------
+
+        await loadProducts();
+
+
+        // ----------------------------------------------------
+        // 予約一覧を更新
+        // ----------------------------------------------------
+
+        await loadReservations();
+
+
+        alert(
+            isReceived
+                ? "受け渡し済みの予約を削除しました。"
+                : "予約を削除し、予約分の在庫を戻しました。"
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "予約削除エラー:",
+            error
+        );
+
+
+        alert(
+            "予約を削除できませんでした。\n\n" +
+            "エラー：" +
+            (
+                error?.message ||
+                error
+            )
+        );
+
+    }
+}
+
+
+async function removeStaleReservationOnce(productId) {
+
+    if (!db) {
+        await openDatabase();
+    }
+
+    const transaction =
+        db.transaction(["products"], "readwrite");
+
+    const store =
+        transaction.objectStore("products");
+
+    const request =
+        store.get(productId);
+
+    request.onsuccess = () => {
+
+        const product = request.result;
+
+        if (!product) {
+            alert("商品が見つかりません。");
+            return;
+        }
+
+        const oldReserved =
+            Number(product.reserved || 0);
+
+        product.reserved =
+            Math.max(0, oldReserved - 1);
+
+        product.updatedAt =
+            new Date().toISOString();
+
+        store.put(product);
+
+        console.log(
+            "予約数を修正:",
+            product.name,
+            oldReserved,
+            "→",
+            product.reserved
+        );
+    };
+
+    request.onerror = () => {
+        console.error(
+            "商品取得エラー:",
+            request.error
+        );
+    };
+
+    transaction.oncomplete = async () => {
+
+        await loadProducts();
+
+        alert(
+            "残っていた予約数1を削除しました。"
+        );
+    };
+
+    transaction.onerror = () => {
+
+        console.error(
+            "予約数修正エラー:",
+            transaction.error
+        );
+
+        alert(
+            "予約数の修正に失敗しました。"
+        );
+    };
 }
 // ============================================================
 // イベント経費一覧表示
@@ -13222,12 +14305,10 @@ async function saveEventStartInventory(eventId) {
             ".event-start-stock-input"
         );
 
-
     const soldInputs =
         document.querySelectorAll(
             ".event-sold-stock-input"
         );
-
 
     if (!eventId) {
 
@@ -13238,7 +14319,6 @@ async function saveEventStartInventory(eventId) {
         return;
     }
 
-
     if (startInputs.length === 0) {
 
         alert(
@@ -13247,7 +14327,6 @@ async function saveEventStartInventory(eventId) {
 
         return;
     }
-
 
     try {
 
@@ -13258,7 +14337,6 @@ async function saveEventStartInventory(eventId) {
         const event =
             await getEventById(eventId);
 
-
         if (!event) {
 
             alert(
@@ -13268,9 +14346,9 @@ async function saveEventStartInventory(eventId) {
             return;
         }
 
-
         if (
-            event.status === "completed"
+            event.status ===
+            "completed"
         ) {
 
             alert(
@@ -13287,24 +14365,20 @@ async function saveEventStartInventory(eventId) {
 
         const inputData = [];
 
-
         startInputs.forEach(
             startInput => {
 
                 const productId =
                     startInput.dataset.productId;
 
-
                 if (!productId) {
                     return;
                 }
-
 
                 const soldInput =
                     document.querySelector(
                         `.event-sold-stock-input[data-product-id="${productId}"]`
                     );
-
 
                 const startQuantity =
                     Math.max(
@@ -13314,7 +14388,6 @@ async function saveEventStartInventory(eventId) {
                         ) || 0
                     );
 
-
                 const soldQuantity =
                     Math.max(
                         0,
@@ -13323,6 +14396,31 @@ async function saveEventStartInventory(eventId) {
                         ) || 0
                     );
 
+                // --------------------------------------------
+                // 売れた数が開始在庫を超えないようにする
+                // --------------------------------------------
+
+                if (
+                    soldQuantity >
+                    startQuantity
+                ) {
+
+                    throw new Error(
+                        "販売数が開始在庫を超えています。\n\n" +
+                        "商品：" +
+                        (
+                            document.querySelector(
+                                `[data-product-id="${productId}"]`
+                            )?.closest(
+                                ".event-product-item"
+                            )?.querySelector(
+                                ".event-product-name"
+                            )?.textContent ||
+                            productId
+                        )
+                    );
+
+                }
 
                 inputData.push({
 
@@ -13354,30 +14452,8 @@ async function saveEventStartInventory(eventId) {
 
 
         // ----------------------------------------------------
-        // 商品数とイベント在庫を取得
+        // イベント在庫の既存データを取得
         // ----------------------------------------------------
-
-        const products =
-            await getAllProducts();
-
-
-        const productMap =
-            new Map();
-
-
-        products.forEach(
-            product => {
-
-                productMap.set(
-                    String(
-                        product.id
-                    ),
-                    product
-                );
-
-            }
-        );
-
 
         const existingInventory =
             await new Promise(
@@ -13385,27 +14461,25 @@ async function saveEventStartInventory(eventId) {
 
                     const transaction =
                         db.transaction(
-                            ["eventInventory"],
+                            [
+                                "eventInventory"
+                            ],
                             "readonly"
                         );
-
 
                     const store =
                         transaction.objectStore(
                             "eventInventory"
                         );
 
-
                     const request =
                         store.getAll();
-
 
                     request.onsuccess =
                         () => {
 
                             const allData =
                                 request.result || [];
-
 
                             const matchedData =
                                 allData.filter(
@@ -13418,13 +14492,11 @@ async function saveEventStartInventory(eventId) {
                                         )
                                 );
 
-
                             resolve(
                                 matchedData
                             );
 
                         };
-
 
                     request.onerror =
                         () => {
@@ -13446,7 +14518,6 @@ async function saveEventStartInventory(eventId) {
         const existingMap =
             new Map();
 
-
         existingInventory.forEach(
             item => {
 
@@ -13462,108 +14533,18 @@ async function saveEventStartInventory(eventId) {
 
 
         // ----------------------------------------------------
-        // マスター在庫を確認
-        //
-        // 現在のマスター在庫は、
-        // すでにイベントへ持ち出した分が
-        // 引かれている状態。
-        //
-        // そのため、
-        //
-        // 現在のマスター在庫
-        // ＋ 前回の開始在庫
-        //
-        // が今回設定できる最大値になる。
-        // ----------------------------------------------------
-
-        for (
-            const data of inputData
-        ) {
-
-            const product =
-                productMap.get(
-                    String(
-                        data.productId
-                    )
-                );
-
-
-            if (!product) {
-
-                alert(
-                    "商品が見つかりません。\n\n" +
-                    "商品ID：" +
-                    data.productId
-                );
-
-                return;
-            }
-
-
-            const currentStock =
-                Math.max(
-                    0,
-                    Number(
-                        product.stock || 0
-                    )
-                );
-
-
-            const oldData =
-                existingMap.get(
-                    String(
-                        data.productId
-                    )
-                );
-
-
-            const oldStartQuantity =
-                Math.max(
-                    0,
-                    Number(
-                        oldData?.quantity || 0
-                    )
-                );
-
-
-            const availableForStart =
-                currentStock +
-                oldStartQuantity;
-
-
-            if (
-                data.quantity >
-                availableForStart
-            ) {
-
-                alert(
-                    "開始在庫を保存できません。\n\n" +
-                    "商品：" +
-                    product.name +
-                    "\n" +
-                    "現在のマスター在庫：" +
-                    currentStock +
-                    "個\n" +
-                    "現在設定できる開始在庫：" +
-                    availableForStart +
-                    "個\n" +
-                    "入力された開始在庫：" +
-                    data.quantity +
-                    "個"
-                );
-
-                return;
-            }
-
-        }
-
-
-        // ----------------------------------------------------
         // 保存用データを作成
+        //
+        // ここでは products.stock を変更しない。
+        //
+        // eventInventory.quantity
+        // = イベントへ持っていく数量
+        //
+        // eventInventory.soldQuantity
+        // = イベントで販売した数量
         // ----------------------------------------------------
 
         const saveData = [];
-
 
         inputData.forEach(
             data => {
@@ -13574,7 +14555,6 @@ async function saveEventStartInventory(eventId) {
                             data.productId
                         )
                     );
-
 
                 saveData.push({
 
@@ -13606,91 +14586,9 @@ async function saveEventStartInventory(eventId) {
 
 
         // ----------------------------------------------------
-        // 商品在庫を変更
+        // eventInventory だけ保存
         //
-        // 新規：
-        //   マスター在庫 - 開始在庫
-        //
-        // 変更：
-        //   新しい開始在庫 - 古い開始在庫
-        //   の差分だけマスター在庫を変更
-        // ----------------------------------------------------
-
-        const productUpdates = [];
-
-
-        inputData.forEach(
-            data => {
-
-                const product =
-                    productMap.get(
-                        String(
-                            data.productId
-                        )
-                    );
-
-
-                if (!product) {
-                    return;
-                }
-
-
-                const currentStock =
-                    Math.max(
-                        0,
-                        Number(
-                            product.stock || 0
-                        )
-                    );
-
-
-                const oldData =
-                    existingMap.get(
-                        String(
-                            data.productId
-                        )
-                    );
-
-
-                const oldStartQuantity =
-                    Math.max(
-                        0,
-                        Number(
-                            oldData?.quantity || 0
-                        )
-                    );
-
-
-                const difference =
-                    data.quantity -
-                    oldStartQuantity;
-
-
-                const newStock =
-                    currentStock -
-                    difference;
-
-
-                productUpdates.push({
-
-                    product:
-                        product,
-
-                    newStock:
-                        Math.max(
-                            0,
-                            newStock
-                        )
-
-                });
-
-            }
-        );
-
-
-        // ----------------------------------------------------
-        // products と eventInventory を
-        // 同じトランザクションで保存
+        // マスター在庫(products)は変更しない
         // ----------------------------------------------------
 
         await new Promise(
@@ -13699,55 +14597,15 @@ async function saveEventStartInventory(eventId) {
                 const transaction =
                     db.transaction(
                         [
-                            "products",
                             "eventInventory"
                         ],
                         "readwrite"
                     );
 
-
-                const productStore =
-                    transaction.objectStore(
-                        "products"
-                    );
-
-
                 const inventoryStore =
                     transaction.objectStore(
                         "eventInventory"
                     );
-
-
-                // --------------------------------------------
-                // マスター在庫を保存
-                // --------------------------------------------
-
-                productUpdates.forEach(
-                    update => {
-
-                        const product =
-                            update.product;
-
-
-                        product.stock =
-                            update.newStock;
-
-
-                        product.updatedAt =
-                            new Date().toISOString();
-
-
-                        productStore.put(
-                            product
-                        );
-
-                    }
-                );
-
-
-                // --------------------------------------------
-                // イベント開始在庫を保存
-                // --------------------------------------------
 
                 saveData.forEach(
                     data => {
@@ -13759,10 +14617,6 @@ async function saveEventStartInventory(eventId) {
                     }
                 );
 
-
-                // --------------------------------------------
-                // 完了
-                // --------------------------------------------
 
                 transaction.oncomplete =
                     () => {
@@ -13803,6 +14657,9 @@ async function saveEventStartInventory(eventId) {
 
         // ----------------------------------------------------
         // 商品一覧を再読み込み
+        //
+        // マスター在庫は変更していないので、
+        // 表示上の在庫数もそのまま。
         // ----------------------------------------------------
 
         await loadProducts();
@@ -13818,7 +14675,7 @@ async function saveEventStartInventory(eventId) {
 
 
         // ----------------------------------------------------
-        // 売上集計も更新
+        // 売上集計を更新
         // ----------------------------------------------------
 
         await loadEventSalesSummary(
@@ -13827,7 +14684,7 @@ async function saveEventStartInventory(eventId) {
 
 
         // ----------------------------------------------------
-        // 利益集計も更新
+        // 利益集計を更新
         // ----------------------------------------------------
 
         await loadEventProfitSummary(
@@ -13837,7 +14694,7 @@ async function saveEventStartInventory(eventId) {
 
         alert(
             "開始在庫・販売数を保存しました。\n\n" +
-            "マスター在庫も更新しました。"
+            "マスター在庫は変更していません。"
         );
 
 
@@ -13848,17 +14705,18 @@ async function saveEventStartInventory(eventId) {
             error
         );
 
-
         alert(
             "イベント開始在庫・販売数の保存に失敗しました。\n\n" +
             "エラー：" +
-            (error?.message || error)
+            (
+                error?.message ||
+                error
+            )
         );
 
     }
 
 }
-
 // ------------------------------------------------------------
 // イベント追加モーダルを開く
 // ------------------------------------------------------------
@@ -14053,21 +14911,17 @@ async function saveEvent() {
 // 初期化
 // ============================================================
 
+// ============================================================
+// 初期化
+// ============================================================
 async function initializeApp() {
-
     try {
-
         await openDatabase();
-
         await requestPersistentStorage();
 
         createInventoryAdjustModal();
-
         setupEventListeners();
-
-        showSection(
-            "products-section"
-        );
+        showSection("products-section");
 
     } catch (error) {
 
@@ -14076,17 +14930,18 @@ async function initializeApp() {
             error
         );
 
-
         alert(
             "アプリの初期化に失敗しました。\n\n" +
             "エラー：" +
             (error?.message || error)
         );
-
     }
-
 }
 
+document.addEventListener(
+    "DOMContentLoaded",
+    initializeApp
+);
 
 // ============================================================
 // 起動
