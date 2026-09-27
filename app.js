@@ -3,7 +3,6 @@
 // app.js
 // ============================================================
 
-alert("app.js 読み込み確認");
 
 
 // ============================================================
@@ -715,45 +714,24 @@ async function importBackupFile(file) {
 
     try {
 
-        alert("復元① ファイルを受け取りました");
-
-
         const text =
             await file.text();
-
-
-        alert(
-            "復元② ファイル読み込み完了\n" +
-            text.length +
-            "文字"
-        );
 
 
         const backupData =
             JSON.parse(text);
 
 
-        alert("復元③ JSON解析完了");
-
-
         if (!db) {
-
-            alert("復元④ DBを開きます");
 
             await openDatabase();
 
         }
 
 
-        alert("復元⑤ restoreBackup開始");
-
-
         await restoreBackup(
             backupData
         );
-
-
-        alert("復元⑥ restoreBackup完了");
 
 
         await loadProducts();
@@ -765,7 +743,8 @@ async function importBackupFile(file) {
 
 
         alert(
-            "復元⑦ 画面更新完了"
+            "バックアップを復元しました。\n\n" +
+            "画面を確認してください。"
         );
 
 
@@ -788,7 +767,6 @@ async function importBackupFile(file) {
     }
 
 }
-
 
 // ============================================================
 // バックアップからデータを復元
@@ -15791,380 +15769,85 @@ document.addEventListener(
 // データバックアップ ボタン
 // ============================================================
 
-document.addEventListener(
-    "DOMContentLoaded",
-    () => {
+function setupBackupButtons() {
 
-        const exportButton =
-            document.getElementById(
-                "export-backup-button"
-            );
+    const exportButton =
+        document.getElementById(
+            "export-backup-button"
+        );
 
 
-        const importButton =
-            document.getElementById(
-                "import-backup-button"
-            );
+    const importButton =
+        document.getElementById(
+            "import-backup-button"
+        );
 
 
-        const importFile =
-            document.getElementById(
-                "import-backup-file"
-            );
+    const importFile =
+        document.getElementById(
+            "import-backup-file"
+        );
 
 
-        // ----------------------------------------------------
-        // エクスポート
-        // ----------------------------------------------------
+    // --------------------------------------------------------
+    // エクスポート
+    // --------------------------------------------------------
 
-        if (exportButton) {
+    if (exportButton) {
 
-            exportButton.addEventListener(
-                "click",
-                () => {
+        exportButton.addEventListener(
+            "click",
+            () => {
 
-                    exportBackup();
+                exportBackup();
 
-                }
-            );
-
-        }
-
-
-        // ----------------------------------------------------
-        // インポート
-        // ----------------------------------------------------
-
-        if (
-            importButton &&
-            importFile
-        ) {
-
-            importButton.addEventListener(
-                "click",
-                () => {
-
-                    importFile.click();
-
-                }
-            );
-
-
-            importFile.addEventListener(
-                "change",
-                async event => {
-
-                    const file =
-                        event.target.files?.[0];
-
-
-                    if (!file) {
-                        return;
-                    }
-
-
-                    try {
-
-                        await importBackupFile(
-                            file
-                        );
-
-                    } finally {
-
-                        // 同じファイルをもう一度
-                        // 選択できるようにする
-                        event.target.value =
-                            "";
-
-                    }
-
-                }
-            );
-
-        }
+            }
+        );
 
     }
-);
-// ============================================================
-// イベント削除
-// ============================================================
 
-async function deleteEvent(eventId) {
 
-    if (!eventId) {
-        return;
-    }
+    // --------------------------------------------------------
+    // インポート
+    // --------------------------------------------------------
 
+    if (
+        importButton &&
+        importFile
+    ) {
 
-    try {
+        importButton.addEventListener(
+            "click",
+            () => {
 
-        if (!db) {
-            await openDatabase();
-        }
-
-
-        if (!db) {
-            throw new Error(
-                "データベースを開けませんでした。"
-            );
-        }
-
-
-        const event =
-            await getEventById(
-                eventId
-            );
-
-
-        if (!event) {
-
-            alert(
-                "イベントが見つかりません。"
-            );
-
-            return;
-        }
-
-
-        const confirmed =
-            confirm(
-                `「${event.name}」を削除しますか？\n\n` +
-                "このイベントに登録されている\n" +
-                "・イベント在庫\n" +
-                "・イベント経費\n" +
-                "も一緒に削除されます。\n\n" +
-                "この操作は元に戻せません。"
-            );
-
-
-        if (!confirmed) {
-            return;
-        }
-
-
-        await new Promise(
-            (resolve, reject) => {
-
-                const transaction =
-                    db.transaction(
-                        [
-                            "events",
-                            "eventInventory",
-                            "eventExpenses"
-                        ],
-                        "readwrite"
-                    );
-
-
-                // ------------------------------------------------
-                // イベント本体
-                // ------------------------------------------------
-
-                const eventStore =
-                    transaction.objectStore(
-                        "events"
-                    );
-
-
-                eventStore.delete(
-                    eventId
-                );
-
-
-                // ------------------------------------------------
-                // イベント在庫
-                // ------------------------------------------------
-
-                const inventoryStore =
-                    transaction.objectStore(
-                        "eventInventory"
-                    );
-
-
-                const inventoryRequest =
-                    inventoryStore.getAll();
-
-
-                inventoryRequest.onsuccess =
-                    () => {
-
-                        const records =
-                            inventoryRequest.result ||
-                            [];
-
-
-                        records.forEach(
-                            record => {
-
-                                if (
-                                    String(
-                                        record.eventId
-                                    ) ===
-                                    String(
-                                        eventId
-                                    )
-                                ) {
-
-                                    inventoryStore.delete(
-                                        record.id
-                                    );
-
-                                }
-
-                            }
-                        );
-
-                    };
-
-
-                inventoryRequest.onerror =
-                    () => {
-
-                        try {
-                            transaction.abort();
-                        } catch (error) {
-                            console.error(
-                                "イベント在庫取得エラー",
-                                error
-                            );
-                        }
-
-                    };
-
-
-                // ------------------------------------------------
-                // イベント経費
-                // ------------------------------------------------
-
-                const expenseStore =
-                    transaction.objectStore(
-                        "eventExpenses"
-                    );
-
-
-                const expenseRequest =
-                    expenseStore.getAll();
-
-
-                expenseRequest.onsuccess =
-                    () => {
-
-                        const records =
-                            expenseRequest.result ||
-                            [];
-
-
-                        records.forEach(
-                            record => {
-
-                                if (
-                                    String(
-                                        record.eventId
-                                    ) ===
-                                    String(
-                                        eventId
-                                    )
-                                ) {
-
-                                    expenseStore.delete(
-                                        record.id
-                                    );
-
-                                }
-
-                            }
-                        );
-
-                    };
-
-
-                expenseRequest.onerror =
-                    () => {
-
-                        try {
-                            transaction.abort();
-                        } catch (error) {
-                            console.error(
-                                "イベント経費取得エラー",
-                                error
-                            );
-                        }
-
-                    };
-
-
-                // ------------------------------------------------
-                // 完了
-                // ------------------------------------------------
-
-                transaction.oncomplete =
-                    () => {
-
-                        resolve();
-
-                    };
-
-
-                // ------------------------------------------------
-                // エラー
-                // ------------------------------------------------
-
-                transaction.onerror =
-                    () => {
-
-                        reject(
-                            transaction.error ||
-                            new Error(
-                                "イベント削除に失敗しました。"
-                            )
-                        );
-
-                    };
-
-
-                // ------------------------------------------------
-                // 中断
-                // ------------------------------------------------
-
-                transaction.onabort =
-                    () => {
-
-                        reject(
-                            transaction.error ||
-                            new Error(
-                                "イベント削除が中断されました。"
-                            )
-                        );
-
-                    };
+                importFile.click();
 
             }
         );
 
 
-        await loadEvents();
+        importFile.addEventListener(
+            "change",
+            event => {
+
+                const file =
+                    event.target.files?.[0];
 
 
-        alert(
-            "イベントを削除しました。"
-        );
+                if (!file) {
+                    return;
+                }
 
 
-    } catch (error) {
-
-        console.error(
-            "イベント削除エラー",
-            error
-        );
+                importBackupFile(
+                    file
+                );
 
 
-        alert(
-            "イベントの削除に失敗しました。\n\n" +
-            "エラー：" +
-            (
-                error?.message ||
-                error
-            )
+                event.target.value =
+                    "";
+
+            }
         );
 
     }
@@ -16172,29 +15855,22 @@ async function deleteEvent(eventId) {
 }
 
 
+// ============================================================
+// DOM読み込み後に初期化
+// ============================================================
 
-document.addEventListener("DOMContentLoaded", () => {
+if (
+    document.readyState ===
+    "loading"
+) {
 
-    const test = document.createElement("div");
+    document.addEventListener(
+        "DOMContentLoaded",
+        setupBackupButtons
+    );
 
-    test.textContent = "JS起動確認";
+} else {
 
-    test.style.position = "fixed";
-    test.style.top = "10px";
-    test.style.left = "10px";
-    test.style.zIndex = "999999";
-    test.style.background = "red";
-    test.style.color = "white";
-    test.style.padding = "10px";
-    test.style.fontSize = "16px";
+    setupBackupButtons();
 
-    document.body.appendChild(test);
-
-
-    document.body.addEventListener("click", event => {
-
-        test.textContent = "クリック検出！";
-
-    });
-
-});
+}
