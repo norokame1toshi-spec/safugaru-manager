@@ -16143,3 +16143,20 @@ async function deleteEvent(eventId) {
     }
 
 }
+
+
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    console.log("DOMContentLoaded 発火");
+
+    document.body.addEventListener("click", event => {
+
+        console.log(
+            "クリック検出:",
+            event.target
+        );
+
+    });
+
+});
