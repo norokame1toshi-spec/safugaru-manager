@@ -48,6 +48,8 @@ type="button"
 
 </button>
 
+
+
 <button
 id="menu-register"
 type="button"
@@ -293,16 +295,57 @@ type="button"
 </label>
 
 <input
-type="number"
-id="cash-received"
-min="0"
-inputmode="numeric"
-placeholder="0"
-
+    type="number"
+    id="cash-received"
+    min="0"
+    inputmode="numeric"
+    placeholder="0"
 >
 
+<div
+    class="cash-quick-buttons"
+>
+    <button
+        type="button"
+        class="cash-quick-button"
+        data-cash-add="100"
+    >
+        ＋100円
+    </button>
+
+    <button
+        type="button"
+        class="cash-quick-button"
+        data-cash-add="500"
+    >
+        ＋500円
+    </button>
+
+    <button
+        type="button"
+        class="cash-quick-button"
+        data-cash-add="1000"
+    >
+        ＋1,000円
+    </button>
+
+    <button
+        type="button"
+        class="cash-quick-button"
+        data-cash-add="5000"
+    >
+        ＋5,000円
+    </button>
+    <button
+    type="button"
+    class="cash-clear-button"
+    id="cash-clear-button"
+>
+    金額をクリア
+</button>
 </div>
 
+</div>
 <div class="change-area">
 
 <span>
@@ -433,6 +476,13 @@ disabled
 <div>
 
 <h2>売上・履歴</h2>
+<button
+    type="button"
+    id="clear-sales-history-button"
+    class="danger-button"
+>
+    売り上げ履歴を全削除
+</button>
 
 <p class="section-description">
     販売履歴を確認
