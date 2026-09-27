@@ -710,12 +710,69 @@ console.log(
 // バックアップからデータを復元
 // ============================================================
 
+async function importBackupFile(file) {
 
-// ============================================================
-// バックアップからデータを復元
-// ============================================================
+    alert("① importBackupFile が呼ばれた");
 
+    try {
 
+        const text = await file.text();
+
+        alert(
+            "② ファイル読み込み成功\n文字数：" +
+            text.length
+        );
+
+        const backupData =
+            JSON.parse(text);
+
+        alert(
+            "③ JSON解析成功\n商品数：" +
+            (
+                backupData.stores?.products?.length
+                ?? "取得失敗"
+            )
+        );
+
+        if (!db) {
+            await openDatabase();
+        }
+
+        alert("④ DB準備完了");
+
+        await restoreBackup(backupData);
+
+        alert("⑤ restoreBackup 完了");
+
+        await loadProducts();
+        await loadReservations();
+        await loadInventory();
+        await loadInventoryHistory();
+        await loadHistory();
+        await loadEvents();
+
+        alert("⑥ 画面更新完了");
+
+        alert(
+            "バックアップを復元しました。\n\n" +
+            "画面を確認してください。"
+        );
+
+    } catch (error) {
+
+        console.error(
+            "バックアップ復元エラー:",
+            error
+        );
+
+        alert(
+            "復元エラー\n\n" +
+            "場所を確認してください。\n\n" +
+            String(error?.message || error)
+        );
+
+    }
+}
 // ============================================================
 // バックアップからデータを復元
 // ============================================================
