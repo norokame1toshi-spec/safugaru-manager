@@ -265,85 +265,91 @@ let registerProductSubCategory = "";
 // ============================================================
 // IndexedDBを開く
 // ============================================================
+```js
+// ============================================================
+// IndexedDBを開く
+// iPhone診断用
+// ============================================================
 
 function openDatabase() {
 
     return new Promise((resolve, reject) => {
 
-        // ----------------------------------------------------
-        // 現在のDBを開く
-        // ----------------------------------------------------
+        alert("DB① indexedDB.open開始");
 
-        const request =
-            indexedDB.open(DB_NAME);
+        let request;
 
+        try {
 
-        // ----------------------------------------------------
-        // 新規DB作成
-        // またはDBバージョンアップ
-        // ----------------------------------------------------
+            request =
+                indexedDB.open(
+                    DB_NAME
+                );
+
+            alert(
+                "DB② indexedDB.open実行OK"
+            );
+
+        } catch (error) {
+
+            alert(
+                "DBエラー①\n\n" +
+                (error?.message || error)
+            );
+
+            reject(error);
+            return;
+        }
+
 
         request.onupgradeneeded = event => {
 
-            const database =
-                event.target.result;
-
-            setupDatabaseStores(
-                database
+            alert(
+                "DB③ onupgradeneeded"
             );
 
+            try {
+
+                const database =
+                    event.target.result;
+
+                setupDatabaseStores(
+                    database
+                );
+
+                alert(
+                    "DB④ setupDatabaseStores OK"
+                );
+
+            } catch (error) {
+
+                alert(
+                    "DBエラー②\n\n" +
+                    (error?.message || error)
+                );
+
+                reject(error);
+            }
         };
 
 
-        // ----------------------------------------------------
-        // DBを開けた
-        // ----------------------------------------------------
-
         request.onsuccess = event => {
 
-            db =
-                event.target.result;
+            alert(
+                "DB⑤ onsuccess"
+            );
 
+            try {
 
-            // ------------------------------------------------
-            // 必要なストア
-            // ------------------------------------------------
+                db =
+                    event.target.result;
 
-            const requiredStores = [
-
-                "products",
-                "reservations",
-                "sales",
-                "inventoryHistory",
-                "events",
-                "eventInventory",
-                "eventExpenses"
-
-            ];
-
-
-            // ------------------------------------------------
-            // 足りないストアがあるか確認
-            // ------------------------------------------------
-
-            const missingStore =
-                requiredStores.some(
-                    storeName =>
-                        !db.objectStoreNames.contains(
-                            storeName
-                        )
+                alert(
+                    "DB⑥ db代入OK\n" +
+                    "version：" +
+                    db.version
                 );
 
-
-            // ------------------------------------------------
-            // 全部そろっている
-            // ------------------------------------------------
-
-            if (!missingStore) {
-
-                // 他のタブなどから
-                // バージョンアップ要求が来たら
-                // 現在の接続を閉じる
 
                 db.onversionchange = () => {
 
@@ -352,131 +358,185 @@ function openDatabase() {
                 };
 
 
-                resolve(db);
-
-                return;
-
-            }
-
-
-            // ------------------------------------------------
-            // 足りないストアがある
-            // → DBバージョンを1つ上げる
-            // ------------------------------------------------
-
-            const currentVersion =
-                db.version;
+                const requiredStores = [
+                    "products",
+                    "reservations",
+                    "sales",
+                    "inventoryHistory",
+                    "events",
+                    "eventInventory",
+                    "eventExpenses"
+                ];
 
 
-            db.close();
+                const missingStores =
+                    requiredStores.filter(
+                        storeName =>
+                            !db.objectStoreNames.contains(
+                                storeName
+                            )
+                    );
 
 
-            const upgradeRequest =
-                indexedDB.open(
-                    DB_NAME,
-                    currentVersion + 1
+                alert(
+                    "DB⑦ store確認\n" +
+                    "不足：" +
+                    missingStores.length
                 );
 
 
-            // ------------------------------------------------
-            // バージョンアップ処理
-            // ------------------------------------------------
+                if (
+                    missingStores.length === 0
+                ) {
 
-            upgradeRequest.onupgradeneeded =
-                event => {
-
-                    const database =
-                        event.target.result;
-
-                    setupDatabaseStores(
-                        database
+                    alert(
+                        "DB⑧ DB準備完了"
                     );
 
-                };
+                    resolve(db);
+
+                    return;
+                }
 
 
-            // ------------------------------------------------
-            // バージョンアップ成功
-            // ------------------------------------------------
+                // --------------------------------------------
+                // 不足ストアがある場合
+                // --------------------------------------------
 
-            upgradeRequest.onsuccess =
-                event => {
+                const newVersion =
+                    db.version + 1;
 
-                    db =
-                        event.target.result;
+                alert(
+                    "DB⑨ 不足ストアあり\n" +
+                    "新version：" +
+                    newVersion
+                );
 
 
-                    db.onversionchange = () => {
+                db.close();
 
-                        db.close();
+
+                const upgradeRequest =
+                    indexedDB.open(
+                        DB_NAME,
+                        newVersion
+                    );
+
+
+                upgradeRequest.onupgradeneeded =
+                    event => {
+
+                        alert(
+                            "DB⑩ 追加upgrade開始"
+                        );
+
+                        const database =
+                            event.target.result;
+
+                        setupDatabaseStores(
+                            database
+                        );
 
                     };
 
 
-                    resolve(db);
+                upgradeRequest.onsuccess =
+                    event => {
 
-                };
+                        db =
+                            event.target.result;
+
+                        alert(
+                            "DB⑪ 追加upgrade完了"
+                        );
+
+                        db.onversionchange =
+                            () => {
+                                db.close();
+                            };
+
+                        resolve(db);
+
+                    };
 
 
-            // ------------------------------------------------
-            // バージョンアップ失敗
-            // ------------------------------------------------
+                upgradeRequest.onerror =
+                    event => {
 
-            upgradeRequest.onerror =
-                () => {
+                        alert(
+                            "DBエラー③\n\n" +
+                            (
+                                upgradeRequest.error?.message ||
+                                upgradeRequest.error ||
+                                "不明なエラー"
+                            )
+                        );
 
-                    reject(
-                        upgradeRequest.error
-                    );
+                        reject(
+                            upgradeRequest.error
+                        );
 
-                };
+                    };
 
 
-            // ------------------------------------------------
-            // 別タブなどがDBを開いていて
-            // バージョンアップできない
-            // ------------------------------------------------
+                upgradeRequest.onblocked =
+                    () => {
 
-            upgradeRequest.onblocked =
-                () => {
+                        alert(
+                            "DBエラー④\n\n" +
+                            "データベースが別の接続によってロックされています。"
+                        );
 
-                    console.warn(
-                        "IndexedDBのバージョンアップがブロックされています。"
-                    );
+                        reject(
+                            new Error(
+                                "IndexedDB upgrade blocked"
+                            )
+                        );
 
-                };
+                    };
 
+            } catch (error) {
+
+                alert(
+                    "DBエラー⑤\n\n" +
+                    (error?.message || error)
+                );
+
+                reject(error);
+            }
         };
 
 
-        // ----------------------------------------------------
-        // DBオープン失敗
-        // ----------------------------------------------------
-
         request.onerror = () => {
+
+            alert(
+                "DBエラー⑥\n\n" +
+                (
+                    request.error?.message ||
+                    request.error ||
+                    "IndexedDBを開けませんでした"
+                )
+            );
 
             reject(
                 request.error
             );
-
         };
 
 
-        // ----------------------------------------------------
-        // DBオープンがブロックされた
-        // ----------------------------------------------------
-
         request.onblocked = () => {
 
-            console.warn(
-                "IndexedDBの読み込みがブロックされています。"
+            alert(
+                "DBエラー⑦\n\n" +
+                "IndexedDBが別の接続によってロックされています。"
             );
 
         };
 
     });
-
 }
+```
+
 
 // ============================================================
 // データバックアップ
