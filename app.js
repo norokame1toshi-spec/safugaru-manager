@@ -15034,44 +15034,52 @@ async function saveEvent() {
 // 初期化
 // ============================================================
 
+
 // ============================================================
 // 初期化
 // ============================================================
 
 async function initializeApp() {
 
+    alert("① initializeApp 開始");
+
     try {
 
         await openDatabase();
 
+        alert("② openDatabase OK");
+
+
         await requestPersistentStorage();
+
+        alert("③ requestPersistentStorage OK");
+
 
         createInventoryAdjustModal();
 
+        alert("④ createInventoryAdjustModal OK");
+
+
         setupEventListeners();
 
-        showSection(
-            "products-section"
-        );
+        alert("⑤ setupEventListeners OK");
+
+
+        showSection("products-section");
+
+        alert("⑥ showSection OK");
+
 
     } catch (error) {
 
-        console.error(
-            "アプリ初期化エラー",
-            error
-        );
+        console.error("アプリ初期化エラー", error);
 
         alert(
-            "アプリの初期化に失敗しました。\n\n" +
+            "初期化エラー\n\n" +
             "エラー：" +
-            (
-                error?.message ||
-                error
-            )
+            (error?.message || error)
         );
-
     }
-
 }
 
 
@@ -15081,50 +15089,47 @@ async function initializeApp() {
 
 document.addEventListener(
     "DOMContentLoaded",
-    async () => {
+    initializeApp
+);
 
-        await initializeApp();
 
+// ============================================================
+// データバックアップ ボタン
+// ============================================================
 
-        // ====================================================
-        // データバックアップ ボタン
-        // ====================================================
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
 
         const exportButton =
-            document.getElementById(
-                "export-backup-button"
-            );
+            document.getElementById("export-backup-button");
 
+        const importButton =
+            document.getElementById("import-backup-button");
+
+        const importFile =
+            document.getElementById("import-backup-file");
+
+
+        // ----------------------------------------------------
+        // エクスポート
+        // ----------------------------------------------------
 
         if (exportButton) {
 
             exportButton.addEventListener(
                 "click",
                 () => {
-
                     exportBackup();
-
                 }
             );
 
         }
 
 
-        // ====================================================
-        // データ復元 ボタン
-        // ====================================================
-
-        const importButton =
-            document.getElementById(
-                "import-backup-button"
-            );
-
-
-        const importFile =
-            document.getElementById(
-                "import-backup-file"
-            );
-
+        // ----------------------------------------------------
+        // インポート
+        // ----------------------------------------------------
 
         if (
             importButton &&
@@ -15141,10 +15146,6 @@ document.addEventListener(
             );
 
 
-            // ==================================================
-            // バックアップファイル選択
-            // ==================================================
-
             importFile.addEventListener(
                 "change",
                 event => {
@@ -15152,21 +15153,12 @@ document.addEventListener(
                     const file =
                         event.target.files?.[0];
 
-
                     if (!file) {
-
                         return;
-
                     }
 
+                    importBackupFile(file);
 
-                    importBackupFile(
-                        file
-                    );
-
-
-                    // 同じファイルを
-                    // もう一度選べるようにする
                     event.target.value = "";
 
                 }
@@ -15175,7 +15167,7 @@ document.addEventListener(
         }
 
     }
-);
+)
 
 
 // ============================================================
