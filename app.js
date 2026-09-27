@@ -15039,6 +15039,11 @@ async function saveEvent() {
 // 初期化
 // ============================================================
 
+
+// ============================================================
+// 初期化
+// ============================================================
+
 async function initializeApp() {
 
     alert("① initializeApp 開始");
@@ -15065,14 +15070,19 @@ async function initializeApp() {
         alert("⑤ setupEventListeners OK");
 
 
+        alert("⑤.5 showSection 呼び出し直前");
+
         showSection("products-section");
 
-        alert("⑥ showSection OK");
+        alert("⑥ showSection 完了");
 
 
     } catch (error) {
 
-        console.error("アプリ初期化エラー", error);
+        console.error(
+            "アプリ初期化エラー",
+            error
+        );
 
         alert(
             "初期化エラー\n\n" +
@@ -15090,7 +15100,7 @@ async function initializeApp() {
 document.addEventListener(
     "DOMContentLoaded",
     initializeApp
-);
+)
 
 
 // ============================================================
