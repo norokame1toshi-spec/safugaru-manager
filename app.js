@@ -15037,14 +15037,22 @@ async function saveEvent() {
 // ============================================================
 // 初期化
 // ============================================================
+
 async function initializeApp() {
+
     try {
+
         await openDatabase();
+
         await requestPersistentStorage();
 
         createInventoryAdjustModal();
+
         setupEventListeners();
-        showSection("products-section");
+
+        showSection(
+            "products-section"
+        );
 
     } catch (error) {
 
@@ -15056,15 +15064,16 @@ async function initializeApp() {
         alert(
             "アプリの初期化に失敗しました。\n\n" +
             "エラー：" +
-            (error?.message || error)
+            (
+                error?.message ||
+                error
+            )
         );
+
     }
+
 }
 
-document.addEventListener(
-    "DOMContentLoaded",
-    initializeApp
-);
 
 // ============================================================
 // 起動
@@ -15072,82 +15081,132 @@ document.addEventListener(
 
 document.addEventListener(
     "DOMContentLoaded",
-    initializeApp
-);
+    async () => {
 
-// ============================================================
-// データバックアップ ボタン
-// ============================================================
-
-document
-    .getElementById("export-backup-button")
-    ?.addEventListener(
-        "click",
-        () => {
-            exportBackup();
-        }
-    );
+        await initializeApp();
 
 
-document
-    .getElementById("import-backup-button")
-    ?.addEventListener(
-        "click",
-        () => {
+        // ====================================================
+        // データバックアップ ボタン
+        // ====================================================
 
-            document
-                .getElementById("import-backup-file")
-                ?.click();
-
-        }
-    );
-
-
-document
-    .getElementById("import-backup-file")
-    ?.addEventListener(
-        "change",
-        event => {
-
-            const file =
-                event.target.files?.[0];
-
-
-            if (!file) {
-
-                return;
-
-            }
-
-
-            importBackupFile(
-                file
+        const exportButton =
+            document.getElementById(
+                "export-backup-button"
             );
 
 
-            // 同じファイルをもう一度選べるようにする
-            event.target.value = "";
+        if (exportButton) {
+
+            exportButton.addEventListener(
+                "click",
+                () => {
+
+                    exportBackup();
+
+                }
+            );
 
         }
-    );
 
-    // ============================================================
+
+        // ====================================================
+        // データ復元 ボタン
+        // ====================================================
+
+        const importButton =
+            document.getElementById(
+                "import-backup-button"
+            );
+
+
+        const importFile =
+            document.getElementById(
+                "import-backup-file"
+            );
+
+
+        if (
+            importButton &&
+            importFile
+        ) {
+
+            importButton.addEventListener(
+                "click",
+                () => {
+
+                    importFile.click();
+
+                }
+            );
+
+
+            // ==================================================
+            // バックアップファイル選択
+            // ==================================================
+
+            importFile.addEventListener(
+                "change",
+                event => {
+
+                    const file =
+                        event.target.files?.[0];
+
+
+                    if (!file) {
+
+                        return;
+
+                    }
+
+
+                    importBackupFile(
+                        file
+                    );
+
+
+                    // 同じファイルを
+                    // もう一度選べるようにする
+                    event.target.value = "";
+
+                }
+            );
+
+        }
+
+    }
+);
+
+
+// ============================================================
 // イベント削除
 // ============================================================
 
 async function deleteEvent(eventId) {
 
     if (!eventId) {
+
         return;
+
     }
+
 
     const event =
-        await getEventById(eventId);
+        await getEventById(
+            eventId
+        );
+
 
     if (!event) {
-        alert("イベントが見つかりません。");
+
+        alert(
+            "イベントが見つかりません。"
+        );
+
         return;
+
     }
+
 
     const confirmed =
         confirm(
@@ -15159,9 +15218,13 @@ async function deleteEvent(eventId) {
             "この操作は元に戻せません。"
         );
 
+
     if (!confirmed) {
+
         return;
+
     }
+
 
     try {
 
@@ -15178,6 +15241,7 @@ async function deleteEvent(eventId) {
                         "readwrite"
                     );
 
+
                 // ------------------------------------------------
                 // イベント本体
                 // ------------------------------------------------
@@ -15186,6 +15250,7 @@ async function deleteEvent(eventId) {
                     transaction.objectStore(
                         "events"
                     );
+
 
                 eventStore.delete(
                     eventId
@@ -15201,14 +15266,18 @@ async function deleteEvent(eventId) {
                         "eventInventory"
                     );
 
+
                 const inventoryRequest =
                     inventoryStore.getAll();
+
 
                 inventoryRequest.onsuccess =
                     () => {
 
                         const records =
-                            inventoryRequest.result || [];
+                            inventoryRequest.result ||
+                            [];
+
 
                         records.forEach(
                             record => {
@@ -15243,14 +15312,18 @@ async function deleteEvent(eventId) {
                         "eventExpenses"
                     );
 
+
                 const expenseRequest =
                     expenseStore.getAll();
+
 
                 expenseRequest.onsuccess =
                     () => {
 
                         const records =
-                            expenseRequest.result || [];
+                            expenseRequest.result ||
+                            [];
+
 
                         records.forEach(
                             record => {
@@ -15276,6 +15349,10 @@ async function deleteEvent(eventId) {
                     };
 
 
+                // ------------------------------------------------
+                // 完了
+                // ------------------------------------------------
+
                 transaction.oncomplete =
                     () => {
 
@@ -15283,6 +15360,10 @@ async function deleteEvent(eventId) {
 
                     };
 
+
+                // ------------------------------------------------
+                // エラー
+                // ------------------------------------------------
 
                 transaction.onerror =
                     () => {
@@ -15293,6 +15374,10 @@ async function deleteEvent(eventId) {
 
                     };
 
+
+                // ------------------------------------------------
+                // 中断
+                // ------------------------------------------------
 
                 transaction.onabort =
                     () => {
@@ -15325,6 +15410,7 @@ async function deleteEvent(eventId) {
             error
         );
 
+
         alert(
             "イベントの削除に失敗しました。\n\n" +
             "エラー：" +
@@ -15337,3 +15423,4 @@ async function deleteEvent(eventId) {
     }
 
 }
+
