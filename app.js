@@ -715,24 +715,45 @@ async function importBackupFile(file) {
 
     try {
 
+        alert("復元① ファイルを受け取りました");
+
+
         const text =
             await file.text();
+
+
+        alert(
+            "復元② ファイル読み込み完了\n" +
+            text.length +
+            "文字"
+        );
 
 
         const backupData =
             JSON.parse(text);
 
 
+        alert("復元③ JSON解析完了");
+
+
         if (!db) {
+
+            alert("復元④ DBを開きます");
 
             await openDatabase();
 
         }
 
 
+        alert("復元⑤ restoreBackup開始");
+
+
         await restoreBackup(
             backupData
         );
+
+
+        alert("復元⑥ restoreBackup完了");
 
 
         await loadProducts();
@@ -744,8 +765,7 @@ async function importBackupFile(file) {
 
 
         alert(
-            "バックアップを復元しました。\n\n" +
-            "画面を確認してください。"
+            "復元⑦ 画面更新完了"
         );
 
 
