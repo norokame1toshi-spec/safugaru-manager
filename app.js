@@ -600,6 +600,15 @@ async function exportBackup() {
         const backupData =
             await backupDatabase();
 
+            console.log(
+    "バックアップ商品数:",
+    backupData.stores.products.length
+);
+
+console.log(
+    "バックアップ商品:",
+    backupData.stores.products
+);
 
         const json =
             JSON.stringify(
@@ -701,6 +710,11 @@ async function exportBackup() {
 // バックアップからデータを復元
 // ============================================================
 
+
+// ============================================================
+// バックアップからデータを復元
+// ============================================================
+
 async function restoreBackup(
     backupData
 ) {
@@ -755,10 +769,80 @@ async function restoreBackup(
 
 
     // ========================================================
+    // 復元前の商品数
+    // ========================================================
+
+    let beforeCount = 0;
+
+
+    try {
+
+        const beforeTransaction =
+            db.transaction(
+                ["products"],
+                "readonly"
+            );
+
+
+        const beforeStore =
+            beforeTransaction.objectStore(
+                "products"
+            );
+
+
+        beforeCount =
+            await new Promise(
+                (resolve, reject) => {
+
+                    const request =
+                        beforeStore.getAll();
+
+
+                    request.onsuccess =
+                        () => {
+
+                            resolve(
+                                request.result.length
+                            );
+
+                        };
+
+
+                    request.onerror =
+                        () => {
+
+                            reject(
+                                request.error
+                            );
+
+                        };
+
+                }
+            );
+
+    } catch (error) {
+
+        console.warn(
+            "復元前の商品数取得に失敗:",
+            error
+        );
+
+    }
+
+
+    // ========================================================
+    // バックアップの商品数
+    // ========================================================
+
+    const backupProductCount =
+        backupData.stores.products.length;
+
+
+    // ========================================================
     // 現在のデータを置き換える
     // ========================================================
 
-    return new Promise(
+    await new Promise(
         (resolve, reject) => {
 
             try {
@@ -779,11 +863,17 @@ async function restoreBackup(
                             );
 
 
+                        // ------------------------------------
                         // 現在のデータを削除
+                        // ------------------------------------
+
                         store.clear();
 
 
+                        // ------------------------------------
                         // バックアップデータを追加
+                        // ------------------------------------
+
                         const records =
                             backupData.stores[
                                 storeName
@@ -843,8 +933,89 @@ async function restoreBackup(
         }
     );
 
-}
 
+    // ========================================================
+    // 復元後の商品数を確認
+    // ========================================================
+
+    let afterCount = 0;
+
+
+    try {
+
+        const afterTransaction =
+            db.transaction(
+                ["products"],
+                "readonly"
+            );
+
+
+        const afterStore =
+            afterTransaction.objectStore(
+                "products"
+            );
+
+
+        afterCount =
+            await new Promise(
+                (resolve, reject) => {
+
+                    const request =
+                        afterStore.getAll();
+
+
+                    request.onsuccess =
+                        () => {
+
+                            resolve(
+                                request.result.length
+                            );
+
+                        };
+
+
+                    request.onerror =
+                        () => {
+
+                            reject(
+                                request.error
+                            );
+
+                        };
+
+                }
+            );
+
+    } catch (error) {
+
+        throw new Error(
+            "復元後の商品数を確認できませんでした。"
+        );
+
+    }
+
+
+    // ========================================================
+    // 結果を表示
+    // ========================================================
+
+    alert(
+        "バックアップ復元結果\n\n" +
+
+        "復元前の商品数：" +
+        beforeCount +
+        "個\n\n" +
+
+        "バックアップの商品数：" +
+        backupProductCount +
+        "個\n\n" +
+
+        "復元後の商品数：" +
+        afterCount +
+        "個"
+    );
+
+}
 
 
 // ============================================================
