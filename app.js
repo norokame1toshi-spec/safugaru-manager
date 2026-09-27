@@ -4,6 +4,8 @@
 // ============================================================
 
 alert("app.js 読み込み確認");
+
+
 // ============================================================
 // IndexedDB
 // ============================================================
@@ -15830,7 +15832,7 @@ document.addEventListener(
 
             importFile.addEventListener(
                 "change",
-                event => {
+                async event => {
 
                     const file =
                         event.target.files?.[0];
@@ -15841,13 +15843,20 @@ document.addEventListener(
                     }
 
 
-                    importBackupFile(
-                        file
-                    );
+                    try {
 
+                        await importBackupFile(
+                            file
+                        );
 
-                    event.target.value =
-                        "";
+                    } finally {
+
+                        // 同じファイルをもう一度
+                        // 選択できるようにする
+                        event.target.value =
+                            "";
+
+                    }
 
                 }
             );
@@ -15856,8 +15865,6 @@ document.addEventListener(
 
     }
 );
-
-
 // ============================================================
 // イベント削除
 // ============================================================
