@@ -16148,14 +16148,25 @@ async function deleteEvent(eventId) {
 
 document.addEventListener("DOMContentLoaded", () => {
 
-    console.log("DOMContentLoaded 発火");
+    const test = document.createElement("div");
+
+    test.textContent = "JS起動確認";
+
+    test.style.position = "fixed";
+    test.style.top = "10px";
+    test.style.left = "10px";
+    test.style.zIndex = "999999";
+    test.style.background = "red";
+    test.style.color = "white";
+    test.style.padding = "10px";
+    test.style.fontSize = "16px";
+
+    document.body.appendChild(test);
+
 
     document.body.addEventListener("click", event => {
 
-        console.log(
-            "クリック検出:",
-            event.target
-        );
+        test.textContent = "クリック検出！";
 
     });
 
