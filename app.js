@@ -15045,56 +15045,23 @@ async function saveEvent() {
 // ============================================================
 
 async function initializeApp() {
-
-alert("① initializeApp 開始");
-
-try {
-
-    alert("DBを開く処理を開始します");
-
-    await openDatabase();
-
-    alert("② openDatabase OK");
-
-
+    try {
+        await openDatabase();
         await requestPersistentStorage();
 
-        alert("③ requestPersistentStorage OK");
-
-
         createInventoryAdjustModal();
-
-        alert("④ createInventoryAdjustModal OK");
-
-
         setupEventListeners();
-
-        alert("⑤ setupEventListeners OK");
-
-
-        alert("⑤.5 showSection 呼び出し直前");
-
         showSection("products-section");
 
-        alert("⑥ showSection 完了");
-
-
     } catch (error) {
-
-        console.error(
-            "アプリ初期化エラー",
-            error
-        );
-
+        console.error("アプリ初期化エラー", error);
         alert(
-            "初期化エラー\n\n" +
+            "アプリの初期化に失敗しました。\n\n" +
             "エラー：" +
             (error?.message || error)
         );
     }
 }
-
-
 // ============================================================
 // 起動
 // ============================================================
