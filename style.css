@@ -797,17 +797,66 @@ main {
 /* 商品画像 */
 
 .register-product-image {
-  width: 100%;
 
-  aspect-ratio: 1 / 1;
+    width: 100%;
 
-  object-fit: cover;
+    aspect-ratio: 1 / 1;
 
-  display: block;
+    object-fit: cover;
 
-  background: #f1f1f1;
+    display: block;
+
+    background: #f1f1f1;
+
 }
 
+.register-product-image img {
+
+    width: 100%;
+
+    height: 100%;
+
+    object-fit: cover;
+
+    display: block;
+
+}
+
+.register-product-image {
+    position: relative;
+}
+
+.register-sold-out {
+    position: absolute;
+
+    top: 50%;
+    left: 50%;
+
+    transform:
+        translate(-50%, -50%);
+
+    background: rgba(
+        0,
+        0,
+        0,
+        0.7
+    );
+
+    color: #fff;
+
+    font-size: 24px;
+
+    font-weight: bold;
+
+    padding:
+        10px 20px;
+
+    border-radius: 8px;
+
+    white-space: nowrap;
+
+    pointer-events: none;
+}
 
 /* 商品情報 */
 
