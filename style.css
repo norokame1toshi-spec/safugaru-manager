@@ -1573,9 +1573,20 @@ main {
     margin-top: 8px;
 }
 
+/* 商品編集・一括登録の入力欄 */
+
 #product-price,
 #product-stock,
 .bulk-product-price,
 .bulk-product-stock {
     touch-action: manipulation;
+}
+
+
+/* レジの商品ボタン */
+
+.register-product-card {
+    touch-action: manipulation;
+    -webkit-user-select: none;
+    user-select: none;
 }
