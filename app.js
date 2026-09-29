@@ -184,39 +184,59 @@ function setupDatabaseStores(database) {
         );
 
     }
+
+
     // --------------------------------------------------------
-// イベント経費
-// --------------------------------------------------------
+    // イベント経費
+    // --------------------------------------------------------
 
-if (
-    !database.objectStoreNames.contains(
-        "eventExpenses"
-    )
-) {
+    if (
+        !database.objectStoreNames.contains(
+            "eventExpenses"
+        )
+    ) {
 
-    const eventExpensesStore =
-        database.createObjectStore(
-            "eventExpenses",
-            { keyPath: "id" }
+        const eventExpensesStore =
+            database.createObjectStore(
+                "eventExpenses",
+                { keyPath: "id" }
+            );
+
+        eventExpensesStore.createIndex(
+            "eventId",
+            "eventId",
+            { unique: false }
         );
 
+        eventExpensesStore.createIndex(
+            "createdAt",
+            "createdAt",
+            { unique: false }
+        );
 
-    eventExpensesStore.createIndex(
-        "eventId",
-        "eventId",
-        { unique: false }
-    );
+    }
 
 
-    eventExpensesStore.createIndex(
-        "createdAt",
-        "createdAt",
-        { unique: false }
-    );
+    // --------------------------------------------------------
+    // 商品画像（端末ごとの保存）
+    // --------------------------------------------------------
+
+    if (
+        !database.objectStoreNames.contains(
+            "productImages"
+        )
+    ) {
+
+        database.createObjectStore(
+            "productImages",
+            { keyPath: "productId" }
+        );
+
+    }
 
 }
 
-}
+
 // ============================================================
 // 商品カテゴリ
 // ============================================================
@@ -253,6 +273,7 @@ let currentProductId = null;
 
 let selectedParentCategory = null;
 let selectedSubCategory = null;
+let productSearchText = "";
 
 let reservationCart = [];
 let registerCart = [];
@@ -319,7 +340,8 @@ function openDatabase() {
                 "inventoryHistory",
                 "events",
                 "eventInventory",
-                "eventExpenses"
+                "eventExpenses",
+                "productImages"
 
             ];
 
@@ -476,11 +498,9 @@ function openDatabase() {
 // ============================================================
 // データバックアップ
 // ============================================================
-
 async function backupDatabase() {
 
     const storeNames = [
-
         "products",
         "reservations",
         "sales",
@@ -488,103 +508,119 @@ async function backupDatabase() {
         "events",
         "eventInventory",
         "eventExpenses"
-
     ];
 
-
     const backupData = {
-
         appName:
             "さふがる工房 イベント管理",
 
         backupVersion:
-            1,
+            2,
 
         createdAt:
             new Date().toISOString(),
 
         stores: {}
-
     };
 
+    return new Promise(
+        (resolve, reject) => {
 
-    return new Promise((resolve, reject) => {
+            try {
 
-        try {
+                const transaction =
+                    db.transaction(
+                        storeNames,
+                        "readonly"
+                    );
 
-            const transaction =
-                db.transaction(
-                    storeNames,
-                    "readonly"
-                );
+                storeNames.forEach(
+                    storeName => {
 
-
-            storeNames.forEach(
-                storeName => {
-
-                    const store =
-                        transaction.objectStore(
-                            storeName
-                        );
-
-
-                    const request =
-                        store.getAll();
-
-
-                    request.onsuccess =
-                        () => {
-
-                            backupData.stores[
+                        const store =
+                            transaction.objectStore(
                                 storeName
-                            ] =
-                                request.result;
-
-                        };
-
-
-                    request.onerror =
-                        () => {
-
-                            reject(
-                                request.error
                             );
 
-                        };
+                        const request =
+                            store.getAll();
 
-                }
-            );
+                        request.onsuccess =
+                            () => {
 
+                                let records =
+                                    request.result;
 
-            transaction.oncomplete =
-                () => {
+                                // ------------------------------------------------
+                                // 商品データは画像をバックアップしない
+                                // ------------------------------------------------
 
-                    resolve(
-                        backupData
-                    );
+                                if (
+                                    storeName ===
+                                    "products"
+                                ) {
 
-                };
+                                    records =
+                                        records.map(
+                                            product => {
 
+                                                const {
+                                                    image,
+                                                    ...productWithoutImage
+                                                } = product;
 
-            transaction.onerror =
-                () => {
+                                                return (
+                                                    productWithoutImage
+                                                );
+                                            }
+                                        );
+                                }
 
-                    reject(
-                        transaction.error
-                    );
+                                backupData.stores[
+                                    storeName
+                                ] =
+                                    records;
+                            };
 
-                };
+                        request.onerror =
+                            () => {
 
-        } catch (error) {
+                                reject(
+                                    request.error
+                                );
 
-            reject(error);
+                            };
+
+                    }
+                );
+
+                transaction.oncomplete =
+                    () => {
+
+                        resolve(
+                            backupData
+                        );
+
+                    };
+
+                transaction.onerror =
+                    () => {
+
+                        reject(
+                            transaction.error
+                        );
+
+                    };
+
+            } catch (error) {
+
+                reject(error);
+
+            }
 
         }
-
-    });
-
+    );
 }
-
 
 // ============================================================
 // バックアップファイルを書き出す
@@ -769,7 +805,7 @@ async function importBackupFile(file) {
 }
 
 // ============================================================
-// バックアップからデータを復元
+// バックアップ復元
 // ============================================================
 
 async function restoreBackup(
@@ -777,7 +813,6 @@ async function restoreBackup(
 ) {
 
     const storeNames = [
-
         "products",
         "reservations",
         "sales",
@@ -785,7 +820,6 @@ async function restoreBackup(
         "events",
         "eventInventory",
         "eventExpenses"
-
     ];
 
 
@@ -896,22 +930,39 @@ async function restoreBackup(
                         ];
 
 
-                    // ------------------------------
-                    // 現在のデータを削除
-                    // ------------------------------
-
                     store.clear();
 
-
-                    // ------------------------------
-                    // バックアップを追加
-                    // ------------------------------
 
                     records.forEach(
                         record => {
 
+                            let recordToSave =
+                                record;
+
+
+                            // ----------------------------------
+                            // 商品画像は復元しない
+                            // ----------------------------------
+
+                            if (
+                                storeName ===
+                                "products"
+                            ) {
+
+                                const {
+                                    image,
+                                    ...productWithoutImage
+                                } = record;
+
+
+                                recordToSave =
+                                    productWithoutImage;
+
+                            }
+
+
                             store.put(
-                                record
+                                recordToSave
                             );
 
                         }
@@ -970,7 +1021,6 @@ async function restoreBackup(
     );
 
 }
-
 
 // ============================================================
 // ストレージを永続化
@@ -1272,13 +1322,11 @@ async function loadProducts() {
     );
 
 }
-
-
 // ============================================================
 // 商品一覧表示
 // ============================================================
 
-function renderProducts(products) {
+async function renderProducts(products) {
 
     const container =
         document.getElementById(
@@ -1296,6 +1344,55 @@ function renderProducts(products) {
     let filteredProducts =
         products;
 
+
+    // --------------------------------------------------------
+    // 商品名検索
+    // --------------------------------------------------------
+
+    const searchText =
+        String(
+            productSearchText || ""
+        )
+            .trim()
+            .toLowerCase();
+
+
+    if (searchText) {
+
+        filteredProducts =
+            filteredProducts.filter(
+                product => {
+
+                    const searchableText =
+                        [
+                            product.name,
+                            product.parentCategory,
+                            product.subCategory
+                        ]
+                            .filter(
+                                value =>
+                                    value !==
+                                    undefined &&
+                                    value !==
+                                    null
+                            )
+                            .join(" ")
+                            .toLowerCase();
+
+
+                    return searchableText.includes(
+                        searchText
+                    );
+
+                }
+            );
+
+    }
+
+
+    // --------------------------------------------------------
+    // 親カテゴリ
+    // --------------------------------------------------------
 
     if (selectedParentCategory) {
 
@@ -1319,6 +1416,10 @@ function renderProducts(products) {
 
     }
 
+
+    // --------------------------------------------------------
+    // 子カテゴリ
+    // --------------------------------------------------------
 
     if (selectedSubCategory) {
 
@@ -1361,6 +1462,90 @@ function renderProducts(products) {
     }
 
 
+    // --------------------------------------------------------
+    // 端末側に保存されている商品画像を取得
+    // --------------------------------------------------------
+
+    const imageRecords =
+        await new Promise(
+            (resolve, reject) => {
+
+                try {
+
+                    const transaction =
+                        db.transaction(
+                            "productImages",
+                            "readonly"
+                        );
+
+
+                    const store =
+                        transaction.objectStore(
+                            "productImages"
+                        );
+
+
+                    const request =
+                        store.getAll();
+
+
+                    request.onsuccess =
+                        () => {
+
+                            resolve(
+                                request.result || []
+                            );
+
+                        };
+
+
+                    request.onerror =
+                        () => {
+
+                            reject(
+                                request.error
+                            );
+
+                        };
+
+                } catch (error) {
+
+                    reject(error);
+
+                }
+
+            }
+        );
+
+
+    const imageMap =
+        new Map();
+
+
+    imageRecords.forEach(
+        record => {
+
+            if (
+                record &&
+                record.productId &&
+                record.image
+            ) {
+
+                imageMap.set(
+                    record.productId,
+                    record.image
+                );
+
+            }
+
+        }
+    );
+
+
+    // --------------------------------------------------------
+    // 商品カード
+    // --------------------------------------------------------
+
     filteredProducts.forEach(
         product => {
 
@@ -1400,26 +1585,8 @@ function renderProducts(products) {
             card.innerHTML = `
 
                 <div class="product-image">
-
-                    ${
-                        product.image
-
-                        ? `
-                            <img
-                                src="${product.image}"
-                                alt="${escapeHTML(
-                                    product.name
-                                )}"
-                            >
-                        `
-
-                        : `
-                            <span>📦</span>
-                        `
-                    }
-
+                    <span>📦</span>
                 </div>
-
 
                 <div class="product-info">
 
@@ -1470,6 +1637,57 @@ function renderProducts(products) {
             `;
 
 
+            // ------------------------------------------------
+            // 保存済み画像があれば表示
+            // ------------------------------------------------
+
+            const image =
+                imageMap.get(
+                    product.id
+                );
+
+
+            if (image) {
+
+                const imageContainer =
+                    card.querySelector(
+                        ".product-image"
+                    );
+
+
+                const imageURL =
+                    URL.createObjectURL(
+                        image
+                    );
+
+
+                imageContainer.innerHTML = `
+                    <img
+                        src="${imageURL}"
+                        alt="${escapeHTML(
+                            product.name
+                        )}"
+                    >
+                `;
+
+
+                const img =
+                    imageContainer.querySelector(
+                        "img"
+                    );
+
+
+                img.onload = () => {
+
+                    URL.revokeObjectURL(
+                        imageURL
+                    );
+
+                };
+
+            }
+
+
             card.addEventListener(
                 "click",
                 () => {
@@ -1490,8 +1708,6 @@ function renderProducts(products) {
     );
 
 }
-
-
 // ============================================================
 // カテゴリナビ
 // ============================================================
@@ -1965,79 +2181,29 @@ async function openProductModal(
         );
 
 
+    const imageInput =
+        document.getElementById(
+            "product-image"
+        );
+
+
     currentProductId =
         productId;
 
 
-    if (productId) {
+    // --------------------------------------------------------
+    // 画像プレビューを初期化
+    // --------------------------------------------------------
 
-        const product =
-            await getProduct(
-                productId
-            );
-
-
-        if (!product) {
-
-            return;
-
-        }
+    imagePreview.innerHTML =
+        "<span>画像なし</span>";
 
 
-        title.textContent =
-            "商品を編集";
+    // --------------------------------------------------------
+    // 新規商品
+    // --------------------------------------------------------
 
-
-        name.value =
-            product.name || "";
-
-
-        price.value =
-            product.price || 0;
-
-
-        stock.value =
-            product.stock || 0;
-
-
-        populateParentCategories(
-            product.parentCategory ||
-            product.category ||
-            "キーホルダー"
-        );
-
-
-        populateSubCategories(
-            product.parentCategory ||
-            product.category ||
-            "キーホルダー",
-
-            product.subCategory || ""
-        );
-
-
-        if (product.image) {
-
-            imagePreview.innerHTML = `
-                <img src="${product.image}">
-            `;
-
-        } else {
-
-            imagePreview.innerHTML =
-                "<span>画像なし</span>";
-
-        }
-
-
-        deleteButton.style.display =
-            "block";
-
-
-        deleteButton.disabled =
-            false;
-
-    } else {
+    if (!productId) {
 
         title.textContent =
             "商品を追加";
@@ -2060,20 +2226,191 @@ async function openProductModal(
         );
 
 
-        imagePreview.innerHTML =
-            "<span>画像なし</span>";
-
-
         deleteButton.style.display =
             "none";
+
+
+        imageInput.value =
+            "";
+
+
+        modal.classList.add(
+            "show"
+        );
+
+
+        return;
 
     }
 
 
-    document.getElementById(
-        "product-image"
-    ).value = "";
+    // --------------------------------------------------------
+    // 編集する商品を取得
+    // --------------------------------------------------------
 
+    const product =
+        await getProduct(
+            productId
+        );
+
+
+    if (!product) {
+
+        return;
+
+    }
+
+
+    title.textContent =
+        "商品を編集";
+
+
+    name.value =
+        product.name || "";
+
+
+    price.value =
+        product.price || 0;
+
+
+    stock.value =
+        product.stock || 0;
+
+
+    populateParentCategories(
+        product.parentCategory ||
+        product.category ||
+        "キーホルダー"
+    );
+
+
+    populateSubCategories(
+        product.parentCategory ||
+        product.category ||
+        "キーホルダー",
+
+        product.subCategory || ""
+    );
+
+
+    deleteButton.style.display =
+        "block";
+
+
+    deleteButton.disabled =
+        false;
+
+
+    // --------------------------------------------------------
+    // 端末側に保存されている画像を取得
+    // --------------------------------------------------------
+
+    try {
+
+        const imageRecord =
+            await new Promise(
+                (resolve, reject) => {
+
+                    const transaction =
+                        db.transaction(
+                            "productImages",
+                            "readonly"
+                        );
+
+
+                    const store =
+                        transaction.objectStore(
+                            "productImages"
+                        );
+
+
+                    const request =
+                        store.get(
+                            productId
+                        );
+
+
+                    request.onsuccess =
+                        () => {
+
+                            resolve(
+                                request.result
+                            );
+
+                        };
+
+
+                    request.onerror =
+                        () => {
+
+                            reject(
+                                request.error
+                            );
+
+                        };
+
+                }
+            );
+
+
+        if (
+            imageRecord &&
+            imageRecord.image
+        ) {
+
+            const imageURL =
+                URL.createObjectURL(
+                    imageRecord.image
+                );
+
+
+            imagePreview.innerHTML = `
+                <img
+                    src="${imageURL}"
+                    alt="${escapeHTML(
+                        product.name || ""
+                    )}"
+                >
+            `;
+
+
+            const img =
+                imagePreview.querySelector(
+                    "img"
+                );
+
+
+            img.onload = () => {
+
+                URL.revokeObjectURL(
+                    imageURL
+                );
+
+            };
+
+        }
+
+    } catch (error) {
+
+        console.error(
+            "商品画像の読み込みに失敗しました:",
+            error
+        );
+
+    }
+
+
+    // --------------------------------------------------------
+    // ファイル選択欄は毎回空にする
+    // --------------------------------------------------------
+
+    imageInput.value =
+        "";
+
+
+    // --------------------------------------------------------
+    // モーダル表示
+    // --------------------------------------------------------
 
     modal.classList.add(
         "show"
@@ -2107,47 +2444,6 @@ function closeProductModal() {
 }
 
 
-// ============================================================
-// ファイル → Data URL
-// ============================================================
-
-function fileToDataURL(file) {
-
-    return new Promise(
-        (resolve, reject) => {
-
-            const reader =
-                new FileReader();
-
-
-            reader.onload =
-                () => {
-
-                    resolve(
-                        reader.result
-                    );
-
-                };
-
-
-            reader.onerror =
-                () => {
-
-                    reject(
-                        reader.error
-                    );
-
-                };
-
-
-            reader.readAsDataURL(
-                file
-            );
-
-        }
-    );
-
-}
 
 
 // ============================================================
@@ -2199,7 +2495,287 @@ function addInventoryHistory(
 
 }
 
+// ============================================================
+// 商品複製
+// ============================================================
 
+async function duplicateProduct(
+    productId
+) {
+
+    if (!productId) {
+
+        return;
+
+    }
+
+
+    const product =
+        await getProduct(
+            productId
+        );
+
+
+    if (!product) {
+
+        alert(
+            "複製元の商品が見つかりません。"
+        );
+
+        return;
+
+    }
+
+
+    // --------------------------------------------------------
+    // 複製元の商品画像を取得
+    // --------------------------------------------------------
+
+    let imageRecord =
+        null;
+
+
+    try {
+
+        imageRecord =
+            await new Promise(
+                (resolve, reject) => {
+
+                    const transaction =
+                        db.transaction(
+                            "productImages",
+                            "readonly"
+                        );
+
+                    const store =
+                        transaction.objectStore(
+                            "productImages"
+                        );
+
+                    const request =
+                        store.get(
+                            productId
+                        );
+
+
+                    request.onsuccess =
+                        () => {
+
+                            resolve(
+                                request.result ||
+                                null
+                            );
+
+                        };
+
+
+                    request.onerror =
+                        () => {
+
+                            reject(
+                                request.error
+                            );
+
+                        };
+
+                }
+            );
+
+    } catch (error) {
+
+        console.error(
+            "商品画像取得エラー:",
+            error
+        );
+
+    }
+
+
+    // --------------------------------------------------------
+    // 新しい商品IDを作成
+    // --------------------------------------------------------
+
+    const newProductId =
+        createId();
+
+
+    const newProduct = {
+
+        id:
+            newProductId,
+
+        name:
+            product.name +
+            "（複製）",
+
+        price:
+            Number(
+                product.price || 0
+            ),
+
+        stock:
+            0,
+
+        reserved:
+            0,
+
+        parentCategory:
+            product.parentCategory ||
+            product.category ||
+            "",
+
+        subCategory:
+            product.subCategory ||
+            "",
+
+        category:
+            product.category ||
+            product.parentCategory ||
+            "",
+
+        updatedAt:
+            new Date().toISOString()
+
+    };
+
+
+    // --------------------------------------------------------
+    // 商品＋画像を保存
+    // --------------------------------------------------------
+
+    try {
+
+        await new Promise(
+            (resolve, reject) => {
+
+                const transaction =
+                    db.transaction(
+                        [
+                            "products",
+                            "productImages"
+                        ],
+                        "readwrite"
+                    );
+
+
+                const productStore =
+                    transaction.objectStore(
+                        "products"
+                    );
+
+
+                const imageStore =
+                    transaction.objectStore(
+                        "productImages"
+                    );
+
+
+                productStore.put(
+                    newProduct
+                );
+
+
+                if (
+                    imageRecord &&
+                    imageRecord.image
+                ) {
+
+                    imageStore.put({
+
+                        productId:
+                            newProductId,
+
+                        image:
+                            imageRecord.image,
+
+                        updatedAt:
+                            new Date().toISOString()
+
+                    });
+
+                }
+
+
+                transaction.oncomplete =
+                    () => {
+
+                        resolve();
+
+                    };
+
+
+                transaction.onerror =
+                    () => {
+
+                        reject(
+                            transaction.error
+                        );
+
+                    };
+
+
+                transaction.onabort =
+                    () => {
+
+                        reject(
+                            transaction.error ||
+                            new Error(
+                                "商品複製が中断されました。"
+                            )
+                        );
+
+                    };
+
+            }
+        );
+
+
+        // ----------------------------------------------------
+        // 複製した商品を編集状態で開く
+        // ----------------------------------------------------
+
+        closeProductModal();
+
+
+        await loadProducts();
+
+
+        await loadRegisterProducts();
+
+
+        await loadInventory();
+
+
+        await openProductModal(
+            newProductId
+        );
+
+
+        alert(
+            "商品を複製しました。\n\n" +
+            "名前と画像を変更して保存してください。"
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "商品複製エラー:",
+            error
+        );
+
+
+        alert(
+            "商品複製に失敗しました。\n\n" +
+            String(
+                error?.message ||
+                error
+            )
+        );
+
+    }
+
+}
 // ============================================================
 // 商品保存
 // ============================================================
@@ -2244,10 +2820,18 @@ async function saveProduct() {
         ).value;
 
 
+    // --------------------------------------------------------
+    // 画像
+    // --------------------------------------------------------
+
     const imageInput =
         document.getElementById(
             "product-image"
         );
+
+
+    const selectedImage =
+        imageInput?.files?.[0] || null;
 
 
     if (!name) {
@@ -2338,27 +2922,6 @@ async function saveProduct() {
 
 
     // --------------------------------------------------------
-    // 画像
-    // --------------------------------------------------------
-
-    let image =
-        oldProduct?.image || null;
-
-
-    if (
-        imageInput.files &&
-        imageInput.files.length > 0
-    ) {
-
-        image =
-            await fileToDataURL(
-                imageInput.files[0]
-            );
-
-    }
-
-
-    // --------------------------------------------------------
     // 商品データ
     // --------------------------------------------------------
 
@@ -2388,8 +2951,6 @@ async function saveProduct() {
         category:
             parentCategory,
 
-        image,
-
         updatedAt:
             new Date().toISOString()
 
@@ -2407,7 +2968,8 @@ async function saveProduct() {
                 db.transaction(
                     [
                         "products",
-                        "inventoryHistory"
+                        "inventoryHistory",
+                        "productImages"
                     ],
                     "readwrite"
                 );
@@ -2425,10 +2987,47 @@ async function saveProduct() {
                 );
 
 
+            const imageStore =
+                transaction.objectStore(
+                    "productImages"
+                );
+
+
+            // ------------------------------------------------
+            // 商品保存
+            // ------------------------------------------------
+
             productStore.put(
                 product
             );
 
+
+            // ------------------------------------------------
+            // 画像が選択されている場合
+            // 端末側の画像ストアに保存
+            // ------------------------------------------------
+
+            if (selectedImage) {
+
+                imageStore.put({
+
+                    productId:
+                        product.id,
+
+                    image:
+                        selectedImage,
+
+                    updatedAt:
+                        new Date().toISOString()
+
+                });
+
+            }
+
+
+            // ------------------------------------------------
+            // 在庫履歴
+            // ------------------------------------------------
 
             const oldStock =
                 oldProduct
@@ -2484,6 +3083,10 @@ async function saveProduct() {
             }
 
 
+            // ------------------------------------------------
+            // 保存完了
+            // ------------------------------------------------
+
             transaction.oncomplete =
                 async () => {
 
@@ -2519,6 +3122,12 @@ async function saveProduct() {
             transaction.onerror =
                 () => {
 
+                    console.error(
+                        "商品保存エラー:",
+                        transaction.error
+                    );
+
+
                     alert(
                         "商品保存に失敗しました。"
                     );
@@ -2547,8 +3156,6 @@ async function saveProduct() {
     );
 
 }
-
-
 // ============================================================
 // 商品一括登録
 // ============================================================
@@ -2776,9 +3383,25 @@ function addBulkProductRow(
             style="
                 display:flex;
                 justify-content:flex-end;
+                gap:10px;
                 margin-top:6px;
             "
         >
+
+            <button
+                type="button"
+                class="bulk-duplicate-row"
+                style="
+                    border:0;
+                    background:none;
+                    color:#1976d2;
+                    font-size:12px;
+                    cursor:pointer;
+                "
+            >
+                この行を複製
+            </button>
+
 
             <button
                 type="button"
@@ -2890,6 +3513,58 @@ function addBulkProductRow(
     );
 
 
+    // --------------------------------------------------------
+    // 行を複製
+    // --------------------------------------------------------
+
+    row.querySelector(
+        ".bulk-duplicate-row"
+    ).addEventListener(
+        "click",
+        () => {
+
+            const duplicateData = {
+
+                name:
+                    row.querySelector(
+                        ".bulk-product-name"
+                    ).value,
+
+                price:
+                    row.querySelector(
+                        ".bulk-product-price"
+                    ).value,
+
+                stock:
+                    row.querySelector(
+                        ".bulk-product-stock"
+                    ).value,
+
+                parentCategory:
+                    row.querySelector(
+                        ".bulk-product-parent"
+                    ).value,
+
+                subCategory:
+                    row.querySelector(
+                        ".bulk-product-sub"
+                    ).value
+
+            };
+
+
+            addBulkProductRow(
+                duplicateData
+            );
+
+        }
+    );
+
+
+    // --------------------------------------------------------
+    // 行を削除
+    // --------------------------------------------------------
+
     row.querySelector(
         ".bulk-delete-row"
     ).addEventListener(
@@ -2905,7 +3580,6 @@ function addBulkProductRow(
     updateSubCategories();
 
 }
-
 
 // ============================================================
 // 商品一括登録
@@ -3094,8 +3768,6 @@ async function saveBulkProducts() {
             category:
                 parentCategory,
 
-            image:
-                null,
 
             updatedAt:
                 new Date().toISOString()
@@ -3659,6 +4331,10 @@ async function loadReservations() {
 // 予約商品一覧
 // ============================================================
 
+// ============================================================
+// 予約商品一覧
+// ============================================================
+
 async function loadReservationProducts() {
 
     const container =
@@ -3666,130 +4342,269 @@ async function loadReservationProducts() {
             "reservation-product-list"
         );
 
+
     if (!container) {
+
         return;
+
     }
+
 
     try {
 
         const products =
             await getAllProducts();
 
-        container.innerHTML = "";
 
-        products.forEach(product => {
+        // ----------------------------------------------------
+        // 端末側に保存されている商品画像を取得
+        // ----------------------------------------------------
 
-            const sellable =
-                getSellableStock(product);
+        const imageRecords =
+            await new Promise(
+                (resolve, reject) => {
 
-            const selected =
-                reservationCart.find(
-                    item =>
-                        item.productId ===
-                        product.id
-                );
-
-            const card =
-                document.createElement("div");
-
-            card.className =
-                "reservation-product-card";
-
-            if (selected) {
-
-                card.classList.add(
-                    "selected"
-                );
-
-            }
-
-            card.innerHTML = `
-
-                <div class="
-                    reservation-product-image
-                ">
-
-                    ${
-                        product.image
-                            ? `
-                                <img
-                                    src="${product.image}"
-                                    alt="${escapeHTML(
-                                        product.name
-                                    )}"
-                                >
-                            `
-                            : `
-                                <span>📦</span>
-                            `
-                    }
-
-                </div>
-
-                <div class="
-                    reservation-product-info
-                ">
-
-                    <div class="
-                        reservation-product-name
-                    ">
-                        ${escapeHTML(
-                            product.name
-                        )}
-                    </div>
-
-                    <div class="
-                        reservation-product-price
-                    ">
-                        ${formatYen(
-                            product.price
-                        )}
-                    </div>
-
-                    <div class="
-                        reservation-product-stock
-                        ${
-                            sellable <= 0
-                                ? "stock-warning"
-                                : ""
-                        }
-                    ">
-
-                        ${
-                            sellable > 0
-                                ? `予約可能 ${sellable}個`
-                                : "予約不可"
-                        }
-
-                    </div>
-
-                </div>
-
-            `;
-
-            if (sellable > 0) {
-
-                card.addEventListener(
-                    "click",
-                    () => {
-
-                        addToReservationCart(
-                            product
+                    const transaction =
+                        db.transaction(
+                            "productImages",
+                            "readonly"
                         );
 
-                    }
-                );
 
-            } else {
+                    const store =
+                        transaction.objectStore(
+                            "productImages"
+                        );
 
-                card.style.opacity = "0.5";
-                card.style.cursor = "not-allowed";
+
+                    const request =
+                        store.getAll();
+
+
+                    request.onsuccess =
+                        () => {
+
+                            resolve(
+                                request.result || []
+                            );
+
+                        };
+
+
+                    request.onerror =
+                        () => {
+
+                            reject(
+                                request.error
+                            );
+
+                        };
+
+                }
+            );
+
+
+        const imageMap =
+            new Map();
+
+
+        imageRecords.forEach(
+            record => {
+
+                if (
+                    record &&
+                    record.productId &&
+                    record.image
+                ) {
+
+                    imageMap.set(
+                        record.productId,
+                        record.image
+                    );
+
+                }
 
             }
+        );
 
-            container.appendChild(card);
 
-        });
+        container.innerHTML = "";
+
+
+        products.forEach(
+            product => {
+
+                const sellable =
+                    getSellableStock(
+                        product
+                    );
+
+
+                const selected =
+                    reservationCart.find(
+                        item =>
+                            item.productId ===
+                            product.id
+                    );
+
+
+                const card =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                card.className =
+                    "reservation-product-card";
+
+
+                if (selected) {
+
+                    card.classList.add(
+                        "selected"
+                    );
+
+                }
+
+
+                card.innerHTML = `
+
+                    <div class="
+                        reservation-product-image
+                    ">
+                        <span>📦</span>
+                    </div>
+
+                    <div class="
+                        reservation-product-info
+                    ">
+
+                        <div class="
+                            reservation-product-name
+                        ">
+                            ${escapeHTML(
+                                product.name
+                            )}
+                        </div>
+
+                        <div class="
+                            reservation-product-price
+                        ">
+                            ${formatYen(
+                                product.price
+                            )}
+                        </div>
+
+                        <div class="
+                            reservation-product-stock
+                            ${
+                                sellable <= 0
+                                    ? "stock-warning"
+                                    : ""
+                            }
+                        ">
+
+                            ${
+                                sellable > 0
+                                    ? `予約可能 ${sellable}個`
+                                    : "予約不可"
+                            }
+
+                        </div>
+
+                    </div>
+
+                `;
+
+
+                // ------------------------------------------------
+                // 保存済み画像があれば表示
+                // ------------------------------------------------
+
+                const image =
+                    imageMap.get(
+                        product.id
+                    );
+
+
+                if (image) {
+
+                    const imageContainer =
+                        card.querySelector(
+                            ".reservation-product-image"
+                        );
+
+
+                    const imageURL =
+                        URL.createObjectURL(
+                            image
+                        );
+
+
+                    imageContainer.innerHTML = `
+                        <img
+                            src="${imageURL}"
+                            alt="${escapeHTML(
+                                product.name || ""
+                            )}"
+                        >
+                    `;
+
+
+                    const img =
+                        imageContainer.querySelector(
+                            "img"
+                        );
+
+
+                    img.onload = () => {
+
+                        URL.revokeObjectURL(
+                            imageURL
+                        );
+
+                    };
+
+                }
+
+
+                // ------------------------------------------------
+                // 予約可能
+                // ------------------------------------------------
+
+                if (
+                    sellable > 0
+                ) {
+
+                    card.addEventListener(
+                        "click",
+                        () => {
+
+                            addToReservationCart(
+                                product
+                            );
+
+                        }
+                    );
+
+                } else {
+
+                    card.style.opacity =
+                        "0.5";
+
+
+                    card.style.cursor =
+                        "not-allowed";
+
+                }
+
+
+                container.appendChild(
+                    card
+                );
+
+            }
+        );
 
     } catch (error) {
 
@@ -3801,7 +4616,6 @@ async function loadReservationProducts() {
     }
 
 }
-
 
 // ============================================================
 // 予約カート追加
@@ -5011,21 +5825,25 @@ async function loadRegisterProducts() {
     // 検索文字入力
     // ========================================================
 
-    searchInput.addEventListener(
-        "input",
-        () => {
+searchInput.addEventListener(
+    "keydown",
+    event => {
 
-            registerProductSearchText =
-                searchInput.value;
-
-
-            // 商品一覧だけ更新
-            // 検索欄自体は作り直さない
-            updateRegisterProductList();
-
+        if (
+            event.key !==
+            "Enter"
+        ) {
+            return;
         }
-    );
 
+        registerProductSearchText =
+            searchInput.value;
+
+        // Enterで確定したときだけ商品一覧を更新
+        updateRegisterProductList();
+
+    }
+);
 
     // ========================================================
     // 大カテゴリ
@@ -5367,78 +6185,72 @@ async function updateRegisterProductList() {
     // 販売可能数を計算
     // ========================================================
 
-    const registerProducts =
-        products
-            .map(
-                product => {
+   const registerProducts =
+    products
+        .map(
+            product => {
 
-                    let sellable = 0;
+                let sellable = 0;
 
 
-                    if (eventId) {
+                if (eventId) {
 
-                        const eventInventory =
-                            eventInventoryMap.get(
-                                String(
-                                    product.id
+                    const eventInventory =
+                        eventInventoryMap.get(
+                            String(
+                                product.id
+                            )
+                        );
+
+
+                    if (eventInventory) {
+
+                        const startQuantity =
+                            Math.max(
+                                0,
+                                Number(
+                                    eventInventory.quantity ||
+                                    0
                                 )
                             );
 
 
-                        if (eventInventory) {
+                        const soldQuantity =
+                            Math.max(
+                                0,
+                                Number(
+                                    eventInventory.soldQuantity ||
+                                    0
+                                )
+                            );
 
-                            const startQuantity =
-                                Math.max(
-                                    0,
-                                    Number(
-                                        eventInventory.quantity ||
-                                        0
-                                    )
-                                );
-
-
-                            const soldQuantity =
-                                Math.max(
-                                    0,
-                                    Number(
-                                        eventInventory.soldQuantity ||
-                                        0
-                                    )
-                                );
-
-
-                            sellable =
-                                Math.max(
-                                    0,
-                                    startQuantity -
-                                    soldQuantity
-                                );
-
-                        }
-
-                    } else {
 
                         sellable =
-                            getSellableStock(
-                                product
+                            Math.max(
+                                0,
+                                startQuantity -
+                                soldQuantity
                             );
 
                     }
 
+                } else {
 
-                    return {
-                        product,
-                        sellable
-                    };
+                    sellable =
+                        getSellableStock(
+                            product
+                        );
 
                 }
-            )
-            .filter(
-                item =>
-                    item.sellable > 0
-            );
 
 
+                return {
+                    product,
+                    sellable
+                };
+
+            }
+        );
     // ========================================================
     // 検索・カテゴリで絞り込み
     // ========================================================
@@ -5572,6 +6384,88 @@ async function updateRegisterProductList() {
 
 
     // ========================================================
+    // 端末側の商品画像を取得
+    // ========================================================
+
+    const imageRecords =
+        await new Promise(
+            (resolve, reject) => {
+
+                try {
+
+                    const transaction =
+                        db.transaction(
+                            "productImages",
+                            "readonly"
+                        );
+
+
+                    const store =
+                        transaction.objectStore(
+                            "productImages"
+                        );
+
+
+                    const request =
+                        store.getAll();
+
+
+                    request.onsuccess =
+                        () => {
+
+                            resolve(
+                                request.result || []
+                            );
+
+                        };
+
+
+                    request.onerror =
+                        () => {
+
+                            reject(
+                                request.error
+                            );
+
+                        };
+
+                } catch (error) {
+
+                    reject(error);
+
+                }
+
+            }
+        );
+
+
+    const imageMap =
+        new Map();
+
+
+    imageRecords.forEach(
+        record => {
+
+            if (
+                record &&
+                record.productId &&
+                record.image
+            ) {
+
+                imageMap.set(
+                    String(
+                        record.productId
+                    ),
+                    record.image
+                );
+
+            }
+
+        }
+    );
+
+
+    // ========================================================
     // 件数表示
     // ========================================================
 
@@ -5672,29 +6566,13 @@ async function updateRegisterProductList() {
 
             card.innerHTML = `
 
-                ${
-                    product.image
-
-                        ? `
-                            <img
-                                src="${product.image}"
-                                class="
-                                    register-product-image
-                                "
-                                alt="${escapeHTML(
-                                    product.name
-                                )}"
-                            >
-                        `
-
-                        : `
-                            <div
-                                class="
-                                    register-product-image
-                                "
-                            ></div>
-                        `
-                }
+                <div
+                    class="
+                        register-product-image
+                    "
+                >
+                    📦
+                </div>
 
 
                 <div class="
@@ -5732,16 +6610,118 @@ async function updateRegisterProductList() {
             `;
 
 
-            card.addEventListener(
-                "click",
-                () => {
+            // ------------------------------------------------
+            // 保存済み画像があれば表示
+            // ------------------------------------------------
 
-                    addToRegisterCart(
-                        product
+const image =
+    imageMap.get(
+        String(
+            product.id
+        )
+    );
+
+console.log(
+    "レジ商品:",
+    product.id,
+    product.name,
+    "画像:",
+    image
+);
+
+
+if (image) {
+
+                const imageContainer =
+                    card.querySelector(
+                        ".register-product-image"
                     );
 
-                }
+
+                const imageURL =
+                    URL.createObjectURL(
+                        image
+                    );
+
+
+                imageContainer.innerHTML = `
+                    <img
+                        src="${imageURL}"
+                        alt="${escapeHTML(
+                            product.name || ""
+                        )}"
+                    >
+                `;
+
+
+                const img =
+                    imageContainer.querySelector(
+                        "img"
+                    );
+
+
+                img.onload = () => {
+
+                    URL.revokeObjectURL(
+                        imageURL
+                    );
+
+                };
+
+            }
+            // ------------------------------------------------
+// 売り切れ表示
+// ------------------------------------------------
+
+if (sellable <= 0) {
+
+    const imageContainer =
+        card.querySelector(
+            ".register-product-image"
+        );
+
+    imageContainer.classList.add(
+        "sold-out"
+    );
+
+    imageContainer.insertAdjacentHTML(
+        "beforeend",
+        `
+            <div class="register-sold-out">
+                売り切れ
+            </div>
+        `
+    );
+
+}
+
+
+            // ------------------------------------------------
+            // 商品クリック
+            // ------------------------------------------------
+
+           if (sellable > 0) {
+
+    card.addEventListener(
+        "click",
+        () => {
+
+            addToRegisterCart(
+                product
             );
+
+        }
+    );
+
+} else {
+
+    card.style.opacity =
+        "0.7";
+
+    card.style.cursor =
+        "not-allowed";
+
+}
 
 
             productArea.appendChild(
@@ -9682,7 +10662,24 @@ function setupEventListeners() {
             "click",
             deleteProduct
         );
+    // --------------------------------------------------------
+    // 商品複製
+    // --------------------------------------------------------
 
+    document
+        .getElementById(
+            "duplicate-product"
+        )
+        ?.addEventListener(
+            "click",
+            () => {
+
+                duplicateProduct(
+                    currentProductId
+                );
+
+            }
+        );
 
     // --------------------------------------------------------
     // 商品キャンセル
@@ -9731,25 +10728,133 @@ function setupEventListeners() {
                 }
 
 
-                const image =
-                    await fileToDataURL(
-                        file
-                    );
+            // --------------------------------------------------------
+// 商品画像
+// ※画像はDBには保存せず、一時プレビューのみ
+// --------------------------------------------------------
+
+document
+    .getElementById(
+        "product-image"
+    )
+    ?.addEventListener(
+        "change",
+        event => {
+
+            const file =
+                event.target.files?.[0];
+
+            if (!file) {
+                return;
+            }
+
+            const preview =
+                document.getElementById(
+                    "image-preview"
+                );
+
+            if (!preview) {
+                return;
+            }
+
+            const imageUrl =
+                URL.createObjectURL(file);
+
+            preview.innerHTML = `
+                <img
+                    src="${imageUrl}"
+                    alt="商品画像プレビュー"
+                >
+            `;
+
+            // 画像読み込み後に一時URLを解放
+            const img =
+                preview.querySelector("img");
+
+            img.onload = () => {
+                URL.revokeObjectURL(
+                    imageUrl
+                );
+            };
+
+        }
+    );
 
 
-                const preview =
-                    document.getElementById(
-                        "image-preview"
-                    );
+// --------------------------------------------------------
+// 商品画像選択
+// --------------------------------------------------------
+
+document
+    .getElementById(
+        "product-image"
+    )
+    ?.addEventListener(
+        "change",
+        event => {
+
+            const file =
+                event.target.files?.[0];
 
 
-                if (preview) {
+            if (!file) {
 
-                    preview.innerHTML = `
-                        <img src="${image}">
-                    `;
+                return;
 
-                }
+            }
+
+
+            const preview =
+                document.getElementById(
+                    "image-preview"
+                );
+
+
+            if (!preview) {
+
+                return;
+
+            }
+
+
+            // ------------------------------------------------
+            // 選択した画像を一時表示
+            // ------------------------------------------------
+
+            const imageUrl =
+                URL.createObjectURL(
+                    file
+                );
+
+
+            preview.innerHTML = `
+                <img
+                    src="${imageUrl}"
+                    alt="商品画像プレビュー"
+                >
+            `;
+
+
+            // ------------------------------------------------
+            // 画像読み込み後に一時URLを解放
+            // ------------------------------------------------
+
+            const img =
+                preview.querySelector(
+                    "img"
+                );
+
+
+            img.onload = () => {
+
+                URL.revokeObjectURL(
+                    imageUrl
+                );
+
+            };
+
+        }
+    );
 
             }
         );
@@ -9801,6 +10906,8 @@ function setupEventListeners() {
             "click",
             closeReservationModal
         );
+
+
 
 
     document
@@ -15874,3 +16981,30 @@ if (
     setupBackupButtons();
 
 }
+
+// ============================================================
+// 商品検索
+// ============================================================
+
+document
+    .getElementById(
+        "product-search"
+    )
+    ?.addEventListener(
+        "keydown",
+        event => {
+
+            if (
+                event.key !==
+                "Enter"
+            ) {
+                return;
+            }
+
+            productSearchText =
+                event.target.value;
+
+            loadProducts();
+
+        }
+    );
