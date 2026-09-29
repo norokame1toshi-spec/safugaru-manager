@@ -1572,3 +1572,10 @@ main {
     cursor: pointer;
     margin-top: 8px;
 }
+
+#product-price,
+#product-stock,
+.bulk-product-price,
+.bulk-product-stock {
+    touch-action: manipulation;
+}
