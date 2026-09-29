@@ -6560,8 +6560,11 @@ async function updateRegisterProductList() {
                 );
 
 
-            card.className =
-                "register-product-card";
+card.className =
+    "register-product-card";
+
+card.style.touchAction =
+    "manipulation";
 
 
             card.innerHTML = `
