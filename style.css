@@ -1485,3 +1485,24 @@ main {
         text-align: center;
     }
 }
+/* =========================================
+   スマホ：レジの商品画像を小さくする
+========================================= */
+
+@media (max-width: 600px) {
+
+    .register-product-image {
+        width: 55px !important;
+        height: 55px !important;
+        aspect-ratio: 1 / 1 !important;
+        margin: 5px auto 0;
+        overflow: hidden;
+    }
+
+    .register-product-image img {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover !important;
+    }
+
+}
