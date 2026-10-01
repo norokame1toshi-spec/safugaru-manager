@@ -463,1043 +463,508 @@ main {
 }
 
 
-/* =========================
+/* =========================================================
    予約一覧
-========================= */
+========================================================= */
 
 .reservation-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
 .reservation-card {
-  border: 1px solid #eee;
-  border-radius: 12px;
-  padding: 15px;
-  background: white;
+    border: 1px solid #eee;
+    border-radius: 12px;
+    padding: 15px;
+    background: white;
 }
 
 .reservation-card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
 }
 
 .reservation-name {
-  font-size: 17px;
-  font-weight: bold;
+    font-size: 17px;
+    font-weight: bold;
 }
 
 .reservation-status {
-  font-size: 12px;
-  padding: 5px 9px;
-  border-radius: 20px;
-  background: #fff0df;
-  color: #d66d00;
+    font-size: 12px;
+    padding: 5px 9px;
+    border-radius: 20px;
+    background: #fff0df;
+    color: #d66d00;
 }
 
 .reservation-status.received {
-  background: #e8f5e9;
-  color: #2e7d32;
+    background: #e8f5e9;
+    color: #2e7d32;
 }
 
 .reservation-items {
-  margin-top: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  font-size: 14px;
+    margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    font-size: 14px;
 }
 
 .reservation-total-row {
-  margin-top: 12px;
-  padding-top: 10px;
-  border-top: 1px solid #eee;
-
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .reservation-total-price {
-  font-size: 18px;
-  font-weight: bold;
+    font-size: 18px;
+    font-weight: bold;
 }
 
 .reservation-receive-button {
-  margin-top: 12px;
-  width: 100%;
-  padding: 10px;
-
-  border: none;
-  border-radius: 8px;
-
-  background: #f28c28;
-  color: white;
-
-  cursor: pointer;
-}
-
-
-/* =========================
-   予約商品選択
-========================= */
-
-.reservation-product-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-
-  max-height: 400px;
-  overflow-y: auto;
-
-  padding: 3px;
-}
-
-.reservation-product-card {
-  border: 2px solid #eee;
-  border-radius: 10px;
-  overflow: hidden;
-  background: white;
-  cursor: pointer;
-}
-
-.reservation-product-card.selected {
-  border-color: #f28c28;
-  background: #fff7ef;
-}
-
-.reservation-product-image {
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  background: #f3f3f3;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  font-size: 30px;
-}
-
-.reservation-product-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.reservation-product-info {
-  padding: 8px;
-}
-
-.reservation-product-name {
-  font-size: 13px;
-  font-weight: bold;
-}
-
-.reservation-product-price {
-  margin-top: 3px;
-  font-size: 13px;
-  color: #777;
-}
-
-.reservation-product-stock {
-  margin-top: 3px;
-  font-size: 11px;
-  color: #999;
-}
-
-
-/* =========================
-   予約カート
-========================= */
-
-.reservation-cart-area {
-  margin-top: 20px;
-  padding: 15px;
-
-  border-radius: 10px;
-  background: #f8f8f8;
-}
-
-.reservation-cart-area h3 {
-  margin: 0 0 10px;
-  font-size: 15px;
-}
-
-.reservation-cart {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.reservation-cart-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-
-  padding: 8px 0;
-  border-bottom: 1px solid #ddd;
-}
-
-.reservation-cart-item-name {
-  flex: 1;
-  font-size: 13px;
-}
-
-.reservation-quantity-controls {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-}
-
-.reservation-quantity-button {
-  width: 28px;
-  height: 28px;
-
-  border: 1px solid #ddd;
-  background: white;
-
-  border-radius: 6px;
-
-  cursor: pointer;
-}
-
-.reservation-quantity {
-  min-width: 20px;
-  text-align: center;
-}
-
-.reservation-total {
-  margin-top: 15px;
-  padding-top: 12px;
-
-  border-top: 2px solid #ddd;
-
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.reservation-total strong {
-  font-size: 21px;
-}
-
-
-/* =========================
-   在庫表示
-========================= */
-
-.stock-warning {
-  color: #d32f2f !important;
-  font-weight: bold;
+    margin-top: 12px;
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    background: #f28c28;
+    color: white;
+    cursor: pointer;
 }
 
 
 /* =========================================================
-   レジ
+   予約商品選択
 ========================================================= */
+
+.reservation-product-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    max-height: 400px;
+    overflow-y: auto;
+    padding: 3px;
+}
+
+.reservation-product-card {
+    border: 2px solid #eee;
+    border-radius: 10px;
+    overflow: hidden;
+    background: white;
+    cursor: pointer;
+}
+
+.reservation-product-card.selected {
+    border-color: #f28c28;
+    background: #fff7ef;
+}
+
+.reservation-product-image {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    background: #f3f3f3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+}
+
+.reservation-product-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.reservation-product-info {
+    padding: 8px;
+}
+
+.reservation-product-name {
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.reservation-product-price {
+    margin-top: 3px;
+    font-size: 13px;
+    color: #777;
+}
+
+.reservation-product-stock {
+    margin-top: 3px;
+    font-size: 11px;
+    color: #999;
+}
+
+
+/* =========================================================
+   予約カート
+========================================================= */
+
+.reservation-cart-area {
+    margin-top: 20px;
+    padding: 15px;
+    border-radius: 10px;
+    background: #f8f8f8;
+}
+
+.reservation-cart-area h3 {
+    margin: 0 0 10px;
+    font-size: 15px;
+}
+
+.reservation-cart {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.reservation-cart-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 8px 0;
+    border-bottom: 1px solid #ddd;
+}
+
+.reservation-cart-item-name {
+    flex: 1;
+    font-size: 13px;
+}
+
+.reservation-quantity-controls {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.reservation-quantity-button {
+    width: 28px;
+    height: 28px;
+    border: 1px solid #ddd;
+    background: white;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.reservation-quantity {
+    min-width: 20px;
+    text-align: center;
+}
+
+.reservation-total {
+    margin-top: 15px;
+    padding-top: 12px;
+    border-top: 2px solid #ddd;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.reservation-total strong {
+    font-size: 21px;
+}
+
+
+/* =========================================================
+   共通設定
+========================================================= */
+
+.stock-warning {
+    color: #d32f2f !important;
+    font-weight: bold;
+}
 
 #register-section,
 #inventory-section,
 #history-section {
-  width: 100%;
+    width: 100%;
 }
 
 
-/* =========================
-   レイアウト
-========================= */
+/* =========================================================
+   レジ：PCレイアウト
+========================================================= */
 
 .register-layout {
-  display: grid;
-
-  grid-template-columns:
-    minmax(0, 1fr)
-    360px;
-
-  gap: 20px;
-
-  align-items: start;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 360px;
+    gap: 20px;
+    align-items: start;
 }
 
-
-/* =========================
-   商品一覧
-========================= */
-
-.register-products-area {
-  background: white;
-
-  border-radius: 16px;
-
-  padding: 20px;
-
-  box-shadow:
-    0 2px 10px rgba(0, 0, 0, 0.06);
+.register-products-area,
+.register-cart-area {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
 }
 
-.register-products-area h3 {
-  margin-top: 0;
-  margin-bottom: 15px;
+.register-products-area h3,
+.register-cart-area h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
 }
-
-
-/* =========================
-   レジ商品グリッド
-========================= */
 
 .register-product-list {
-  display: grid;
-
-  grid-template-columns:
-    repeat(auto-fill, minmax(140px, 1fr));
-
-  gap: 12px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 12px;
 }
 
-
-/* =========================
-   レジ商品カード
-========================= */
-
 .register-product-card {
-  border: 2px solid #eee;
-
-  border-radius: 12px;
-
-  background: white;
-
-  overflow: hidden;
-
-  cursor: pointer;
-
-  transition:
-    transform 0.12s ease,
-    border-color 0.12s ease,
-    box-shadow 0.12s ease;
+    border: 2px solid #eee;
+    border-radius: 12px;
+    background: white;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease;
+    touch-action: manipulation;
+    -webkit-user-select: none;
+    user-select: none;
 }
 
 .register-product-card:hover {
-  border-color: #f28c28;
-
-  box-shadow:
-    0 3px 10px rgba(0, 0, 0, 0.08);
+    border-color: #f28c28;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
 }
 
 .register-product-card:active {
-  transform: scale(0.97);
-}
-
-
-/* 商品画像 */
-
-.register-product-image {
-
-    width: 100%;
-
-    aspect-ratio: 1 / 1;
-
-    object-fit: cover;
-
-    display: block;
-
-    background: #f1f1f1;
-
-}
-
-.register-product-image img {
-
-    width: 100%;
-
-    height: 100%;
-
-    object-fit: cover;
-
-    display: block;
-
+    transform: scale(0.97);
 }
 
 .register-product-image {
     position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    background: #f1f1f1;
+    overflow: hidden;
+}
+
+.register-product-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
 }
 
 .register-sold-out {
     position: absolute;
-
     top: 50%;
     left: 50%;
-
-    transform:
-        translate(-50%, -50%);
-
-    background: rgba(
-        0,
-        0,
-        0,
-        0.7
-    );
-
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.7);
     color: #fff;
-
     font-size: 24px;
-
     font-weight: bold;
-
-    padding:
-        10px 20px;
-
+    padding: 10px 20px;
     border-radius: 8px;
-
     white-space: nowrap;
-
     pointer-events: none;
 }
 
-/* 商品情報 */
-
 .register-product-info {
-  padding: 9px;
+    padding: 9px;
 }
 
 .register-product-name {
-  font-size: 13px;
-
-  font-weight: bold;
-
-  line-height: 1.4;
-
-  min-height: 36px;
+    font-size: 13px;
+    font-weight: bold;
+    line-height: 1.4;
+    min-height: 36px;
 }
 
 .register-product-price {
-  margin-top: 5px;
-
-  font-size: 16px;
-
-  font-weight: bold;
-
-  color: #e87500;
+    margin-top: 5px;
+    font-size: 16px;
+    font-weight: bold;
+    color: #e87500;
 }
 
 .register-product-stock {
-  margin-top: 5px;
-
-  font-size: 11px;
-
-  color: #777;
+    margin-top: 5px;
+    font-size: 11px;
+    color: #777;
 }
 
 .register-product-stock.sold-out {
-  color: #d32f2f;
-
-  font-weight: bold;
+    color: #d32f2f;
+    font-weight: bold;
 }
 
 
-/* =========================
-   会計エリア
-========================= */
-
-.register-cart-area {
-  background: white;
-
-  border-radius: 16px;
-
-  padding: 20px;
-
-  box-shadow:
-    0 2px 10px rgba(0, 0, 0, 0.06);
-}
-
-.register-cart-area h3 {
-  margin-top: 0;
-
-  margin-bottom: 15px;
-}
-
-
-/* =========================
-   カート
-========================= */
+/* =========================================================
+   レジ：カート
+========================================================= */
 
 .register-cart {
-  min-height: 150px;
-
-  border: 1px solid #eee;
-
-  border-radius: 10px;
-
-  padding: 10px;
-
-  margin-bottom: 15px;
+    min-height: 150px;
+    border: 1px solid #eee;
+    border-radius: 10px;
+    padding: 10px;
+    margin-bottom: 15px;
 }
 
 .empty-cart {
-  margin: 0;
-
-  min-height: 130px;
-
-  display: flex;
-
-  align-items: center;
-
-  justify-content: center;
-
-  text-align: center;
-
-  color: #999;
-
-  font-size: 14px;
+    margin: 0;
+    min-height: 130px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: #999;
+    font-size: 14px;
 }
 
-
-/* =========================
-   カート商品
-========================= */
-
 .register-cart-item {
-  display: grid;
-
-  grid-template-columns:
-    minmax(0, 1fr)
-    auto;
-
-  gap: 10px;
-
-  padding: 12px 4px;
-
-  border-bottom: 1px solid #eee;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px;
+    padding: 12px 4px;
+    border-bottom: 1px solid #eee;
 }
 
 .register-cart-item:last-child {
-  border-bottom: none;
+    border-bottom: none;
 }
 
 .register-cart-item-name {
-  font-size: 14px;
-
-  font-weight: bold;
-
-  line-height: 1.4;
+    font-size: 14px;
+    font-weight: bold;
+    line-height: 1.4;
 }
 
 .register-cart-item-price {
-  margin-top: 3px;
-
-  font-size: 12px;
-
-  color: #777;
+    margin-top: 3px;
+    font-size: 12px;
+    color: #777;
 }
 
-
-/* =========================
-   数量ボタン
-========================= */
-
 .register-cart-controls {
-  display: flex;
-
-  align-items: center;
-
-  gap: 7px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
 }
 
 .register-cart-controls button {
-  width: 32px;
-
-  height: 32px;
-
-  padding: 0;
-
-  border: 1px solid #ddd;
-
-  border-radius: 7px;
-
-  background: #f7f7f7;
-
-  cursor: pointer;
-
-  font-size: 18px;
-
-  line-height: 1;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: 1px solid #ddd;
+    border-radius: 7px;
+    background: #f7f7f7;
+    cursor: pointer;
+    font-size: 18px;
+    line-height: 1;
 }
 
 .register-cart-controls button:hover {
-  background: #fff3e7;
-
-  border-color: #f28c28;
+    background: #fff3e7;
+    border-color: #f28c28;
 }
 
 .register-cart-quantity {
-  min-width: 24px;
-
-  text-align: center;
-
-  font-weight: bold;
+    min-width: 24px;
+    text-align: center;
+    font-weight: bold;
 }
 
 
-/* =========================
-   合計
-========================= */
+/* =========================================================
+   レジ：合計・会計
+========================================================= */
 
 .register-total-row {
-  display: flex;
-
-  justify-content: space-between;
-
-  align-items: center;
-
-  padding: 14px 0;
-
-  border-top: 2px solid #333;
-
-  font-size: 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 0;
+    border-top: 2px solid #333;
+    font-size: 18px;
 }
 
 .register-total-row strong {
-  font-size: 26px;
+    font-size: 26px;
 }
 
-
-/* =========================
-   預かり金
-========================= */
-
 .cash-input-area {
-  margin-top: 10px;
+    margin-top: 10px;
 }
 
 .cash-input-area label {
-  display: block;
-
-  margin-bottom: 7px;
-
-  font-size: 13px;
-
-  font-weight: bold;
+    display: block;
+    margin-bottom: 7px;
+    font-size: 13px;
+    font-weight: bold;
 }
 
 .cash-input-area input {
-  width: 100%;
-
-  padding: 13px;
-
-  border: 2px solid #ddd;
-
-  border-radius: 10px;
-
-  font-size: 22px;
-
-  font-weight: bold;
-
-  text-align: right;
-
-  background: white;
+    width: 100%;
+    padding: 13px;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    font-size: 22px;
+    font-weight: bold;
+    text-align: right;
+    background: white;
+    box-sizing: border-box;
 }
 
 .cash-input-area input:focus {
-  outline: none;
-
-  border-color: #f28c28;
+    outline: none;
+    border-color: #f28c28;
 }
 
-
-/* =========================
-   お釣り
-========================= */
-
 .register-change-row {
-  display: flex;
-
-  justify-content: space-between;
-
-  align-items: center;
-
-  padding: 14px 0;
-
-  font-size: 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 0;
+    font-size: 18px;
 }
 
 .register-change-row strong {
-  font-size: 25px;
+    font-size: 25px;
 }
 
-
-/* =========================
-   販売確定
-========================= */
-
 .complete-sale-button {
-  width: 100%;
-
-  padding: 16px;
-
-  border: none;
-
-  border-radius: 12px;
-
-  background: #f28c28;
-
-  color: white;
-
-  font-size: 18px;
-
-  font-weight: bold;
-
-  cursor: pointer;
+    width: 100%;
+    padding: 16px;
+    border: none;
+    border-radius: 12px;
+    background: #f28c28;
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
 }
 
 .complete-sale-button:hover:not(:disabled) {
-  background: #df7917;
+    background: #df7917;
 }
 
 .complete-sale-button:active:not(:disabled) {
-  transform: scale(0.98);
+    transform: scale(0.98);
 }
 
 .complete-sale-button:disabled {
-  background: #ccc;
-
-  color: #888;
-
-  cursor: not-allowed;
+    background: #ccc;
+    color: #888;
+    cursor: not-allowed;
 }
 
 
-/* =========================
-   在庫・履歴の仮表示領域
-========================= */
-
-#inventory-list,
-#history-list {
-  background: white;
-
-  border-radius: 16px;
-
-  padding: 20px;
-
-  box-shadow:
-    0 2px 10px rgba(0, 0, 0, 0.06);
-}
-
-
-/* =====================================================
-   レジ：スマホ
-===================================================== */
-
-@media (max-width: 700px) {
-
-  .register-layout {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-
-  .register-products-area,
-  .register-cart-area {
-    padding: 15px;
-  }
-    /* レジを一番上に */
-  .register-cart-area {
-    order: -1;
-  }
-
-  .register-products-area {
-    order: 0;
-  }
-
-
-  /* =====================================================
-     レジ商品一覧：2列
-  ===================================================== */
-
-  .register-product-list {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
-    width: 100%;
-  }
-
-
-  /* =====================================================
-     レジ商品カード
-  ===================================================== */
-
-  .register-product-card {
-    width: 100%;
-  }
-
-
-  /* =====================================================
-     レジ商品画像
-     正方形・コンパクト
-  ===================================================== */
-
-  .register-product-image {
-    width: 100%;
-    aspect-ratio: 1 / 1;
-    height: auto;
-    object-fit: cover;
-    display: block;
-    background: #f1f1f1;
-  }
-
-
-  /* =====================================================
-     商品情報
-  ===================================================== */
-
-  .register-product-info {
-    padding: 5px;
-  }
-
-  .register-product-name {
-    font-size: 11px;
-    line-height: 1.3;
-    min-height: 29px;
-  }
-
-  .register-product-price {
-    margin-top: 3px;
-    font-size: 14px;
-  }
-
-  .register-product-stock {
-    margin-top: 3px;
-    font-size: 10px;
-  }
-
-
-  /* =====================================================
-     カート
-  ===================================================== */
-
-  .register-cart-area {
-    margin-top: 0;
-  }
-
-  .register-total-row strong {
-    font-size: 24px;
-  }
-
-  .register-change-row strong {
-    font-size: 23px;
-  }
-
-  .complete-sale-button {
-    padding: 17px;
-    font-size: 18px;
-  }
-
-}
-
-
-/* =====================================================
-   さらに小さいスマホ
-===================================================== */
-
-@media (max-width: 380px) {
-
-  main {
-    padding: 8px;
-  }
-
-  .register-product-list {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 6px;
-  }
-
-  .register-product-card {
-    width: 100%;
-  }
-
-  .register-product-image {
-    width: 100%;
-    aspect-ratio: 1 / 1;
-    height: auto;
-    object-fit: cover;
-  }
-
-  .register-product-info {
-    padding: 4px;
-  }
-
-  .register-product-name {
-    font-size: 10px;
-    min-height: 26px;
-  }
-
-  .register-product-price {
-    font-size: 13px;
-  }
-
-  .register-cart-controls button {
-    width: 29px;
-    height: 29px;
-  }
-
-}
-
-/* =====================================================
-   在庫管理：スマホ対応
-===================================================== */
-
-@media (max-width: 700px) {
-
-  /* 在庫一覧全体 */
-  #inventory-section {
-    width: 100%;
-    max-width: 100%;
-    min-width: 0;
-    overflow-x: hidden;
-  }
-
-  #inventory-list {
-    width: 100%;
-    max-width: 100%;
-    min-width: 0;
-    padding: 10px;
-    overflow-x: hidden;
-    box-sizing: border-box;
-  }
-
-
-  /* =================================================
-     在庫1商品
-  ================================================= */
-
-  #inventory-list .inventory-item {
-    width: 100%;
-    max-width: 100%;
-    min-width: 0;
-    box-sizing: border-box;
-    overflow: hidden;
-
-    grid-template-columns:
-      minmax(0, 1fr)
-      52px
-      52px
-      60px
-      78px !important;
-
-    gap: 5px !important;
-
-    padding: 10px 4px !important;
-  }
-
-
-  /* =================================================
-     商品名・カテゴリ
-  ================================================= */
-
-  #inventory-list .inventory-item > div:first-child {
-    min-width: 0;
-    max-width: 100%;
-    overflow: hidden;
-  }
-
-  #inventory-list .inventory-item > div:first-child > div:first-child {
-    min-width: 0;
-    max-width: 100%;
-
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-
-    font-size: 13px;
-  }
-
-  #inventory-list .inventory-item > div:first-child > div:nth-child(2) {
-    min-width: 0;
-    max-width: 100%;
-
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-
-  /* =================================================
-     在庫・予約・販売可能
-  ================================================= */
-
-  #inventory-list .inventory-item > div:not(:first-child) {
-    min-width: 0;
-    text-align: center;
-  }
-
-  #inventory-list .inventory-item small {
-    font-size: 9px !important;
-  }
-
-  #inventory-list .inventory-item strong {
-    font-size: 15px;
-  }
-
-
-  /* =================================================
-     在庫修正ボタン
-  ================================================= */
-
-  #inventory-list .inventory-adjust-button {
-    width: 78px;
-    min-width: 0;
-    max-width: 100%;
-
-    padding: 8px 4px !important;
-
-    font-size: 11px;
-    white-space: nowrap;
-
-    box-sizing: border-box;
-  }
-
-}
-
-
-/* =====================================================
-   さらに小さいスマホ
-===================================================== */
-
-@media (max-width: 380px) {
-
-  #inventory-list {
-    padding: 6px;
-  }
-
-  #inventory-list .inventory-item {
-    grid-template-columns:
-      minmax(0, 1fr)
-      48px
-      48px
-      55px
-      72px !important;
-
-    gap: 4px !important;
-
-    padding: 9px 2px !important;
-  }
-
-  #inventory-list .inventory-item > div:first-child > div:first-child {
-    font-size: 12px;
-  }
-
-  #inventory-list .inventory-item strong {
-    font-size: 14px;
-  }
-
-  #inventory-list .inventory-adjust-button {
-    width: 72px;
-    font-size: 10px;
-  }
-
-}
-/* =====================================================
-   預かり金 加算ボタン
-===================================================== */
+/* =========================================================
+   預かり金：加算ボタン
+========================================================= */
 
 .cash-quick-buttons {
     display: grid;
@@ -1525,12 +990,6 @@ main {
     background: #f5f5f5;
 }
 
-@media (max-width: 380px) {
-    .cash-quick-button {
-        min-height: 38px;
-        font-size: 13px;
-    }
-}
 .cash-clear-button {
     width: 100%;
     min-height: 40px;
@@ -1549,6 +1008,11 @@ main {
     transform: scale(0.98);
     background: #e9e9e9;
 }
+
+
+/* =========================================================
+   ボタン類
+========================================================= */
 
 .danger-button {
     background: #d9534f;
@@ -1573,7 +1037,10 @@ main {
     margin-top: 8px;
 }
 
-/* 商品編集・一括登録の入力欄 */
+
+/* =========================================================
+   商品編集・一括登録
+========================================================= */
 
 #product-price,
 #product-stock,
@@ -1583,24 +1050,171 @@ main {
 }
 
 
-/* レジの商品ボタン */
+/* =========================================================
+   在庫・履歴表示
+========================================================= */
 
-.register-product-card {
-    touch-action: manipulation;
-    -webkit-user-select: none;
-    user-select: none;
+#inventory-list,
+#history-list {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+    box-sizing: border-box;
 }
-/* =========================================
-   iPhone縦画面：レジ・在庫 共通デザイン
-========================================= */
+
+
+/* =========================================================
+   在庫管理：PC表示
+========================================================= */
+
+.inventory-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.inventory-item {
+    display: grid;
+    grid-template-columns: 80px minmax(0, 1fr) 80px 80px 90px auto;
+    gap: 12px;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    background: white;
+}
+
+.inventory-product-image {
+    width: 80px;
+    height: 80px;
+    aspect-ratio: 1 / 1;
+    flex-shrink: 0;
+    overflow: hidden;
+    background: #f1f1f1;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    box-sizing: border-box;
+}
+
+.inventory-product-image img {
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.inventory-product-name {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.inventory-product-counts {
+    display: contents;
+}
+
+.inventory-product-counts > div {
+    text-align: center;
+}
+
+.inventory-product-counts small {
+    display: block;
+}
+
+.inventory-adjust-button {
+    cursor: pointer;
+}
+
+
+/* =========================================================
+   スマホ共通：レジ
+========================================================= */
+
+@media (max-width: 700px) {
+
+    .register-layout {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .register-products-area,
+    .register-cart-area {
+        padding: 15px;
+    }
+
+    .register-cart-area {
+        order: -1;
+        margin-top: 0;
+    }
+
+    .register-products-area {
+        order: 0;
+    }
+
+    .register-product-list {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+        width: 100%;
+    }
+
+    .register-product-card {
+        width: 100%;
+    }
+
+    .register-product-image {
+        width: 100%;
+        aspect-ratio: 1 / 1;
+    }
+
+    .register-product-info {
+        padding: 5px;
+    }
+
+    .register-product-name {
+        font-size: 11px;
+        line-height: 1.3;
+        min-height: 29px;
+    }
+
+    .register-product-price {
+        margin-top: 3px;
+        font-size: 14px;
+    }
+
+    .register-product-stock {
+        margin-top: 3px;
+        font-size: 10px;
+    }
+
+    .register-total-row strong {
+        font-size: 24px;
+    }
+
+    .register-change-row strong {
+        font-size: 23px;
+    }
+
+    .complete-sale-button {
+        padding: 17px;
+        font-size: 18px;
+    }
+}
+
+
+/* =========================================================
+   iPhone縦画面：レジ・在庫
+========================================================= */
 
 @media (max-width: 600px) {
 
-    /* レジ商品 */
-
+    /* レジ：4列 */
     .register-product-list {
-        grid-template-columns:
-            repeat(4, minmax(0, 1fr));
+        grid-template-columns: repeat(4, minmax(0, 1fr));
         gap: 6px;
     }
 
@@ -1611,7 +1225,6 @@ main {
     .register-product-card {
         border-width: 1px;
         border-radius: 8px;
-        touch-action: manipulation;
     }
 
     .register-product-info {
@@ -1643,12 +1256,26 @@ main {
         padding: 5px 7px;
     }
 
-    /* 在庫商品 */
+
+    /* 在庫：4列 */
+    #inventory-section {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        overflow-x: hidden;
+    }
+
+    #inventory-list {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        padding: 10px;
+        overflow-x: hidden;
+    }
 
     .inventory-list {
         display: grid;
-        grid-template-columns:
-            repeat(4, minmax(0, 1fr));
+        grid-template-columns: repeat(4, minmax(0, 1fr));
         gap: 6px;
     }
 
@@ -1661,23 +1288,24 @@ main {
         border: 1px solid #eee;
         border-radius: 8px;
         min-width: 0;
+        overflow: hidden;
+        box-sizing: border-box;
     }
 
     .inventory-product-image {
         width: 100%;
+        height: auto;
         aspect-ratio: 1 / 1;
-        background: #f1f1f1;
-        border-radius: 5px;
-        overflow: hidden;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        max-height: none;
         font-size: 24px;
+        border-radius: 5px;
     }
 
     .inventory-product-image img {
         width: 100%;
         height: 100%;
+        max-width: 100%;
+        max-height: 100%;
         object-fit: cover;
     }
 
@@ -1729,9 +1357,8 @@ main {
         font-size: 10px;
         white-space: nowrap;
         touch-action: manipulation;
+        box-sizing: border-box;
     }
-
-    /* 在庫集計 */
 
     .inventory-summary {
         gap: 5px;
@@ -1747,5 +1374,74 @@ main {
 
     .inventory-summary-card strong {
         font-size: 16px;
+    }
+}
+
+
+/* =========================================================
+   小さいスマホ
+========================================================= */
+
+@media (max-width: 380px) {
+
+    main {
+        padding: 8px;
+    }
+
+    .register-product-list {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 6px;
+    }
+
+    .register-product-info {
+        padding: 4px;
+    }
+
+    .register-product-name {
+        font-size: 10px;
+        min-height: 26px;
+    }
+
+    .register-product-price {
+        font-size: 13px;
+    }
+
+    .register-cart-controls button {
+        width: 29px;
+        height: 29px;
+    }
+
+    .cash-quick-button {
+        min-height: 38px;
+        font-size: 13px;
+    }
+
+    #inventory-list {
+        padding: 6px;
+    }
+
+    .inventory-list {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 4px;
+    }
+
+    .inventory-item {
+        padding: 4px !important;
+    }
+
+    .inventory-product-name {
+        font-size: 9px;
+    }
+
+    .inventory-product-counts small {
+        font-size: 7px;
+    }
+
+    .inventory-product-counts strong {
+        font-size: 10px;
+    }
+
+    .inventory-adjust-button {
+        font-size: 9px;
     }
 }
