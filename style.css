@@ -1572,3 +1572,17 @@ main {
     }
 
 }
+
+/* =========================================
+   商品管理：スマホ3列表示（最優先）
+========================================= */
+
+@media (max-width: 600px) {
+
+    #product-list.product-grid {
+        display: grid !important;
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        gap: 6px !important;
+    }
+
+}
