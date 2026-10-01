@@ -1661,14 +1661,16 @@ async function renderProducts(products) {
                     );
 
 
-                imageContainer.innerHTML = `
-                    <img
-                        src="${imageURL}"
-                        alt="${escapeHTML(
-                            product.name
-                        )}"
-                    >
-                `;
+imageContainer.innerHTML = `
+    <div class="register-product-image-inner">
+        <img
+            src="${imageURL}"
+            alt="${escapeHTML(
+                product.name || ""
+            )}"
+        >
+    </div>
+`;
 
 
                 const img =
