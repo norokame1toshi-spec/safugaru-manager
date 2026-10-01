@@ -1506,3 +1506,31 @@ main {
     }
 
 }
+/* =========================================
+   スマホ：レジ画像サイズを強制変更
+========================================= */
+
+@media (max-width: 600px) {
+
+    .register-product-card .register-product-image {
+        width: 55px !important;
+        height: 55px !important;
+        min-height: 55px !important;
+        max-height: 55px !important;
+        aspect-ratio: 1 / 1 !important;
+        margin: 5px auto !important;
+        padding: 0 !important;
+        overflow: hidden !important;
+        box-sizing: border-box !important;
+    }
+
+    .register-product-card .register-product-image img {
+        width: 55px !important;
+        height: 55px !important;
+        max-width: 55px !important;
+        max-height: 55px !important;
+        object-fit: cover !important;
+        display: block !important;
+    }
+
+}
