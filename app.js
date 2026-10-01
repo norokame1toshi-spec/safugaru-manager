@@ -9068,134 +9068,63 @@ async function saveInventoryAdjustment() {
 // 在庫一覧
 // ============================================================
 
+
+// ============================================================
+// 在庫一覧
+// ============================================================
+
 async function loadInventory() {
 
     const container =
-        document.getElementById(
-            "inventory-list"
-        );
+        document.getElementById("inventory-list");
 
+    if (!container) return;
 
-    if (!container) {
-
-        return;
-
-    }
-
-
-    const products =
-        await getAllProducts();
-
+    const products = await getAllProducts();
 
     // --------------------------------------------------------
     // 集計
     // --------------------------------------------------------
 
-    const productCount =
-        products.length;
+    const productCount = products.length;
 
+    const totalStock = products.reduce(
+        (sum, product) =>
+            sum + Number(product.stock || 0),
+        0
+    );
 
-    const totalStock =
-        products.reduce(
-            (sum, product) =>
-                sum +
-                Number(
-                    product.stock || 0
-                ),
-            0
-        );
+    const totalReserved = products.reduce(
+        (sum, product) =>
+            sum + Number(product.reserved || 0),
+        0
+    );
 
+    const totalSellable = products.reduce(
+        (sum, product) =>
+            sum + getSellableStock(product),
+        0
+    );
 
-    const totalReserved =
-        products.reduce(
-            (sum, product) =>
-                sum +
-                Number(
-                    product.reserved || 0
-                ),
-            0
-        );
+    document.getElementById(
+        "inventory-product-count"
+    ).textContent = productCount;
 
+    document.getElementById(
+        "inventory-total-stock"
+    ).textContent = totalStock;
 
-    const totalSellable =
-        products.reduce(
-            (sum, product) =>
-                sum +
-                getSellableStock(
-                    product
-                ),
-            0
-        );
+    document.getElementById(
+        "inventory-total-reserved"
+    ).textContent = totalReserved;
 
+    document.getElementById(
+        "inventory-total-sellable"
+    ).textContent = totalSellable;
 
-    const countElement =
-        document.getElementById(
-            "inventory-product-count"
-        );
+    container.innerHTML = "";
 
-
-    const stockElement =
-        document.getElementById(
-            "inventory-total-stock"
-        );
-
-
-    const reservedElement =
-        document.getElementById(
-            "inventory-total-reserved"
-        );
-
-
-    const sellableElement =
-        document.getElementById(
-            "inventory-total-sellable"
-        );
-
-
-    if (countElement) {
-
-        countElement.textContent =
-            productCount;
-
-    }
-
-
-    if (stockElement) {
-
-        stockElement.textContent =
-            totalStock;
-
-    }
-
-
-    if (reservedElement) {
-
-        reservedElement.textContent =
-            totalReserved;
-
-    }
-
-
-    if (sellableElement) {
-
-        sellableElement.textContent =
-            totalSellable;
-
-    }
-
-
-    // --------------------------------------------------------
-    // 商品一覧
-    // --------------------------------------------------------
-
-    container.innerHTML =
-        "";
-
-
-    if (
-        products.length === 0
-    ) {
-
+    if (products.length === 0) {
         container.innerHTML = `
             <div style="
                 text-align:center;
@@ -9208,275 +9137,195 @@ async function loadInventory() {
             </div>
         `;
 
-
         await loadInventoryHistory();
-
-
         return;
-
     }
 
+    // --------------------------------------------------------
+    // 商品画像を取得
+    // --------------------------------------------------------
+
+    const imageRecords = await new Promise(
+        (resolve, reject) => {
+
+            const transaction =
+                db.transaction(
+                    "productImages",
+                    "readonly"
+                );
+
+            const request =
+                transaction
+                    .objectStore("productImages")
+                    .getAll();
+
+            request.onsuccess = () => {
+                resolve(request.result || []);
+            };
+
+            request.onerror = () => {
+                reject(request.error);
+            };
+        }
+    );
+
+    const imageMap = new Map();
+
+    imageRecords.forEach(record => {
+
+        if (
+            record &&
+            record.productId &&
+            record.image
+        ) {
+            imageMap.set(
+                String(record.productId),
+                record.image
+            );
+        }
+
+    });
+
+    // --------------------------------------------------------
+    // 商品名順
+    // --------------------------------------------------------
 
     products.sort(
         (a, b) =>
-            String(
-                a.name || ""
-            ).localeCompare(
-                String(
-                    b.name || ""
-                ),
+            String(a.name || "").localeCompare(
+                String(b.name || ""),
                 "ja"
             )
     );
 
+    // --------------------------------------------------------
+    // 商品カード
+    // --------------------------------------------------------
 
-    products.forEach(
-        product => {
+    products.forEach(product => {
 
-            const stock =
-                Number(
-                    product.stock || 0
-                );
+        const stock =
+            Number(product.stock || 0);
 
+        const reserved =
+            Number(product.reserved || 0);
 
-            const reserved =
-                Number(
-                    product.reserved || 0
-                );
+        const sellable =
+            getSellableStock(product);
 
+        const card =
+            document.createElement("div");
 
-            const sellable =
-                getSellableStock(
-                    product
-                );
+        card.className = "inventory-item";
 
+        card.innerHTML = `
 
-            const row =
-                document.createElement(
-                    "div"
-                );
+            <div class="inventory-product-image">
+                📦
+            </div>
 
+            <div class="inventory-product-name">
+                ${escapeHTML(product.name || "")}
+            </div>
 
-            row.className =
-                "inventory-item";
+            <div class="inventory-product-counts">
 
+                <div>
+                    <small>在庫</small>
+                    <strong>${stock}</strong>
+                </div>
 
-            row.style.cssText = `
-                display:grid;
-                grid-template-columns:
-                    minmax(0,1fr)
-                    80px
-                    80px
-                    90px
-                    auto;
-                gap:12px;
-                align-items:center;
-                padding:14px 10px;
-                border-bottom:1px solid #eee;
-                background:white;
-            `;
+                <div>
+                    <small>予約</small>
+                    <strong>${reserved}</strong>
+                </div>
 
-
-            let sellableClass =
-                "";
-
-
-            if (
-                sellable <= 0
-            ) {
-
-                sellableClass =
-                    "color:#c62828;";
-
-            } else if (
-                sellable <= 3
-            ) {
-
-                sellableClass =
-                    "color:#e67e22;";
-
-            }
-
-
-            row.innerHTML = `
-
-                <div
-                    style="
-                        min-width:0;
-                    "
-                >
-
-                    <div
-                        style="
-                            font-weight:bold;
-                            overflow:hidden;
-                            text-overflow:ellipsis;
-                            white-space:nowrap;
-                        "
-                    >
-                        ${escapeHTML(
-                            product.name || ""
-                        )}
-                    </div>
-
-
-                    ${
-                        product.subCategory
-
-                            ? `
-                                <div
-                                    style="
-                                        font-size:11px;
-                                        color:#999;
-                                        margin-top:3px;
-                                    "
-                                >
-                                    ${escapeHTML(
-                                        product.parentCategory ||
-                                        product.category ||
-                                        ""
-                                    )}
-                                    ＞
-                                    ${escapeHTML(
-                                        product.subCategory
-                                    )}
-                                </div>
-                            `
-
+                <div class="${
+                    sellable <= 0
+                        ? "sold-out"
+                        : sellable <= 3
+                            ? "low-stock"
                             : ""
-                    }
-
+                }">
+                    <small>販売可能</small>
+                    <strong>${sellable}</strong>
                 </div>
 
+            </div>
 
-                <div
-                    style="
-                        text-align:center;
-                    "
+            <button
+                type="button"
+                class="inventory-adjust-button"
+                data-product-id="${escapeHTML(
+                    String(product.id)
+                )}"
+            >
+                在庫修正
+            </button>
+
+        `;
+
+        // ----------------------------------------------------
+        // 画像表示
+        // ----------------------------------------------------
+
+        const image =
+            imageMap.get(String(product.id));
+
+        if (image) {
+
+            const imageURL =
+                URL.createObjectURL(image);
+
+            const imageContainer =
+                card.querySelector(
+                    ".inventory-product-image"
+                );
+
+            imageContainer.innerHTML = `
+                <img
+                    src="${imageURL}"
+                    alt="${escapeHTML(product.name || "")}"
                 >
-
-                    <small
-                        style="
-                            display:block;
-                            color:#888;
-                            font-size:11px;
-                        "
-                    >
-                        在庫
-                    </small>
-
-
-                    <strong>
-                        ${stock}
-                    </strong>
-
-                </div>
-
-
-                <div
-                    style="
-                        text-align:center;
-                    "
-                >
-
-                    <small
-                        style="
-                            display:block;
-                            color:#888;
-                            font-size:11px;
-                        "
-                    >
-                        予約
-                    </small>
-
-
-                    <strong>
-                        ${reserved}
-                    </strong>
-
-                </div>
-
-
-                <div
-                    style="
-                        text-align:center;
-                        ${sellableClass}
-                    "
-                >
-
-                    <small
-                        style="
-                            display:block;
-                            color:#888;
-                            font-size:11px;
-                        "
-                    >
-                        販売可能
-                    </small>
-
-
-                    <strong>
-                        ${sellable}
-                    </strong>
-
-                </div>
-
-
-                <button
-                    type="button"
-                    class="inventory-adjust-button"
-                    data-product-id="${escapeHTML(
-                        String(
-                            product.id
-                        )
-                    )}"
-                    style="
-                        padding:9px 12px;
-                        border:1px solid #ddd;
-                        border-radius:8px;
-                        background:#fff;
-                        cursor:pointer;
-                        white-space:nowrap;
-                    "
-                >
-                    在庫修正
-                </button>
-
             `;
 
+            const img =
+                imageContainer.querySelector("img");
 
-            const adjustButton =
-                row.querySelector(
-                    ".inventory-adjust-button"
-                );
+            img.onload = () => {
+                URL.revokeObjectURL(imageURL);
+            };
 
+            img.onerror = () => {
+                URL.revokeObjectURL(imageURL);
+            };
+        }
 
-            if (adjustButton) {
+        // ----------------------------------------------------
+        // 在庫修正ボタン
+        // ----------------------------------------------------
 
-                adjustButton.addEventListener(
-                    "click",
-                    event => {
-
-                        event.stopPropagation();
-
-
-                        openInventoryAdjustModal(
-                            product.id
-                        );
-
-                    }
-                );
-
-            }
-
-
-            container.appendChild(
-                row
+        const adjustButton =
+            card.querySelector(
+                ".inventory-adjust-button"
             );
 
-        }
-    );
+        adjustButton.addEventListener(
+            "click",
+            event => {
 
+                event.stopPropagation();
+
+                openInventoryAdjustModal(
+                    product.id
+                );
+
+            }
+        );
+
+        container.appendChild(card);
+
+    });
 
     await loadInventoryHistory();
 
