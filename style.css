@@ -1445,90 +1445,36 @@ main {
         font-size: 9px;
     }
 }
-
 /* =========================================
-   スマホ：在庫画像を小さく固定
-========================================= */
-
-@media (max-width: 600px) {
-
-    #inventory-list .inventory-item {
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: center !important;
-        min-width: 0 !important;
-    }
-
-    #inventory-list .inventory-product-image {
-        width: 55px !important;
-        height: 55px !important;
-        min-width: 55px !important;
-        max-width: 55px !important;
-        min-height: 55px !important;
-        max-height: 55px !important;
-        aspect-ratio: 1 / 1 !important;
-        margin: 0 auto;
-        overflow: hidden;
-        flex-shrink: 0;
-    }
-
-    #inventory-list .inventory-product-image img {
-        width: 100% !important;
-        height: 100% !important;
-        max-width: 100% !important;
-        max-height: 100% !important;
-        object-fit: cover !important;
-    }
-
-    #inventory-list .inventory-product-name {
-        width: 100%;
-        text-align: center;
-    }
-}
-/* =========================================
-   スマホ：レジの商品画像を小さくする
-========================================= */
-
-@media (max-width: 600px) {
-
-    .register-product-image {
-        width: 55px !important;
-        height: 55px !important;
-        aspect-ratio: 1 / 1 !important;
-        margin: 5px auto 0;
-        overflow: hidden;
-    }
-
-    .register-product-image img {
-        width: 100% !important;
-        height: 100% !important;
-        object-fit: cover !important;
-    }
-
-}
-/* =========================================
-   スマホ：レジ画像サイズを強制変更
+   スマホ：レジの商品画像サイズ
 ========================================= */
 
 @media (max-width: 600px) {
 
     .register-product-card .register-product-image {
-        width: 55px !important;
-        height: 55px !important;
-        min-height: 55px !important;
-        max-height: 55px !important;
-        aspect-ratio: 1 / 1 !important;
+        width: 65px !important;
+        height: 65px !important;
+        min-width: 65px !important;
+        max-width: 65px !important;
+        min-height: 65px !important;
+        max-height: 65px !important;
+        aspect-ratio: auto !important;
         margin: 5px auto !important;
         padding: 0 !important;
         overflow: hidden !important;
         box-sizing: border-box !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
     }
 
     .register-product-card .register-product-image img {
-        width: 55px !important;
-        height: 55px !important;
-        max-width: 55px !important;
-        max-height: 55px !important;
+        width: 65px !important;
+        height: 65px !important;
+        min-width: 65px !important;
+        max-width: 65px !important;
+        min-height: 65px !important;
+        max-height: 65px !important;
         object-fit: cover !important;
         display: block !important;
     }
