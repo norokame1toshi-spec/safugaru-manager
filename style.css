@@ -1168,7 +1168,26 @@ main {
 
     .register-product-image {
         width: 100%;
-        aspect-ratio: 1 / 1;
+        height: 75px;
+        aspect-ratio: auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+
+    .register-product-image-inner {
+        width: 65px;
+        height: 65px;
+        flex: 0 0 65px;
+        overflow: hidden;
+    }
+
+    .register-product-image-inner img {
+        display: block;
+        width: 65px;
+        height: 65px;
+        object-fit: cover;
     }
 
     .register-product-info {
@@ -1444,39 +1463,38 @@ main {
     .inventory-adjust-button {
         font-size: 9px;
     }
-}
-/* =========================================
-   スマホ：レジの商品画像サイズ
+}/* =========================================
+   レジ商品画像：スマホ表示
 ========================================= */
 
 @media (max-width: 600px) {
 
     .register-product-card .register-product-image {
-        width: 65px !important;
-        height: 65px !important;
-        min-width: 65px !important;
-        max-width: 65px !important;
-        min-height: 65px !important;
-        max-height: 65px !important;
+        width: 100% !important;
+        height: 75px !important;
+        min-height: 75px !important;
+        max-height: 75px !important;
         aspect-ratio: auto !important;
-        margin: 5px auto !important;
-        padding: 0 !important;
-        overflow: hidden !important;
-        box-sizing: border-box !important;
         display: flex !important;
-        align-items: center !important;
         justify-content: center !important;
+        align-items: center !important;
+        overflow: hidden !important;
+        margin: 0 auto !important;
+        padding: 0 !important;
     }
 
-    .register-product-card .register-product-image img {
+    .register-product-card .register-product-image-inner {
         width: 65px !important;
         height: 65px !important;
-        min-width: 65px !important;
-        max-width: 65px !important;
-        min-height: 65px !important;
-        max-height: 65px !important;
-        object-fit: cover !important;
+        flex: 0 0 65px !important;
+        overflow: hidden !important;
+    }
+
+    .register-product-card .register-product-image-inner img {
         display: block !important;
+        width: 65px !important;
+        height: 65px !important;
+        object-fit: cover !important;
     }
 
 }
