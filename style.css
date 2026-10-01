@@ -1590,3 +1590,162 @@ main {
     -webkit-user-select: none;
     user-select: none;
 }
+/* =========================================
+   iPhone縦画面：レジ・在庫 共通デザイン
+========================================= */
+
+@media (max-width: 600px) {
+
+    /* レジ商品 */
+
+    .register-product-list {
+        grid-template-columns:
+            repeat(4, minmax(0, 1fr));
+        gap: 6px;
+    }
+
+    .register-products-area {
+        padding: 8px;
+    }
+
+    .register-product-card {
+        border-width: 1px;
+        border-radius: 8px;
+        touch-action: manipulation;
+    }
+
+    .register-product-info {
+        padding: 4px;
+    }
+
+    .register-product-name {
+        font-size: 10px;
+        line-height: 1.25;
+        min-height: 0;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        overflow: hidden;
+    }
+
+    .register-product-price {
+        font-size: 11px;
+        margin-top: 3px;
+    }
+
+    .register-product-stock {
+        font-size: 9px;
+        margin-top: 2px;
+    }
+
+    .register-sold-out {
+        font-size: 12px;
+        padding: 5px 7px;
+    }
+
+    /* 在庫商品 */
+
+    .inventory-list {
+        display: grid;
+        grid-template-columns:
+            repeat(4, minmax(0, 1fr));
+        gap: 6px;
+    }
+
+    .inventory-item {
+        display: flex !important;
+        flex-direction: column;
+        align-items: stretch !important;
+        gap: 4px !important;
+        padding: 5px !important;
+        border: 1px solid #eee;
+        border-radius: 8px;
+        min-width: 0;
+    }
+
+    .inventory-product-image {
+        width: 100%;
+        aspect-ratio: 1 / 1;
+        background: #f1f1f1;
+        border-radius: 5px;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+    }
+
+    .inventory-product-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .inventory-product-name {
+        font-size: 10px;
+        font-weight: bold;
+        line-height: 1.25;
+        min-height: 25px;
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        overflow-wrap: anywhere;
+    }
+
+    .inventory-product-counts {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 2px;
+        text-align: center;
+    }
+
+    .inventory-product-counts > div {
+        min-width: 0;
+    }
+
+    .inventory-product-counts small {
+        display: block;
+        font-size: 8px;
+        color: #888;
+    }
+
+    .inventory-product-counts strong {
+        display: block;
+        font-size: 11px;
+    }
+
+    .inventory-product-counts .sold-out strong {
+        color: #c62828;
+    }
+
+    .inventory-product-counts .low-stock strong {
+        color: #e67e22;
+    }
+
+    .inventory-adjust-button {
+        width: 100%;
+        padding: 5px 2px !important;
+        font-size: 10px;
+        white-space: nowrap;
+        touch-action: manipulation;
+    }
+
+    /* 在庫集計 */
+
+    .inventory-summary {
+        gap: 5px;
+    }
+
+    .inventory-summary-card {
+        padding: 8px 4px;
+    }
+
+    .inventory-summary-card span {
+        font-size: 10px;
+    }
+
+    .inventory-summary-card strong {
+        font-size: 16px;
+    }
+}
