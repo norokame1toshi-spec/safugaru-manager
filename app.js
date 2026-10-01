@@ -6569,13 +6569,11 @@ card.style.touchAction =
 
             card.innerHTML = `
 
-                <div
-                    class="
-                        register-product-image
-                    "
-                >
-                    📦
-                </div>
+              <div class="register-product-image">
+    <div class="register-product-image-inner">
+        📦
+    </div>
+</div>
 
 
                 <div class="
