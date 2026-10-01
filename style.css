@@ -1560,30 +1560,6 @@ main {
 
 }
 
-
-/* =========================================
-   商品管理：スマホ4列表示
-========================================= */
-
-@media (max-width: 600px) {
-
-    #product-list {
-        display: grid !important;
-        grid-template-columns: repeat(4, 1fr) !important;
-        gap: 6px !important;
-        width: 100% !important;
-        min-width: 0 !important;
-    }
-
-    #product-list .product-card {
-        width: 100% !important;
-        min-width: 0 !important;
-        box-sizing: border-box !important;
-    }
-
-}
-
-
 /* =========================================
    商品管理：スマホ4列表示
 ========================================= */
