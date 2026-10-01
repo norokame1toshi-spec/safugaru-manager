@@ -1532,14 +1532,13 @@ main {
 /* =========================================
    スマホ：商品管理の商品画像を小さくする
 ========================================= */
-
 @media (max-width: 600px) {
 
     .product-card .product-image {
         width: 100% !important;
-        height: 75px !important;
-        min-height: 75px !important;
-        max-height: 75px !important;
+        height: 65px !important;
+        min-height: 65px !important;
+        max-height: 65px !important;
         aspect-ratio: auto !important;
         display: flex !important;
         align-items: center !important;
@@ -1549,12 +1548,12 @@ main {
     }
 
     .product-card .product-image img {
-        width: 65px !important;
-        height: 65px !important;
-        min-width: 65px !important;
-        max-width: 65px !important;
-        min-height: 65px !important;
-        max-height: 65px !important;
+        width: 55px !important;
+        height: 55px !important;
+        min-width: 55px !important;
+        max-width: 55px !important;
+        min-height: 55px !important;
+        max-height: 55px !important;
         object-fit: cover !important;
         display: block !important;
     }
